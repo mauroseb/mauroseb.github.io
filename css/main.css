@@ -46,7 +46,7 @@ a {
 a:hover {
       text-decoration: underline;
 }
-li a:hover {
+nav ul li a:hover {
       background-color: #808080;
       text-decoration: none;
 }
