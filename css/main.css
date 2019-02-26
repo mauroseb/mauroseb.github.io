@@ -14,7 +14,6 @@ nav ul {
     text-transform: uppercase;
     background-color: #333;
     overflow: hidden;
-    color: #FFFFFF;
 }
 
 footer ul {
@@ -32,6 +31,7 @@ nav ul li a {
     display: block;
     text-align: center;
     text-decoration: none;
+    color: #FFFFFF;
 }
 
 footer ul li {
