@@ -12,6 +12,8 @@ nav ul {
     font-weight: bold;
     border-bottom: 1px solid #000000;
     text-transform: uppercase;
+    background-color: #333
+    overflow: hidden;
 }
 
 footer ul {
@@ -27,7 +29,6 @@ nav ul li {
 nav ul li a {
     padding: 14px 16px;
     display: block;
-    overflow: hidden;
     text-align: center;
     text-decoration: none;
 }
