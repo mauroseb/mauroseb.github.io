@@ -43,10 +43,10 @@ a {
     color: #999;
 }
 a:hover {
-      b text-decoration: underline;
+      text-decoration: underline;
 }
 li a:hover {
-      background-color: #C0C0C0;
+      background-color: #808080;
 }
 h1 {
     font-size: 54px;
