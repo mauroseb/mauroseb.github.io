@@ -1,7 +1,7 @@
 body {
     margin: 60px auto;
     width: 70%;
-    background-color: #636363;
+    background-color: #606060;
     background-blend-mode: multiply, luminosity;
 }
 nav ul, footer ul {
