@@ -4,11 +4,21 @@ body {
     background-color: #d3d3d3;
     background-blend-mode: multiply, luminosity;
 }
-nav ul, footer ul {
+nav ul {
     font-family: 'Arial', 'Sans-Serif';
     padding: 0px;
     list-style: none;
     font-weight: bold;
+    background-color: #808080;
+    border-bottom: 1px solid #000000;
+}
+
+footer ul {
+    font-family: 'Arial', 'Sans-Serif';
+    padding: 0px;
+    list-style: none;
+    font-weight: bold;
+    border-bottom: 1px solid #555;
 }
 nav ul li, footer ul li {
     display: inline;
