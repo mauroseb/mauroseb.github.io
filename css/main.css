@@ -20,11 +20,19 @@ footer ul {
     list-style: none;
     font-weight: bold;
 }
-nav ul li, footer ul li {
+nav ul li {
     margin-right: 20px;
+    float: left;
+}
+
+nav ul li a {
     padding: 14px 16px;
     display: block;
+    overflow: hidden;
+    text-align: center;
+    text-decoration: none;
 }
+
 footer ul li {
     display: inline;
     margin-right: 20px;
@@ -35,6 +43,9 @@ a {
     color: #999;
 }
 a:hover {
+      b text-decoration: underline;
+}
+li a:hover {
       background-color: #C0C0C0;
 }
 h1 {
