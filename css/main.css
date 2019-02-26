@@ -1,11 +1,11 @@
 body {
     margin: 60px auto;
     width: 70%;
-    background-color: light-gray;
+    background-color: gray;
     background-blend-mode: multiply, luminosity;
 }
 nav ul, footer ul {
-    font-family:'Helvetica', 'Arial', 'Sans-Serif';
+    font-family: 'Arial', 'Sans-Serif';
     padding: 0px;
     list-style: none;
     font-weight: bold;
