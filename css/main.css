@@ -32,8 +32,11 @@ a:hover {
     text-decoration: underline;
 }
 h1 {
-    font-size: 3em;
+    font-size: 54px;
     font-family:'Arial', 'Sans-Serif';
+    font-weight: 300;
+    line-height: 50px;
+    text-transform: uppercase;
     color: #696969;
 }
 p {
