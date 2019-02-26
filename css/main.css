@@ -10,6 +10,8 @@ nav ul {
     list-style: none;
     font-weight: bold;
     border-bottom: 1px solid #000000;
+    text-transform: uppercase;
+    width: 30px;
 }
 
 footer ul {
