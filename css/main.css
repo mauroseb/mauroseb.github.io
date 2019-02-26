@@ -7,11 +7,11 @@ body {
 nav ul {
     font-family: 'Arial', 'Sans-Serif';
     padding: 0px;
+    margin: 0;
     list-style: none;
     font-weight: bold;
     border-bottom: 1px solid #000000;
     text-transform: uppercase;
-    width: 100%;
 }
 
 footer ul {
