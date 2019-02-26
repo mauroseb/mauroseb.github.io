@@ -29,7 +29,8 @@ a {
     color: #999;
 }
 a:hover {
-    text-decoration: underline;
+      background-color: #C0C0C0;
+      color: #FFFFFF;
 }
 h1 {
     font-size: 54px;
