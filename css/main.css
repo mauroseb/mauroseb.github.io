@@ -14,7 +14,7 @@ nav ul {
     text-transform: uppercase;
     background-color: #333;
     overflow: hidden;
-    font-color: #FFFFFF;
+    color: #FFFFFF;
 }
 
 footer ul {
@@ -48,6 +48,7 @@ a:hover {
 }
 li a:hover {
       background-color: #808080;
+      text-decoration: none;
 }
 h1 {
     font-size: 54px;
