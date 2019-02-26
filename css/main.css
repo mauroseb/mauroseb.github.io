@@ -11,7 +11,7 @@ nav ul {
     font-weight: bold;
     border-bottom: 1px solid #000000;
     text-transform: uppercase;
-    width: 30px;
+    width: 100%;
 }
 
 footer ul {
@@ -21,16 +21,22 @@ footer ul {
     font-weight: bold;
 }
 nav ul li, footer ul li {
+    margin-right: 20px;
+    text-align: center;
+    padding: 14px 16px;
+    display: block;
+}
+footer ul li {
     display: inline;
     margin-right: 20px;
 }
+
 a {
     text-decoration: none;
     color: #999;
 }
 a:hover {
       background-color: #C0C0C0;
-      color: #FFFFFF;
 }
 h1 {
     font-size: 54px;
