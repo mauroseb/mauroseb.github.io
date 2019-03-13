@@ -50,6 +50,10 @@ nav ul li a:hover {
       background-color: #000000;
       text-decoration: none;
 }
+nav ul li a:active {
+      background-color: #FFA500;
+      text-decoration: none;
+}
 h1 {
     font-size: 54px;
     font-family:'Arial', 'Sans-Serif';
