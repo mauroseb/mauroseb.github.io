@@ -7,6 +7,9 @@
 		<body>
 			<nav>
 	    		<ul>
+				      
+                                <li><a class="nav-ul-li-a {% if page.url == node.url %} active{% endif %}" href="{{ node.url }}">{{ node.title }}</a>
+
 	        		<li><a href="/">Home</a></li>
                                 <li><a href="/blog">Blog</a></li>
 		        	<li><a href="/about">About</a></li>
