@@ -11,7 +11,7 @@ nav ul {
     list-style: none;
     font-weight: bold;
     border-bottom: 1px solid #000000;
-    text-transform: uppercase;
+    text-transform: lowercase;
     background-color: #333;
     overflow: hidden;
 }
