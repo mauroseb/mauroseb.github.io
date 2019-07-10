@@ -1,3 +1,31 @@
 name: Mauro Oddi
-markdown: kramdown
+description: >
+  This is a blog with random OpenStack and Linux related notes so I don't
+  forget things.
+  If you find something inaccurate or that could be fixed, please file a bug
+  report <a href='https://github.com/JAORMX/JAORMX.github.io/issues'>here.</a>
+url: 'http://mauroseb.github.io'
+baseurl: '/'
+
+author: Mauro Oddi
+github_username:  mauroseb
+linkedin_username:  mauro27
+
+# Build settings
+paginate: 10
 permalink: /blog/:year/:month/:day/:title
+markdown: kramdown
+highlighter: rouge
+
+kramdown:
+  # use Github Flavored Markdown
+  input: GFM
+  # do not replace newlines by <br>s
+  hard_wrap: false
+
+plugins:
+- 'jekyll-paginate'
+- 'jekyll-seo-tag'
+exclude: ['README.md', 'Gemfile', 'Gemfile.lock', 'screenshot.png', 'create_post.py', 'templates', 'vendor']
+
+theme: jekyll-theme-hacker
