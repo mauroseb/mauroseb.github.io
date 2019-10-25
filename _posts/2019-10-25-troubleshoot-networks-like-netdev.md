@@ -1,1 +1,2 @@
-HA!
+Firstly, I would like to mention that I had the honor to work next to some brilliant people at Red Hat, and during the process had the chance to learn some very interesting techniques when it comes to troubleshoot network issues in complex environments like OpenStack where there are tens or even hundreds of virtual devices involved. And even though I cannot touch the feet of these people I can still share some examples of the issues and how to resolve them.
+
