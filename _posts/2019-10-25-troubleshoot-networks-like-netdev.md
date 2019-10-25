@@ -1,3 +1,11 @@
+---
+layout: posts
+title: "Troubleshoot OpenStack Networking Like a Netdev Kernel Developer"
+date: 2019-10-25
+categories: [blog]
+tags: [ neutron, openstack, networking, kernel ]
+---
+
 ## Troubleshoot OpenStack Networking Like a Netdev Kernel Developer
 
 ### Introduction
@@ -13,7 +21,7 @@ The architecture of ML2/OvS has been largely documented and described [1] but th
 
 #### Compute Network Layout
 
-![Compute Network Layout](images/compute-layout.png)
+<img src=images/compute-layout.png alt="Compute Network Layout" >
 
 
 ### Cases Scenarios
