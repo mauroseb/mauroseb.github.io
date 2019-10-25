@@ -21,7 +21,7 @@ The architecture of ML2/OvS has been largely documented and described [1] but th
 
 #### Compute Network Layout
 
-<img src=images/compute-layout.png alt="Compute Network Layout" >
+<img src=/images/compute-layout.png alt="Compute Network Layout" >
 
 
 ### Cases Scenarios
