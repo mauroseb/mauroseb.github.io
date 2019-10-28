@@ -17,10 +17,7 @@ OpenStack is a dynamic product and by design fully maleable to fit one's needs. 
 
 The architecture of ML2/OvS has been largely documented and described (just to list some references: [1][2][3][4] ) so the assumption is that the reader is already familiar with it. However a diagram like the one following is needed to illustrate to some extent what a typical OpenStack compute and networker node layout looks like in order to proceed with the cases' analysis.
 
-### Compute Network Layout
-
- {{ /images/compute-layout.png }}
-
+![Compute Network Layout](/images/compute-layout.png)
 
 ## Cases Scenarios
 
