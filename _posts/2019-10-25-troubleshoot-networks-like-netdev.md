@@ -35,5 +35,7 @@ The architecture of ML2/OvS has been largely documented and described [1][2][3] 
 ## References
 
 [1] https://www.rdoproject.org/networking/networking-in-too-much-detail/
+
 [2] https://docs.openstack.org/neutron/latest/
+
 [3] https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html-single/networking_guide/index
