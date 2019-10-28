@@ -13,9 +13,9 @@ Firstly, I would like to mention that many times I had the honor to work next to
 
 ## OpenStack Network Architecture
 
-OpenStack is a dynamic product and by design fully maleable to fit one's needs. Virtually every component can be interchangable with something else. In respect to networking it is no different. The main project Neutron can handle a range of _ML2_ plugins from different upstream projects or from different vendors, and inside every ML2 plugin most of the networking services are designed as pluggable and can also be interchanged. With this said, this article mainly refers to the stock network layout for Neutron which is ML2/OvS (recently OVN has been introduced however still uncommon), as it has been the one where the problems covered below arised.
+OpenStack is a dynamic product and by design fully maleable to fit one's needs. Virtually every component can be interchangable with something else. In respect to networking it is no different. The main project Neutron can handle a range of _ML2_ plugins from different upstream projects or from different vendors, and inside every ML2 plugin most of the networking services are designed as pluggable and can also be interchanged. With this said, this article mainly refers to the stock network layout for Neutron which is ML2 with OpenvSwitch (OvS) mechanism driver (recently OVN has been introduced however still uncommon in the field), as it has been the one where the problems covered below arised.
 
-The architecture of ML2/OvS has been largely documented and described [1][2][3] but the diagram below illustrates to some extent what is fonud in a typical OpenStack compute and networker node.
+The architecture of ML2/OvS has been largely documented and described (for instance: [1][2][3][4] ) so I am not going into many details of it, however a diagram like the one following is needed to illustrate to some extent what a typical OpenStack compute and networker node layout looks like in order to proceed with the cases' analysis.
 
 ### Compute Network Layout
 
@@ -39,3 +39,5 @@ The architecture of ML2/OvS has been largely documented and described [1][2][3] 
 [2] https://docs.openstack.org/neutron/latest/
 
 [3] https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html-single/networking_guide/index
+
+[4] https://www.slideshare.net/nyechiel/neutron-networking-with-red-hat-enterprise-linux-openstack-platform
