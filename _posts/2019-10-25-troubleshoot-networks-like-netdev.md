@@ -13,7 +13,7 @@ Firstly, I would like to mention that many times I had the honor to work next to
 
 ## OpenStack Network Architecture
 
-OpenStack is a dynamic product and by definition fully maleable to fit one's needs. Virtually every component can be interchangable with something else. In respect to networking it is no different. The main project Neutron can handle a range of ML2 plugins from different upstream projects or from different vendors, and inside every ML2 plugin most of the networking services are designed as pluggable and can also be interchanged. With this said, this article mainly refers to the stock network layout for Neutron which is ML2/OvS (recently OVN has been introduced however still uncommon), as it has been the one where the problems covered below arised.
+OpenStack is a dynamic product and by definition fully maleable to fit one's needs. Virtually every component can be interchangable with something else. In respect to networking it is no different. The main project Neutron can handle a range of _ML2_ plugins from different upstream projects or from different vendors, and inside every ML2 plugin most of the networking services are designed as pluggable and can also be interchanged. With this said, this article mainly refers to the stock network layout for Neutron which is ML2/OvS (recently OVN has been introduced however still uncommon), as it has been the one where the problems covered below arised.
 
 The architecture of ML2/OvS has been largely documented and described [1] but the diagram below illustrates to some extent what is fonud in a typical OpenStack compute and networker node.
 
