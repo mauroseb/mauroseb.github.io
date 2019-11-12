@@ -82,6 +82,7 @@ p {
     color: #333;
     width: 75%;
 }
+
 footer {
     border-top: 1px solid #d5d5d5;
     font-size: .8em;
@@ -98,4 +99,8 @@ ul.posts {
 ul.posts li {
     list-style: none;
     width: 75;
+}
+
+.main {
+  margin-top: 50px; 
 }
