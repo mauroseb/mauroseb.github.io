@@ -6,6 +6,7 @@ body {
 
 nav ul {
     font-family: 'Arial', 'Sans-Serif';
+    color: #ffffff;
     padding: 0px;
     margin: 0;
     width: 100%;
@@ -15,7 +16,6 @@ nav ul {
     font-weight: bold;
     border-bottom: 1px solid #000000;
     text-transform: lowercase;
-    background-color: #333;
     position: fixed;
     overflow: hidden;
     background-color: #3f384a;
