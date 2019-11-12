@@ -15,7 +15,7 @@ nav ul {
     border-bottom: 1px solid #000000;
     text-transform: lowercase;
     background-color: #333;
-    position: sticky;
+    position: fixed;
     overflow: hidden;
 }
 
