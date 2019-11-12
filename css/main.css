@@ -26,7 +26,7 @@ footer ul {
     font-weight: bold;
 }
 nav ul li {
-   float: left;
+   float: center;
 }
 
 nav ul li a {
@@ -80,6 +80,7 @@ ul.posts {
     margin: 20px auto 40px; 
     font-size: 1.5em;
     font-family: 'Arial', 'Sans-Serif';
+     width: 70%;
 }
 
 ul.posts li {
