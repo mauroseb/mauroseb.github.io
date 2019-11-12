@@ -73,6 +73,11 @@ h1 {
     width: 75%;
 }
 
+div:container {
+    width: 75%
+    top: 70px;
+}
+
 p {
     font-family: 'Arial', 'Sans-Serif';
     font-size: 1.5em;
