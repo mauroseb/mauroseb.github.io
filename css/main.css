@@ -1,5 +1,4 @@
 body {
-    margin: 60px auto;
     width: 100%;
     background-color: #d3d3d3;
     background-blend-mode: multiply, luminosity;
@@ -10,7 +9,7 @@ nav ul {
     padding: 0px;
     margin: 0;
     top: 0;
-    height: 200px;
+    height: 60px;
     list-style: none;
     font-weight: bold;
     border-bottom: 1px solid #000000;
