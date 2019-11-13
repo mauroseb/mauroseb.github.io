@@ -1,7 +1,7 @@
 body {
     width: 100%;
-    background-image: linear-gradient(to top, #d3d3d3, #00aab2);
-    background-blend-mode: multiply, luminosity;
+    background-image: linear-gradient(to top, #d3d3d3, #ffffff);
+    background-blend-mode:luminosity;
 }
 
 nav ul {
