@@ -1,6 +1,7 @@
 body {
     width: 100%;
     background-image: linear-gradient(to top, #d3d3d3, #ffffff);
+    background-size: cover;
     background-blend-mode:luminosity;
 }
 
