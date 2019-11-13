@@ -80,8 +80,9 @@ h1 {
     width: 75%;
 }
 
-div:container {
+div {
     width: 75%
+    margin: 10px;
 }
 
 p {
@@ -108,8 +109,4 @@ ul.posts {
 ul.posts li {
     list-style: none;
     width: 75%;
-}
-
-.main {
-  margin-top: 70px; 
 }
