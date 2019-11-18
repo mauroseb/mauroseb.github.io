@@ -5,6 +5,7 @@ body {
     background-image: linear-gradient(to top, #d3d3d3, #ffffff);
     background-size: cover;
     background-blend-mode:luminosity;
+    background-repeat: no-repeat;
 
 }
 
