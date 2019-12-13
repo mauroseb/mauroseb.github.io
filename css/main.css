@@ -6,7 +6,9 @@ body {
     background-size: cover;
     background-blend-mode:luminosity;
     background-repeat: no-repeat;
-    background-color: #d3d3d3
+    background-color: #d3d3d3;
+    font-size: 12px;
+    font-family: 'Arial', 'Sans-Serif';
 }
 
 nav ul {
@@ -107,7 +109,7 @@ h2 {
 }
 
 h3 {
-    font-size: 16px;
+    font-size: 24px;
     font-family:'Arial', 'Sans-Serif';
     font-weight: 300;
     text-transform: uppercase;
@@ -117,7 +119,7 @@ h3 {
 }
 
 h4 {
-    font-size: 12px;
+    font-size: 16px;
     font-family:'Arial', 'Sans-Serif';
     font-weight: 300;
     text-transform: uppercase;
