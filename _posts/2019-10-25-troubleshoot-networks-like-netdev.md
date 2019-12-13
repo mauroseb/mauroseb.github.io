@@ -64,7 +64,7 @@ For the same purpose, there is an excellent tool from Jiri Benc for this purpose
 
 The former will create a picture like the following:
 
-![plotnet sample PNG](/images/plotnet_sample.png)
+![plotnet sample PNG](/images/plotnet_sample.png =250x)
 
 Actually there are many different formats to choose as output:
 ~~~
