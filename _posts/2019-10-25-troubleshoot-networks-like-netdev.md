@@ -102,18 +102,7 @@ For that more tools come handy: **perf** is probably one I used the most in this
 During the past years I stumbled at least 4 times upon network driver bugs that prevent ```GSO``` (generic segmentation offloading) to work properly (each time on a different driver: ```ixgbe```, ```mlx5_core```, ```mlx4_core```, can't recall the last one yet), in combination with ```VxLAN``` encapsulation on top of ```VLAN```.
 
 
-## TCP Retransmissions due to VETH device
-
-## Performance drop in VxLAN
-
-## SNAT Port Exhaustion
-
-## Netlink Messages Overflow
-
-## Tracing VNF packet drops
-
-
-# References
+## References
 
 [1] https://www.rdoproject.org/networking/networking-in-too-much-detail/
 
