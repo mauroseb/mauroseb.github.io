@@ -56,7 +56,7 @@ To understand the problem we need to have a clear picture of the path the packet
 
 The diagram above actually OvS circuitry is a bit more complex because it is performing VLAN tagging and untagging of the "tenant" network on ```br-ex``` (OvS bridge) internal port, which in turn carries VxLAN traffic, that is then forwarded internally to the ```br-tun``` where the VTEP lives (with the IP address of the previously mentioned internal port), and terminates each ```VNI``` corresponding to each tenant, then the traffic is forwarded via OvS internal patches to the ```br-int``` bridge that in turn forwards the traffic to the instance's qvo veth device.
 
-For the same purpose, there is an excellent tool from Jiri Benc for this purpose: **plotnetcfg**[8]. To run it needs either ```root``` ileges or ```CAP_SYS_ADMIN``` + ```CAP_NET_ADMIN``` capabilities. The tool will create an output file in ```dot``` format, that can then be converted to ```PNG``` format with the **dot** command.
+For the same purpose, there is an excellent tool from Jiri Benc for this purpose: **plotnetcfg**[8]. To run it needs either ```root``` ileges or ```CAP_SYS_ADMIN``` and ```CAP_NET_ADMIN``` capabilities. The tool will create an output file in ```dot``` format, that can then be converted to ```PNG``` format with the **dot** command.
 
         # dnf install -y plotnetcfg
         # plotnetcfg > layout.out
@@ -76,7 +76,7 @@ Actually there are many different formats to choose as output:
  
 ### 3. Test initial conditions
 
-The reproduction of the problem can depend on multiple factors like hardware architecture, NIC vendor/model, firmware version, OS and kernel version, NIC driver version, physical network devices configuration and firmware/software versions (switches, load balancers and routers). Many times permutation of any of these components is helpful to narrow down the problem before delving deeper into the analysis. 
+The reproduction of the problem can depend on multiple factors like hardware architecture, NIC vendor/model, firmware version, OS version, kernel version, NIC driver version, physical network devices (switches, load balancers and routers). Many times permutation of any of these components is helpful to narrow down the problem to a particular component before delving deeper into the analysis. 
 
 For instance, one of the first actions I normally try is use the latest kernel available (downstream in case of ```RHEL```), then the latest kernel upstream, and sometimes the latest kernel in ```net-next``` branch of the linux kernel (which will become the next upstream linux kernel release). Same goes for NIC firmware, drivers or even testing with a different NIC hardware if resources permit. 
 
