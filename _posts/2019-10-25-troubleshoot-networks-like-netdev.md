@@ -39,40 +39,41 @@ First and foremost if there is an identified set of steps that can reproduce the
 ### 2. Understand the virtual and physical layout
 
 To understand the problem we need to have a clear picture of the path the packets need to traverse. Without that, the search for a root cause will be partial and inaccurate. Taking note of **ALL** the network components, virtual or physical, is paramount. Following is a basic example of an instance running in an OpenStack compute node:
-~~~
-+-------+
-|       |
-| PF 0  +---+++++++++     +++++++++++++  +++++++++++++   +++++++++++++   +++++++++++++
-| (eth0)|   +       +     +           +  +           +   +           +   +           +
-+-------+   +       +     +   (VLAN)  +  +  (VxLAN)  +   +  linux    +   +           +
-+-------+   + bond0 +---- +    OvS    +--+-   OvS    +---+  bridge   +---+  virtio   +
-|       |   +       +     +           +  +           +   +  (qbr)    +   +  guest    +
-| PF 1  +---+++++++++     +++++++++++++  +++++++++++++   +++++++++++++   +++++++++++++
-| (eth1)|                            (patch)    (qbo-qbv veths)      (tap)
-+-------+
 
-COMPUTE HOST
-~~~
+        +-------+
+        |       |
+        | PF 0  +---+++++++++     +++++++++++++  +++++++++++++   +++++++++++++   +++++++++++++
+        | (eth0)|   +       +     +           +  +           +   +           +   +           +
+        +-------+   +       +     +   (VLAN)  +  +  (VxLAN)  +   +  linux    +   +           +
+        +-------+   + bond0 +---- +    OvS    +--+-   OvS    +---+  bridge   +---+  virtio   +
+        |       |   +       +     +           +  +           +   +  (qbr)    +   +  guest    +
+        | PF 1  +---+++++++++     +++++++++++++  +++++++++++++   +++++++++++++   +++++++++++++
+        | (eth1)|                            (patch)    (qbo-qbv veths)      (tap)
+        +-------+
+
+        COMPUTE HOST
+
+
+
 The diagram above actually OvS circuitry is a bit more complex because it is performing VLAN tagging and untagging of the "tenant" network on ```br-ex``` (OvS bridge) internal port, which in turn carries VxLAN traffic, that is then forwarded internally to the ```br-tun``` where the VTEP lives (with the IP address of the previously mentioned internal port), and terminates each ```VNI``` corresponding to each tenant, then the traffic is forwarded via OvS internal patches to the ```br-int``` bridge that in turn forwards the traffic to the instance's qvo veth device.
 
 For the same purpose, there is an excellent tool from Jiri Benc for this purpose: **plotnetcfg**[8]. To run it needs either ```root``` ileges or ```CAP_SYS_ADMIN``` + ```CAP_NET_ADMIN``` capabilities. The tool will create an output file in ```dot``` format, that can then be converted to ```PNG``` format with the **dot** command.
-~~~
-# dnf install -y plotnetcfg
-# plotnetcfg > layout.out
-# dot -Tpng layout.out > layout.png
-~~~
+
+        # dnf install -y plotnetcfg
+        # plotnetcfg > layout.out
+        # dot -Tpng layout.out > layout.png
 
 The former will create a picture like the following:
 
-![plotnet sample PNG](/images/plotnet_sample.png =250x)
+![plotnet sample PNG](/images/plotnet_sample.png)
 
 Actually there are many different formats to choose as output:
-~~~
--Tbmp        -Tcmapx_np   -Tfig        -Timap       -Tjpeg       -Tmp         -Tplain-ext  -Tps2        -Ttiff       -Tvmlz       -Txdot1.4    
--Tcanon      -Tdot        -Tgtk        -Timap_np    -Tjpg        -Tpdf        -Tpng        -Tsvg        -Ttk         -Tx11        -Txdot_json  
--Tcmap       -Tdot_json   -Tgv         -Tismap      -Tjson       -Tpic        -Tpov        -Tsvgz       -Tvdx        -Txdot       -Txlib       
--Tcmapx      -Teps        -Tico        -Tjpe        -Tjson0      -Tplain      -Tps         -Ttif        -Tvml        -Txdot1.2  
-~~~
+
+        -Tbmp        -Tcmapx_np   -Tfig        -Timap       -Tjpeg       -Tmp         -Tplain-ext  -Tps2        -Ttiff       -Tvmlz       -Txdot1.4    
+        -Tcanon      -Tdot        -Tgtk        -Timap_np    -Tjpg        -Tpdf        -Tpng        -Tsvg        -Ttk         -Tx11        -Txdot_json  
+        -Tcmap       -Tdot_json   -Tgv         -Tismap      -Tjson       -Tpic        -Tpov        -Tsvgz       -Tvdx        -Txdot       -Txlib       
+        -Tcmapx      -Teps        -Tico        -Tjpe        -Tjson0      -Tplain      -Tps         -Ttif        -Tvml        -Txdot1.2  
+
  
 ### 3. Test initial conditions
 
