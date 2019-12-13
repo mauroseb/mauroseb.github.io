@@ -21,8 +21,7 @@ OpenStack is a dynamic product and by design fully maleable to fit one's needs. 
 
 The architecture of ML2/OvS has been largely documented and described (just to list some references: [1][2][3][4] ) so the assumption is that the reader is already familiar with it. However a diagram like the one following is needed to illustrate to some extent what a typical OpenStack compute and networker node layout looks like in order to proceed with the cases' analysis.
 
-![Compute Network Layout](/images/neutron_architecture.png)
-
+<img src="/images/neutron_architecture.png" alt="Compute Network Layout" style="width:1200px;"/>
 
 ## General Approach (if any?)
 
@@ -65,7 +64,7 @@ For the same purpose, there is an excellent tool from Jiri Benc for this purpose
 
 The former will create a picture like the following:
 
-<img src="/images/plotnet_sample.png" alt="plotnet sample PNG" style="width:1024px;"/>
+<img src="/images/plotnet_sample.png" alt="plotnet sample PNG" style="width:1200px;"/>
 
 Actually there are many different formats to choose as output:
 
