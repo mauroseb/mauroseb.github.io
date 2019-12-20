@@ -56,7 +56,7 @@ To understand the problem we need to have a clear picture of the path the packet
 
 In the diagram above the OvS circuitry is a bit more complex because it is performing VLAN tagging/untagging of the "tenant" network on ```br-ex``` (OvS bridge) internal port, which in turn carries VxLAN traffic, that is then forwarded internally to the ```br-tun``` where the VTEP lives (with the IP address of the previously mentioned internal port), and terminates each ```VNI``` corresponding to each tenant, then the traffic is forwarded via OvS internal patches to the ```br-int``` bridge that in turn forwards the traffic to the instance's qvo veth device.
 
-For the same purpose, there is an excellent tool from Jiri Benc: **plotnetcfg**[8]. To run it needs either ```root``` ileges or ```CAP_SYS_ADMIN``` and ```CAP_NET_ADMIN``` capabilities. The tool will create an output file in ```dot``` format, that can then be converted to ```PNG``` format with the **dot** command.
+For the same purpose, there is an excellent tool from Jiri Benc: **plotnetcfg**[6]. To run it needs either ```root``` ileges or ```CAP_SYS_ADMIN``` and ```CAP_NET_ADMIN``` capabilities. The tool will create an output file in ```dot``` format, that can then be converted to ```PNG``` format with the **dot** command.
 
         # dnf install -y plotnetcfg
         # plotnetcfg > layout.out
@@ -88,9 +88,11 @@ Actions like these have been by far the fastest way to identify existing bugs. J
  
 ### 4. Performance metrics
 
-Starting from a performance related description like _low troughput..._, normally would start with checking the output of performance and metrics monitoring tools. There are hundreds of command line tools to chose here but for simplicity we can use the good old ```sar``` only because is the most widespread accross systems. It is normal to find environments with proper performance tooling like stacks combining ```collectd```, ```prometheus```, ```grafana```, ```ganglia```, or any ```rrdtool``` based plotter. One interesting tool is also ```pcp``` (performance co-pilot [5]). It does not really matter which tool to use as long as one can get the metrics that is after (for a comprehensive list of Linux command line tools check out the mind blowing work of Brendan Gregg [6][7]).
+Dealing with a performance issue with a broad description like _low troughput..._, normally would involve also checking the output of performance and metrics monitoring tools, looking for stats like RX/TX packet counts and sizes in each interface involved, error counts and in general what counters are moving network wise to understand if they are or not part of the problem. 
 
-#### 5. Tracing
+There are hundreds of command line tools to chose here but for the sake of simplicity I will focus on the readings of ```ethtool``` and ```sar``` (the later because they are the most widespread accross systems). It is normal to find environments with proper performance tooling like stacks combining ```collectd```, ```prometheus```, ```grafana```, ```ganglia```, or any ```rrdtool``` based plotter. One interesting tool is also ```pcp``` (performance co-pilot [5]). It does not really matter which tool to use as long as one can get the metrics that is after (for a comprehensive list of Linux command line tools check out the mind blowing work of Brendan Gregg [7][8]).
+
+### 5. Tracing
 
 Once we have identified that a bottleneck resides in certain userland process or kernel thread, what happens next? Understanding what that task is doing is a fair next step which will reveal which part of the code is generating the noise. 
 
@@ -114,8 +116,9 @@ During the past years I stumbled at least 4 times upon network driver bugs that 
 
 [5] https://pcp.io/docs/guide.html
 
-[6] http://www.brendangregg.com/blog/2014-11-22/linux-perf-tools-2014.html
+[6] https://github.com/jbenc/plotnetcfg
 
 [7] http://www.brendangregg.com/
 
-[8] https://github.com/jbenc/plotnetcfg
+[8] http://www.brendangregg.com/blog/2014-11-22/linux-perf-tools-2014.html
+
