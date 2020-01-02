@@ -101,7 +101,7 @@ For that more tools come handy: **perf** is probably one I used the most in this
 
 ## Detecting Software Segmentation
 
-During the past years I stumbled at least 4 times upon network driver bugs that prevent ```GSO``` (generic segmentation offloading) to work properly (each time on a different driver: ```ixgbe```, ```mlx5_core```, ```mlx4_core```, can't recall the last one yet), in combination with ```VxLAN``` encapsulation on top of ```VLAN```.
+During the past years I stumbled a few times upon network driver bugs that prevent ```GSO``` (generic segmentation offloading) to work properly (each time on a different driver: ```ixgbe```, ```mlx5_core```, ```mlx4_core```, can't recall the last one yet), in combination with ```VxLAN``` encapsulation on top of a ```VLAN```.
 
 
 ## References
