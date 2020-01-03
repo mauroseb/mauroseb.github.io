@@ -78,10 +78,22 @@ Actually there are many different formats to choose as output:
 
 The reproduction of the problem can depend on multiple factors like hardware architecture, NIC vendor/model, firmware version, OS version, kernel version, NIC driver version, physical network devices (switches, load balancers and routers). Many times permutation of any of these components is helpful to narrow down the problem to a particular component before delving deeper into the analysis. 
 
-One of the first actions I normally try is to try to reproduce with the latest kernel available (downstream in case of ```RHEL```), then the latest upstream kernel, and sometimes the latest kernel in ```net-next``` branch of the linux kernel (which will become the next upstream linux kernel release) if there is any promising commit. 
+One of the first actions I normally try is to try to reproduce with the latest kernel available (downstream in case of ```RHEL```), then the latest upstream kernel, also sometimes the latest kernel in ```net-next``` brnach of the linux kernel (which will become the next upstream linux kernel release) if there is any promising commit. 
 
+For ```RHEL```:
 
-Same goes for NIC firmware, drivers or even testing with a different NIC hardware if resources permit. 
+  * **Test latest downstream kernel.** You can check easily in CDN for the latest if you are using a local repo.
+  
+  * **Test lastest upstream stable kernel.** The easiest here is to leverage ```elrepo``` repository which provides an RPM for ```Centos``` and ```RHEL``` distros built from the ```mainline``` stable branch of Linux Kernel Archive and thus named ```kernel-ml``` to avoid conflict with RHEL stock kernels. In the following example I am installing the RPM for major version 7 and setting grub to boot from it only once as we just want to test a reproducer and go back to the default kernel:
+  
+     # rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+     # yum install https://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
+     # yum --enablerepo=elrepo-kernel install kernel-ml
+     # gru2-reboot 0
+     
+    And just like that one can retry and discard tons of already fixed bugs or include new features that could improve the situation.
+
+Similar approach could be adopted for NIC firmware, drivers or even testing with a different NIC hardware if resources permit. 
 
 If the layout determined at step 2. is too complex. Chopping down the devices and test if the issue can still be reproduced will remove false positives from the way. In example, if the issue happens with a bond device, does it still happen if we use directly one leg, or without bond at all ?  If the answer is yes, then we continue with the next piece to chop.
 
