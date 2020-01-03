@@ -86,10 +86,10 @@ For ```RHEL```:
   
   * **Test lastest upstream stable kernel.** The easiest here is to leverage ```elrepo``` repository which provides an RPM for ```Centos``` and ```RHEL``` distros built from the ```mainline``` stable branch of Linux Kernel Archive and thus named ```kernel-ml``` to avoid conflict with RHEL stock kernels. In the following example I am installing the RPM for major version 7 and setting grub to boot from it only once as we just want to test a reproducer and go back to the default kernel:
   
-        # rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
-        # yum install https://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
-        # yum --enablerepo=elrepo-kernel install kernel-ml
-        # gru2-reboot 0
+          # rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+          # yum install https://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
+          # yum --enablerepo=elrepo-kernel install kernel-ml
+          # gru2-reboot 0
      
     And just like that one can retry and discard tons of already fixed bugs or include new features that could improve the situation.
 
