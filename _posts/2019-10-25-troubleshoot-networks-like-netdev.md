@@ -78,7 +78,10 @@ Actually there are many different formats to choose as output:
 
 The reproduction of the problem can depend on multiple factors like hardware architecture, NIC vendor/model, firmware version, OS version, kernel version, NIC driver version, physical network devices (switches, load balancers and routers). Many times permutation of any of these components is helpful to narrow down the problem to a particular component before delving deeper into the analysis. 
 
-For instance, one of the first actions I normally try is use the latest kernel available (downstream in case of ```RHEL```), then the latest kernel upstream, and sometimes the latest kernel in ```net-next``` branch of the linux kernel (which will become the next upstream linux kernel release). Same goes for NIC firmware, drivers or even testing with a different NIC hardware if resources permit. 
+One of the first actions I normally try is to try to reproduce with the latest kernel available (downstream in case of ```RHEL```), then the latest upstream kernel, and sometimes the latest kernel in ```net-next``` branch of the linux kernel (which will become the next upstream linux kernel release) if there is any promising commit. 
+
+
+Same goes for NIC firmware, drivers or even testing with a different NIC hardware if resources permit. 
 
 If the layout determined at step 2. is too complex. Chopping down the devices and test if the issue can still be reproduced will remove false positives from the way. In example, if the issue happens with a bond device, does it still happen if we use directly one leg, or without bond at all ?  If the answer is yes, then we continue with the next piece to chop.
 
@@ -96,7 +99,10 @@ There are hundreds of command line tools to chose here but for the sake of simpl
 
 Once we have identified that a bottleneck resides in certain userland process or kernel thread, what happens next? Understanding what that task is doing is a fair next step which will reveal which part of the code is generating the noise. 
 
-For that more tools come handy: **perf** is probably one I used the most in this cases. Also facilities like dynamic kernel tracing or **ftrace**, either manually with some scripts or through **trace-cmd** command line tool.
+For that more tools come handy: **perf** is probably one I used the most in this cases. Also facilities like dynamic kernel tracing or ```ftrace```, either through scripting directly or through **trace-cmd** command line tool.
+
+Lastly, I must mention ```eBPF``` (extended Barkley Packet Filter, originially named after BSD's BPF, however radically different) which is remarkably valuable and versatile kernel facility that was created for tracing purposes, but quickly became a swiss-army knife within the kernel that allows the user to create his own code and run it in a JIT compiler
+in kernel land. Scary? Of course.
 
 
 ## Detecting Software Segmentation
