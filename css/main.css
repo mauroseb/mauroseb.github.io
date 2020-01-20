@@ -149,3 +149,7 @@ ul.posts li {
     list-style: none;
     width: 75%;
 }
+
+code {
+    background-color: #A9A9A9;
+}
