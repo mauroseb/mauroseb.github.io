@@ -101,7 +101,7 @@ Just by doing that one can discard hundreds of bugs and enhancements that have b
 
 Actions like these have been by far the fastest way to identify existing bugs. Just by knowing it is not happening in the kernel version X, means that we only need to backport certain fix to a downstream kernel (in case of ```RHEL```)  or that the fix will be released soon in case of using the ```net-next``` kernel. 
 
-Of course there is some extra work to identify which commit or set of commits are needed to solve the problem, like using ```git bisect```, exploring the repo logs, and some other manual tasks. However the software and hardware vendors should normally take care of that. As a quick example, to search through branches for a given commit:
+Of course there is some extra work to identify which commit or set of commits are needed to solve the problem, like using ```git bisect```, exploring the repo logs, and some other manual tasks. However the software and hardware vendors should normally take care of that. Once the commit or commits needed are known I can get in which branch was applied (downstream):
 
       $ git branch --contains cc2af34db9a5b5222eefdc25fd1265e305df9f2e
       * (HEAD detached at kernel-3.10.0-1122.el7)
