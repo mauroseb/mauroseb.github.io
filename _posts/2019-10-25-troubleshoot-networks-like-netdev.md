@@ -39,7 +39,7 @@ First and foremost if there is an identified set of steps that can reproduce the
 ### 2. Understand the virtual and physical layout
 
 To understand the problem we need to have a clear picture of the path the packets need to traverse. Without that, the search for a root cause will be partial and inaccurate. Taking note of **ALL** the network components, virtual or physical, is paramount. Following is a basic example of an instance running in an OpenStack compute node:
-
+~~~
         +-------+
         |       |
         | PF 0  +---+++++++++     +++++++++++++  +++++++++++++   +++++++++++++   +++++++++++++
@@ -52,7 +52,7 @@ To understand the problem we need to have a clear picture of the path the packet
         +-------+
 
         COMPUTE HOST
-
+~~~
 
 
 In the diagram above the OvS circuitry is a bit more complex because it is performing VLAN tagging/untagging of the "tenant" network on ```br-ex``` (OvS bridge) internal port, which in turn carries VxLAN traffic, that is then forwarded internally to the ```br-tun``` where the VTEP lives (with the IP address of the previously mentioned internal port), and terminates each ```VNI``` corresponding to each tenant, then the traffic is forwarded via OvS internal patches to the ```br-int``` bridge that in turn forwards the traffic to the instance's qvo veth device.
