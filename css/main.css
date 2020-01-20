@@ -153,4 +153,9 @@ ul.posts li {
 code {
     background-color: #232323;
     color: #FFFFFF;
+    border: 1px solid #000000;
+    border-radius: 3px;
+    padding 1px 5px;
+    width: 75%;
+    margin-left: 20px;
 }
