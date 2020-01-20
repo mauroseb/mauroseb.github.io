@@ -103,8 +103,8 @@ Actions like these have been by far the fastest way to identify existing bugs. J
 
 Of course there is some extra work to identify which commit or set of commits are needed to solve the problem, like using ```git bisect```, exploring the repo logs, and some other manual tasks. However the software and hardware vendors should normally take care of that. As a quick example, to search through branches for a given commit:
 
-          $ git branch --contains cc2af34db9a5b5222eefdc25fd1265e305df9f2e
-          * (HEAD detached at kernel-3.10.0-1122.el7)
+      $ git branch --contains cc2af34db9a5b5222eefdc25fd1265e305df9f2e
+      * (HEAD detached at kernel-3.10.0-1122.el7)
           
 
  
