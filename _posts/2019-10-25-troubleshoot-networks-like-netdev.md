@@ -4,6 +4,7 @@ title: "Troubleshoot OpenStack Networking Like a Netdev Kernel Developer - Part 
 date: 2019-10-25
 categories: [blog]
 tags: [ neutron, openstack, networking, kernel ]
+author: mauroseb
 ---
 
 ## Introduction
