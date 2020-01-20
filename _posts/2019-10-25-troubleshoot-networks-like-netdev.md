@@ -78,7 +78,7 @@ Actually there are many different formats to choose as output:
 
 The reproduction of the problem can depend on multiple factors like hardware architecture, NIC vendor/model, firmware version, OS version, kernel version, NIC driver version, physical network devices (switches, load balancers and routers). Many times permutation of any of these components is helpful to narrow down the problem to a particular component before delving deeper into the analysis. 
 
-One of the first actions I normally try is to try to reproduce with the latest kernel available (downstream in case of ```RHEL```), then the latest upstream kernel, also sometimes the latest kernel in ```net-next``` brnach of the linux kernel (which will become the next upstream linux kernel release) if there is any promising commit. 
+One of the first actions I normally try is to try to reproduce with the latest kernel available (downstream in case of ```RHEL```), then the latest upstream kernel, also sometimes the latest kernel in ```net-next``` tree of the linux kernel (which will become part of the next upstream linux kernel release) if there is any promising commit. 
 
 For ```RHEL```:
 
@@ -99,7 +99,14 @@ If the layout determined at step 2. is too complex. Chopping down the devices an
 
 Just by doing that one can discard hundreds of bugs and enhancements that have been already fixed and incorporated in the latests releases, hardware/firmaware/driver issues that affect a single vendor, and so forth. 
 
-Actions like these have been by far the fastest way to identify existing bugs. Just by knowing it is not happening in the kernel version X, means that we only need to backport certain fix to a downstream kernel (in case of ```RHEL```)  or that the fix will be released soon in case of using the ```net-next``` kernel. Of course there is some extra work to identify which commit or set of commits are needed to solve the problem however the vendors should take care of that, we still can touch base on that later on.
+Actions like these have been by far the fastest way to identify existing bugs. Just by knowing it is not happening in the kernel version X, means that we only need to backport certain fix to a downstream kernel (in case of ```RHEL```)  or that the fix will be released soon in case of using the ```net-next``` kernel. 
+
+Of course there is some extra work to identify which commit or set of commits are needed to solve the problem, like using ```git bisect```, exploring the repo logs, and some other manual tasks. However the software and hardware vendors should normally take care of that. As a quick example, to search through branches for a given commit:
+
+          $ git branch --contains cc2af34db9a5b5222eefdc25fd1265e305df9f2e
+          * (HEAD detached at kernel-3.10.0-1122.el7)
+          
+
  
 ### 4. Performance metrics
 
