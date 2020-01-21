@@ -39,7 +39,7 @@ First and foremost if there is an identified set of steps that can reproduce the
 ### 2. Understand the virtual and physical layout
 
 To understand the problem we need to have a clear picture of the path the packets need to traverse. Without that, the search for a root cause will be partial and inaccurate. Taking note of **ALL** the network components, virtual or physical, is paramount. Following is a basic example of an instance running in an OpenStack compute node:
-```bash
+
         +-------+
         |       |
         | PF 0  +---+++++++++     +++++++++++++  +++++++++++++   +++++++++++++   +++++++++++++
@@ -52,7 +52,7 @@ To understand the problem we need to have a clear picture of the path the packet
         +-------+
 
         COMPUTE HOST
-```
+
 
 
 In the diagram above the OvS circuitry is a bit more complex because it is performing VLAN tagging/untagging of the "tenant" network on ```br-ex``` (OvS bridge) internal port, which in turn carries VxLAN traffic, that is then forwarded internally to the ```br-tun``` where the VTEP lives (with the IP address of the previously mentioned internal port), and terminates each ```VNI``` corresponding to each tenant, then the traffic is forwarded via OvS internal patches to the ```br-int``` bridge that in turn forwards the traffic to the instance's qvo veth device.
@@ -68,12 +68,12 @@ The former will create a picture like the following:
 <img src="/images/plotnet_sample.png" alt="plotnet sample PNG" style="width:1200px;"/>
 
 Actually there are many different formats to choose as output:
-{% highlight bash linenos %}
+
         -Tbmp        -Tcmapx_np   -Tfig        -Timap       -Tjpeg       -Tmp         -Tplain-ext  -Tps2        -Ttiff       -Tvmlz       -Txdot1.4    
         -Tcanon      -Tdot        -Tgtk        -Timap_np    -Tjpg        -Tpdf        -Tpng        -Tsvg        -Ttk         -Tx11        -Txdot_json  
         -Tcmap       -Tdot_json   -Tgv         -Tismap      -Tjson       -Tpic        -Tpov        -Tsvgz       -Tvdx        -Txdot       -Txlib       
         -Tcmapx      -Teps        -Tico        -Tjpe        -Tjson0      -Tplain      -Tps         -Ttif        -Tvml        -Txdot1.2  
-{% endhighlight %}
+
  
 ### 3. Test initial conditions
 
@@ -87,12 +87,10 @@ For ```RHEL```:
   
   * **Test lastest upstream stable kernel.** The easiest here is to leverage ```elrepo``` repository which provides an RPM for ```Centos``` and ```RHEL``` distros built from the ```mainline``` stable branch of Linux Kernel Archive and thus named ```kernel-ml``` to avoid conflict with RHEL stock kernels. In the following example I am installing the RPM for major version 7 and setting grub to boot from it only once as we just want to test a reproducer and go back to the default kernel:
   
-{% highlight bash %}
           # rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
           # yum install https://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
           # yum --enablerepo=elrepo-kernel install kernel-ml
           # gru2-reboot 0
-{% endhighlight %}
 
     And just like that one can retry and discard tons of already fixed bugs or include new features that could improve the situation.
 
