@@ -1,5 +1,6 @@
 name: Mauro Oddi
-description: OpenStack | Ceph | Kubernetes | Linux | Random 
+title: 'MAURO'S BLOG'
+description: OpenStack | Ceph | Kubernetes | Linux | Code | Random 
 url: 'http://mauroseb.github.io'
 baseurl: '/'
 
@@ -25,6 +26,3 @@ plugins:
 exclude: ['README.md', 'Gemfile', 'Gemfile.lock', 'screenshot.png', 'create_post.py', 'templates', 'vendor']
 
 theme: jekyll-theme-hacker
-
-main-title: 'MAURO's BLOG'
-main-subtitle: 'MEMORY DUMP FOR OpenStack / Kubernetes / Ceph / Linux / Code / Random'
