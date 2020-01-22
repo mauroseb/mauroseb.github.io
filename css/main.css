@@ -41,7 +41,7 @@ nav ul li {
    float: left;
 }
 
-nav ul li main {
+nav ul li:main {
    float:center;
    font-color:#FFFFFF;
    font-size: 30px;
