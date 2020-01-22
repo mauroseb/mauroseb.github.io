@@ -1,5 +1,7 @@
 name: Mauro Oddi
-title: 'MAURO'S BLOG'
+title: >
+MAURO'S BLOG
+
 description: OpenStack | Ceph | Kubernetes | Linux | Code | Random 
 url: 'http://mauroseb.github.io'
 baseurl: '/'
