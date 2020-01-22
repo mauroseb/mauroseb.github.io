@@ -2,7 +2,7 @@
 layout: default
 ---
 <h1>{{ page.title }}</h1>
-<p class="meta">{{ page.date | date_to_string }} - {{ page.author }}</p>
+<p class="meta">POSTED ON {{ page.date | date_to_string }} BY {{ page.author }}</p>
 <p class="meta">
 	  {% for tag in page.tags %}
 	    #{{ tag }} 
