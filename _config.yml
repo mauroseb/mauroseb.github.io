@@ -25,3 +25,6 @@ plugins:
 exclude: ['README.md', 'Gemfile', 'Gemfile.lock', 'screenshot.png', 'create_post.py', 'templates', 'vendor']
 
 theme: jekyll-theme-hacker
+
+main-title: 'MAURO's BLOG'
+main-subtitle: 'MEMORY DUMP FOR OpenStack / Kubernetes / Ceph / Linux / Code / Random'
