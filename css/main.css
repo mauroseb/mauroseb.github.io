@@ -78,7 +78,7 @@ div {
 }
 
 div#rest {
-    padding-top: 70px;
+    padding-top: 80px;
 }
 
 div#nav {
@@ -140,12 +140,13 @@ h2 {
 }
 
 h2#main {
-    font-size: 36px;
+    font-size: 10px;
     font-family:'Arial', 'Sans-Serif';
     font-weight: 300;
     text-transform: uppercase;
     color: #ffffff;
     align: center;
+    vertical-align: middle;
 }
 
 h3 {
