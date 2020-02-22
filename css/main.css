@@ -82,7 +82,7 @@ div#rest {
 }
 
 div#nav {
-    float: center;
+    float: left;
     width: 50%;
     vertical-align: top;
     align: center;
