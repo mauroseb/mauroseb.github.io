@@ -10,7 +10,8 @@ body {
     font-family: 'Arial', 'Sans-Serif';
 }
 
-nav ul {
+nav {
+    z-index: 1;
     font-family: 'Arial', 'Sans-Serif';
     font-weight: bold;
     padding: 0;
