@@ -114,13 +114,13 @@ h1 {
 }
 
 h1#main {
-    font-size: 12px;
+    font-size: 24px;
     font-family:'Arial', 'Sans-Serif';
-    font-weight: 100;
-    line-height: 12px;
+    font-weight: 500;
+    line-height: 24px;
     text-transform: uppercase;
     color:  #ffffff;
-    align: left;
+    align: center;
     margin-left: 20px;
     top: 0;
 }
