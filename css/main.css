@@ -72,12 +72,12 @@ nav ul li a:active {
 }
 
 div {
-    width: 75%;
     margin-left: 20px;
 }
 
 div#rest {
     padding-top: 80px;
+    width: 75%;
 }
 
 div#nav {
