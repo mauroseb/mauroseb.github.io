@@ -6,13 +6,11 @@
 		</head>
 		<body>
 			<nav>
-			<div id=nav>
+			<div id="nav">
                           <h1 class="main">
-                            <a href="{{ site.baseurl }}">
                             {{ site.title }}
-                            </a>
                           </h1>
-                          <p>{{ site.description }}</p>
+                          <p id=nav>{{ site.description }}</p>
                         </div>
 	    		<ul>      
                                 <li><a class="nav-ul-li-a-active" href="/">HOME</a>
@@ -20,7 +18,7 @@
 		        	<li><a href="/about">WHOAMI</a></li>
 	    		</ul>
 			</nav>
-			<div id=rest>
+			<div id="rest">
 			
 			{{ content }}
 			
