@@ -94,6 +94,14 @@ p {
     margin-left: 20px;
 }
 
+p#nav {
+    font-family: 'Arial', 'Sans-Serif';
+    font-size: 8px;
+    color: #333;
+    width: 75%;
+    margin-left: 20px;
+}
+
 h1 {
     font-size: 54px;
     font-family:'Arial', 'Sans-Serif';
@@ -105,13 +113,13 @@ h1 {
     margin-left: 20px;
 }
 
-h1:main {
+h1#main {
     font-size: 12px;
     font-family:'Arial', 'Sans-Serif';
     font-weight: 100;
     line-height: 12px;
     text-transform: uppercase;
-    color: #FFFFFF;
+    color:  #ffffff;
     align: left;
     margin-left: 20px;
     top: 0;
@@ -126,12 +134,12 @@ h2 {
     margin-left: 20px;
 }
 
-h2:main {
+h2#main {
     font-size: 36px;
     font-family:'Arial', 'Sans-Serif';
     font-weight: 300;
     text-transform: uppercase;
-    color: #FFFFFF;
+    color: #ffffff;
     align: center;
 }
 
