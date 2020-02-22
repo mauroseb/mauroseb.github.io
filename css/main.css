@@ -82,7 +82,10 @@ div#rest {
 }
 
 div#nav {
-    float: right;
+    float: center;
+    width: 50%;
+    vertical-align: top;
+    align: center;
 }
 
 p {
@@ -97,7 +100,7 @@ p {
 p#nav {
     font-family: 'Arial', 'Sans-Serif';
     font-size: 16px;
-    color: #fffff;
+    color: #ffffff;
     width: 75%;
     margin-left: 20px;
     vertical-align: middle;
