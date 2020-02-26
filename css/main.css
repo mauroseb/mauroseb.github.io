@@ -81,10 +81,10 @@ div#rest {
 }
 
 div#nav {
-    float: right;
+    position:absolute;
+    top: 25px;
+    right: 50px;
     width: 50%;
-    vertical-align: top;
-    align: center;
 }
 
 p {
