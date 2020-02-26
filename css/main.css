@@ -118,9 +118,9 @@ h1 {
 }
 
 h1#main {
-    font-size: 24px;
+    font-size: 36px;
     font-family:'Arial', 'Sans-Serif';
-    font-weight: 500;
+    font-weight: 300;
     line-height: 24px;
     text-transform: uppercase;
     color:  #ffffff;
