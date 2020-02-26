@@ -28,7 +28,9 @@ The architecture of ML2/OvS has been largely documented and described (just to l
 
 As disclaimer there should be definitely a better standard approach to engage problems of this nature than the one  following, however it should still be useful, as at least I have myself applied it successfully in many occasions.
 
-Also there is no general recipe, and the starting point where to look may vary based on the overall description of the issue. It can be more often than not something utterly generic like _low throughput between A and B_, or more specfic isolated observations like: packet drops in X device, retransmissions, high CPU in one or more cores, and so on so forth. In a nutshell, the problem quickly winds up into finding a bottleneck, a misconfiguration or a bug.
+In this article I do not intend to cover basic troubleshooting of connectivity issues, where you would normally start checking IP configuration, routing and so forth. Instead, I am assuming there is an already working environment where unsual behavior is observed and we would like to find the root cause.
+
+Also there is no general recipe, and the starting point where to look and lenght of the analysis may vary based on the overall description of the issue. The description itself can come more often than not as something utterly generic like _"low throughput between A and B"_, or more specfic isolated observations like _"packet drops in X device"_, _"retransmissions"_, _"CPU starvation in one or more cores"_, and so on so forth. In a nutshell, the problem quickly winds up into finding a bottleneck, a misconfiguration or a bug.
 
 For the sake of simplicity I will try to keep the list short:
 
