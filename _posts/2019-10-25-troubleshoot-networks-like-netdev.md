@@ -85,7 +85,7 @@ One of the first actions I normally try is to try to reproduce with the latest k
 
 For ```RHEL```:
 
-  * **Test latest downstream kernel.** You can check easily in CDN for the latest if you are using a local repo.
+  * **Test latest downstream kernel.** You can check easily in CDN for the latest and update it if it is newer than the version in the system.
   
   * **Test lastest upstream stable kernel.** The easiest here is to leverage ```elrepo``` repository which provides an RPM for ```Centos``` and ```RHEL``` distros built from the ```mainline``` stable branch of Linux Kernel Archive and thus named ```kernel-ml``` to avoid conflict with RHEL stock kernels. In the following example I am installing the RPM for major version 7 and setting grub to boot from it only once as we just want to test a reproducer and go back to the default kernel:
   
