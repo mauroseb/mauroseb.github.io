@@ -76,6 +76,10 @@ Actually there are many different formats to choose as output:
         -Tcmap       -Tdot_json   -Tgv         -Tismap      -Tjson       -Tpic        -Tpov        -Tsvgz       -Tvdx        -Txdot       -Txlib       
         -Tcmapx      -Teps        -Tico        -Tjpe        -Tjson0      -Tplain      -Tps         -Ttif        -Tvml        -Txdot1.2  
 
+#### Hardware architecture
+
+If there is a performance problem, the starting point is to check that hardware architecture of the involved nodes: improper  NIC specifications for the configuration, wrong CPU assignments or isolation, slow PCI bus, NUMA not taken into account, and other.
+
  
 ### 3. Test initial conditions
 
@@ -116,6 +120,8 @@ Of course there is some extra work to identify which commit or set of commits ar
 Dealing with a performance issue with a broad description like _low troughput..._, normally would involve also checking the output of performance and metrics monitoring tools, looking for stats like RX/TX packet counts and sizes in each interface involved, error counts and in general what counters are moving network wise to understand if they are or not part of the problem. 
 
 There are hundreds of command line tools to chose here but for the sake of simplicity I will focus on the readings of ```ethtool``` and ```sar``` (the later because is the most widespread accross systems). It is normal to find environments with proper performance tooling like stacks combining ```collectd```, ```prometheus```, ```grafana```, ```ganglia```, or any ```rrdtool``` based plotter. One interesting tool is also ```pcp``` (performance co-pilot [5]). It does not really matter which tool to use as long as one can get the metrics that is after (for a comprehensive list of Linux command line tools check out the mind blowing work of Brendan Gregg [7][8]).
+
+
 
 ### 5. Tracing
 
