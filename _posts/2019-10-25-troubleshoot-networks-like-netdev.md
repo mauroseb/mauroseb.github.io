@@ -59,7 +59,7 @@ To understand the problem we need to have a clear picture of the path the packet
 
 In the diagram above the OvS circuitry is a bit more complex because it is performing VLAN tagging/untagging of the "tenant" network on ```br-ex``` (OvS bridge) internal port, which in turn carries VxLAN traffic, that is then forwarded internally to the ```br-tun``` where the VTEP lives (with the IP address of the previously mentioned internal port), and terminates each ```VNI``` corresponding to each tenant, then the traffic is forwarded via OvS internal patches to the ```br-int``` bridge that in turn forwards the traffic to the instance's qvo veth device.
 
-For the same purpose, there is an excellent tool from Jiri Benc: **plotnetcfg**[6]. To run it needs either ```root``` ileges or ```CAP_SYS_ADMIN``` and ```CAP_NET_ADMIN``` capabilities. The tool will create an output file in ```dot``` format, that can then be converted to ```PNG``` format with the **dot** command.
+For the same purpose, there is an excellent tool from Jiri Benc: **plotnetcfg**[5]. To run it needs either ```root``` ileges or ```CAP_SYS_ADMIN``` and ```CAP_NET_ADMIN``` capabilities. The tool will create an output file in ```dot``` format, that can then be converted to ```PNG``` format with the **dot** command.
 
         # dnf install -y plotnetcfg
         # plotnetcfg > layout.out
@@ -106,7 +106,15 @@ If the layout determined at step 2. is too complex. Chopping down the devices an
 
 Just by doing that one can discard hundreds of bugs and enhancements that have been already fixed and incorporated in the latests releases, hardware/firmaware/driver issues that affect a single vendor, and so forth. 
 
-Actions like these have been by far the fastest way to identify existing bugs. Just by knowing it is not happening in the kernel version X, means that we only need to backport certain fix to a downstream kernel (in case of ```RHEL```)  or that the fix will be released soon in case of using the ```net-next``` kernel. 
+Actions like these have been by far the fastest way to identify existing bugs. Just by knowing it is not happening in the kernel version X, means that we only need to backport certain fix to a downstream kernel (in case of ```RHEL```)  or that the fix will be released soon in case of using the ```linux-next``` kernel.
+
+      $ git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+      $ cd linux
+      $ git remote add linux-next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+      $ git fetch linux-next
+      $ git fetch --tags linux-next
+      
+Now a specific ```linux-next``` tag can be checked out and built[6].
 
 Of course there is some extra work to identify which commit or set of commits are needed to solve the problem, like using ```git bisect```, exploring the repo logs, and some other manual tasks. However the software and hardware vendors should normally take care of that. Once the commit or commits needed are known I can get in which branch was applied (downstream):
 
@@ -119,7 +127,7 @@ Of course there is some extra work to identify which commit or set of commits ar
 
 Dealing with a performance issue with a broad description like _low troughput..._, normally would involve also checking the output of performance and metrics monitoring tools, looking for stats like RX/TX packet counts and sizes in each interface involved, error counts and in general what counters are moving network wise to understand if they are or not part of the problem. 
 
-There are hundreds of command line tools to chose here but for the sake of simplicity I will focus on the readings of ```ethtool``` and ```sar``` (the later because is the most widespread accross systems). It is normal to find environments with proper performance tooling like stacks combining ```collectd```, ```prometheus```, ```grafana```, ```ganglia```, or any ```rrdtool``` based plotter. One interesting tool is also ```pcp``` (performance co-pilot [5]). It does not really matter which tool to use as long as one can get the metrics that is after (for a comprehensive list of Linux command line tools check out the mind blowing work of Brendan Gregg [7][8]).
+There are hundreds of command line tools to chose here but for the sake of simplicity I will focus on the readings of ```ethtool``` and ```sar``` (the later because is the most widespread accross systems). It is normal to find environments with proper performance tooling like stacks combining ```collectd```, ```prometheus```, ```grafana```, ```ganglia```, or any ```rrdtool``` based plotter. One interesting tool is also ```pcp``` (performance co-pilot [7]). It does not really matter which tool to use as long as one can get the metrics that is after (for a comprehensive list of Linux command line tools check out the mind blowing work of Brendan Gregg [8][9]).
 
 
 
@@ -148,11 +156,13 @@ During the past years I stumbled a few times upon network driver bugs that preve
 
 [4] https://www.slideshare.net/nyechiel/neutron-networking-with-red-hat-enterprise-linux-openstack-platform
 
-[5] https://pcp.io/docs/guide.html
+[5] https://github.com/jbenc/plotnetcfg
 
-[6] https://github.com/jbenc/plotnetcfg
+[6] https://kernelnewbies.org/KernelBuild
 
-[7] http://www.brendangregg.com/
+[7] https://pcp.io/docs/guide.html
 
-[8] http://www.brendangregg.com/blog/2014-11-22/linux-perf-tools-2014.html
+[8] http://www.brendangregg.com/
+
+[9] http://www.brendangregg.com/blog/2014-11-22/linux-perf-tools-2014.html
 
