@@ -96,7 +96,7 @@ For ```RHEL```:
           # rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
           # yum install https://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
           # yum --enablerepo=elrepo-kernel install kernel-ml
-          # gru2-reboot 0
+          # grub2-reboot 0
 
     And just like that one can retry and discard tons of already fixed bugs or include new features that could improve the situation.
 
