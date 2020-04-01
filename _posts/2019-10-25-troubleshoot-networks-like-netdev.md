@@ -26,17 +26,19 @@ The architecture of ML2/OvS has been largely documented and described (just to l
 
 ## General Approach (if any?)
 
-As disclaimer there should be definitely a better standard approach to engage problems of this nature than the one  following, however it should still be useful, as at least I have myself applied it successfully in many occasions.
+A ton has been written on the matter and arguably many methods and techniques may compete to be proven effective under specific circumstances. But it has to be acknowledged that the complexity of modern software systems makes the process not precisely deterministic, and that the time there is critical impact the expert may choose the tools that her/his experience is dicating in order to address the problem in the fastest manner. With that said, I personally find Google SRE Guide Troubleshooting section quite comprehensive[5], but there are many other sources for methodologys too. There are techniques exclusive to root cause analysis like the simple _5 whys_, _RPR_, and other covered by _Problem Management_ domain in _ITILv3_ literature.
 
-In this article I do not intend to cover basic troubleshooting of connectivity issues, where you would normally start checking IP configuration, routing and so forth. Instead, I am assuming there is an already working environment where unsual behavior is observed and we would like to find the root cause.
+The second point that has to be acknowledged is that no matter what technique it is, they all start with thorough observation and data gathering has to take place first for any analysis to make sense.
 
-Also there is no general recipe, and the starting point where to look and lenght of the analysis may vary based on the overall description of the issue. The description itself can come more often than not as something utterly generic like _"low throughput between A and B"_, or more specfic isolated observations like _"packet drops in X device"_, _"retransmissions"_, _"CPU starvation in one or more cores"_, and so on so forth. In a nutshell, the problem quickly winds up into finding a bottleneck, a misconfiguration or a bug.
+The follwoing method is assuming there is a basic triage on the subject problem and it is worth a deeper analysis. I do not intend to cover basic troubleshooting of network connectivity issues (for what you can also find good resources[6]), where one would normally start checking IP configuration, routing and so forth. Also it is assumed that there was a working environment in an earlier stage, and now an unsual and/or erratic behavior is manifestating.
 
-For the sake of simplicity I will try to keep the list short:
+As mentioned before, methods can be twisted by picking a sensitive starting point, depth of the analysis in every step, so on so forth, depending on time/resource constraints and on the overall description of the issue. The description itself can come more often than not as something utterly generic like _"low throughput between A and B"_, or more specfic isolated observations like _"packet drops in X device"_, _"retransmissions"_, _"CPU starvation in one or more cores"_, or a full analysis done by someone very experienced in the matter (these are normally the most challenging problems). The problem's root cause analysis can more often than not quickly wind up into some sort of bottleneck, a misconfiguration or a bug (in SW/FW/HW).
+
+Finally even though there should definitely be a better standard approach to engage problems than the one following, for the sake of simplicity I am trying to keep the list of steps short, and I trust it should still be useful for some, as at least I have myself applied it successfully in many occasions.
 
 ### 1. Reproduce it
 
-First and foremost if there is an identified set of steps that can reproduce the problem will simplify the witch hunt considerably for you and any other involved party. To determine which recurrence, if it happens in only one system, in many, time patterns, etc. Sometimes this is not possible as the problem only shows up sporadically and under unknown conditions. Some times it is just enough to use **iperf3** , **netperf** or similar tools to display the problem. Many times is difficult to locate resources to reproduce a "production"-like environment as it may use multiple expensive equipments. Hence the use of virtual reproducers is often the case, unless the involved pieces of hardware are part of the problem.
+First and foremost if there is an identified set of steps that can reproduce the problem will simplify the witch hunt considerably for you and any other involved party. This is a little short cut which is part of the initial observation. If there is one, great. To determine which recurrence, if it happens in only one system, in many, time patterns, etc. Sometimes this is not possible as the problem only shows up sporadically and under unknown, apparently non-deterministic conditions. Some times it is just enough to use **iperf3** , **netperf** or similar tools to display the problem. Also often times is difficult to locate resources to reproduce a _production-like_ environment as it may use expensive equipment. Hence the use of virtual reproducers is a common case, unless the involved pieces of hardware are also part of the problem.
  
 ### 2. Understand the virtual and physical layout
 
@@ -155,6 +157,10 @@ During the past years I stumbled a few times upon network driver bugs that preve
 [3] https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html-single/networking_guide/index
 
 [4] https://www.slideshare.net/nyechiel/neutron-networking-with-red-hat-enterprise-linux-openstack-platform
+
+[5] https://landing.google.com/sre/sre-book/chapters/effective-troubleshooting/
+
+[6] https://www.redhat.com/sysadmin/beginners-guide-network-troubleshooting-linux
 
 [5] https://github.com/jbenc/plotnetcfg
 
