@@ -118,7 +118,11 @@ Actions like these have been by far the fastest way to identify existing bugs. J
       $ git fetch linux-next
       $ git fetch --tags linux-next
       
-Now a specific ```linux-next``` tag can be checked out and built[6].
+Now a specific ```linux-next``` tag can be checked out and built[6]. Alternatively the ```net-next``` branch can be used.
+
+      $ git remote add net git://git.kernel.org/pub/scm/linux/kernel/git/davem/net.git
+      $ git fetch net
+
 
 Of course there is some extra work to identify which commit or set of commits are needed to solve the problem, like using ```git bisect```, exploring the repo logs, and some other manual tasks. However the software and hardware vendors should normally take care of that. Once the commit or commits needed are known I can get in which branch was applied (downstream):
 
