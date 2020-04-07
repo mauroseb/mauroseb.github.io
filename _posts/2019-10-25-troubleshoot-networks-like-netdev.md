@@ -38,11 +38,7 @@ The description itself can come more often than not as something utterly generic
 
 Finally even though there should definitely be a better standard approach to engage problems than the one following, for the sake of simplicity I am trying to keep the list of steps short, and I trust it should still be useful for some, as at least I have myself applied it successfully in many occasions.
 
-### 1. Reproduce it
-
-First and foremost if there is an identified set of steps that can reproduce the problem will simplify the witch hunt considerably for you and any other involved party. This is a little short cut which is part of the initial observation. If there is one, great. To determine which recurrence, if it happens in only one system, in many, time patterns, etc. Sometimes this is not possible as the problem only shows up sporadically and under unknown, apparently non-deterministic conditions. Some times it is just enough to use **iperf3** , **netperf** or similar tools to display the problem. Also often times is difficult to locate resources to reproduce a _production-like_ environment as it may use expensive equipment. Hence the use of virtual reproducers is a common case, unless the involved pieces of hardware are also part of the problem.
- 
-### 2. Understand the virtual and physical layout
+### 1. Understand the virtual and physical layout
 
 To understand the problem we need to have a clear picture of the path the packets need to traverse. Without that, the search for a root cause will be partial and inaccurate. Taking note of **ALL** the network components, virtual or physical, is paramount. Following is a basic example of an instance running in an OpenStack compute node:
 
@@ -82,8 +78,17 @@ Actually there are many different formats to choose as output:
 
 #### Hardware architecture
 
-If there is a performance problem, the starting point is to check that hardware architecture of the involved nodes: improper  NIC specifications for the configuration, wrong CPU assignments or isolation, slow PCI bus, NUMA not taken into account, and other.
+If there is a performance problem, a point is to check that hardware architecture of the involved nodes: improper NIC specifications for the configuration, wrong CPU assignments or isolation, slow PCI bus, NUMA not taken into account, and other.
 
+
+### 2. Reproduce it
+
+One of the first questions I normally ask is if there is a clear set of steps that can reproduce the problem. If so, it will simplify the witch hunt considerably for you and any other involved party. This is a little short cut which is part of the initial observation. If there is one, great. 
+
+Determine which recurrence, if it happens in only one system, in many, time patterns, etc. Sometimes this is not possible as the problem only shows up sporadically and under unknown, apparently non-deterministic conditions. 
+
+Some times it is just enough to use **iperf3** , **netperf** or similar tools to display the problem. Also often times is difficult to locate resources to reproduce a _production-like_ environment as it may use expensive equipment. Hence the use of virtual reproducers is a common case, unless the involved pieces of hardware are also part of the problem.
+ 
  
 ### 3. Test initial conditions
 
