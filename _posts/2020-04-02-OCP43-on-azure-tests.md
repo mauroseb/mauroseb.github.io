@@ -1,14 +1,23 @@
+---
+layout: posts
+title: "OCP 4.3 on Azure Tests"
+date: 2020-04-02
+categories: [blog]
+tags: [ ocp, azure, kubernetes ]
+author: mauroseb
+---
+
 ## Intro
 
 These are my first notes testing the official procedure to deploy OCP4.3 on Azure. [1]
 
 ## Table of Contents
 
- 1. [Prerequisites](##Prerequisites)
+ 1. [Prerequisites](##-Prerequisites)
  2. [Install](##Install)
 
 
-## Prerequisites
+(##-Prerequisites)
 
 The BOM to start with:
 
@@ -108,10 +117,10 @@ The BOM to start with:
             }
 
 
- - Create a cluster in cloud.redhat.com, pick Azure as infrastructure provider, method IPI and download the oc client, oc installer and pull-secret
+ - Create a cluster in ```cloud.redhat.com```, pick Azure as infrastructure provider, method IPI and download the oc client, openshift-installer and pull-secret
 
 
-## Install
+##Install
 
 I am running different tests based on the IPI documentation. The deployment with customization requires configuration.
 
