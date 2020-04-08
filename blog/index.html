@@ -6,6 +6,6 @@ title: Posts
 	<ul class="posts">
 
 	  {% for post in site.posts %}
-	    <li><span style="color: #00e500" > ‣ </span> <a href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a> - <span>{{ post.date | date_to_string }}</span> </li>
+	    <li><span style="color: #00e500" > ‣ </span> <a style="color: #000000" href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a> - <span>{{ post.date | date_to_string }}</span> </li>
 	  {% endfor %}
 	</ul>
