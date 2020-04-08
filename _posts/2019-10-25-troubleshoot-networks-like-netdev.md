@@ -155,6 +155,8 @@ The architecture of ML2/OvS has been largely documented and described (just to l
 The best practices dictate to use at least 6 VLANs (+1 for management) that would be normally trunked to at least two physical node NICs so they can be bonded together, however the installer is totally flexible and allows the user to be creative, use multiple independant NICs, flat networks, etc. Typical diagram is shown in the picture below.
 
 <img src="/images/6-vlan-arch.png" alt="Node connectivity" style="width:1000px;"/>
+
+
 ## Detecting Software Segmentation
 
 During the past years I stumbled a few times upon network driver bugs that prevent ```GSO``` (generic segmentation offloading) to work properly (each time on a different driver: ```ixgbe```, ```mlx5_core```, ```mlx4_core```, can't recall the last one yet), in combination with ```VxLAN``` encapsulation on top of a ```VLAN```.
