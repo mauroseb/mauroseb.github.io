@@ -17,11 +17,11 @@ Lastly this is the first article from hopefully many, therefore will end up in t
 
 ## General Approach (if any?)
 
-A ton has been written on the matter and arguably many methods and techniques may compete to be proven effective under specific circumstances. But firstly it has to be acknowledged that even if one strives to abide to a method as much as possible, the complexity of modern software systems makes the process not precisely deterministic, and that at the time there is critical impact the expert may choose the tools that her/his experience is dicating in order to address the problem first in the fastest manner, and then chase the root cause. With that said, I personally find Google SRE Guide Troubleshooting section quite comprehensive[1] and references the hypothetico-deductive model as proposed method. But there are many other sources for methodologies too. There are techniques exclusive to root cause analysis like the simple _5 whys_, _RPR_, and other covered by _Problem Management_ domain in _ITILv3_ literature.
+A ton has been written on the matter and arguably many methods and techniques may compete to be proven effective under specific circumstances. But firstly it has to be acknowledged that even if one strives to abide to a method as much as possible, the complexity of modern software systems makes the process not precisely deterministic, and that at the time there is critical impact the expert may choose the tools that her/his experience is dicating in order to address the problem first in the fastest manner, and then chase the root cause. With that said, I personally find Google SRE Guide Troubleshooting section quite comprehensive[^fn1] and references the hypothetico-deductive model as proposed method. But there are many other sources for methodologies too. There are techniques exclusive to root cause analysis like the simple _5 whys_, _RPR_, and other covered by _Problem Management_ domain in _ITILv3_ literature.
 
 The second point that has to be acknowledged is that no matter what technique it is, there is a common ground for all. Most agree that a thorough observation and data gathering has to take place first for any analysis to make any sense. Then analysis. Hypothesis. Action. Repeat.
 
-The follwoing method is assuming a basic triage on the subject problem has taken place and it is worth a deeper analysis. I do not intend to cover basic troubleshooting of network connectivity issues (for what you can also find good resources[2]), where one would normally start checking IP configuration, routing and so forth. Also it is assumed that there was a working environment in an earlier stage, and now an unsual and/or erratic behavior is manifestating. 
+The follwoing method is assuming a basic triage on the subject problem has taken place and it is worth a deeper analysis. I do not intend to cover basic troubleshooting of network connectivity issues (for what you can also find good resources[^fn2]), where one would normally start checking IP configuration, routing and so forth. Also it is assumed that there was a working environment in an earlier stage, and now an unsual and/or erratic behavior is manifestating. 
 
 As mentioned before, methods can be slightly twisted by picking a sensitive starting point, depth of the analysis in every step, so on so forth, depending on time/resource constraints and on the overall description of the issue. However it is important not to be biased by past experiences and in general be skeptical that what is being witnessed, even if similar to previous problems, shares causality. This especially holds true for networking problems. 
 
@@ -50,7 +50,7 @@ To understand the problem we need to have a clear picture of the path the packet
 
 In the diagram above the OvS circuitry is a bit more complex because it is performing VLAN tagging/untagging of the "tenant" network on ```br-ex``` (OvS bridge) internal port, which in turn carries VxLAN traffic, that is then forwarded internally to the ```br-tun``` where the VTEP lives (with the IP address of the previously mentioned internal port), and terminates each ```VNI``` corresponding to each tenant, then the traffic is forwarded via OvS internal patches to the ```br-int``` bridge that in turn forwards the traffic to the instance's qvo veth device.
 
-For the same purpose, there is an excellent tool from Jiri Benc: **plotnetcfg**[3]. To run it needs either ```root``` ileges or ```CAP_SYS_ADMIN``` and ```CAP_NET_ADMIN``` capabilities. The tool will create an output file in ```dot``` format, that can then be converted to ```PNG``` format with the **dot** command.
+For the same purpose, there is an excellent tool from Jiri Benc: **plotnetcfg**[^fn3]. To run it needs either ```root``` ileges or ```CAP_SYS_ADMIN``` and ```CAP_NET_ADMIN``` capabilities. The tool will create an output file in ```dot``` format, that can then be converted to ```PNG``` format with the **dot** command.
 
         # dnf install -y plotnetcfg
         # plotnetcfg > layout.out
@@ -106,7 +106,7 @@ For ```RHEL```:
           $ git fetch linux-next
           $ git fetch --tags linux-next
     
-    Now a specific ```linux-next``` tag can be checked out and built[4]. Alternatively the ```net-next``` branch can be used.
+    Now a specific ```linux-next``` tag can be checked out and built[^4]. Alternatively the ```net-next``` branch can be used.
 
           $ git remote add net git://git.kernel.org/pub/scm/linux/kernel/git/davem/net.git
           $ git fetch net
@@ -164,13 +164,13 @@ During the past years I stumbled a few times upon network driver bugs that preve
 
 ## References
 
-[1] https://landing.google.com/sre/sre-book/chapters/effective-troubleshooting/
+[^fn1] https://landing.google.com/sre/sre-book/chapters/effective-troubleshooting/
 
-[2] https://www.redhat.com/sysadmin/beginners-guide-network-troubleshooting-linux
+[^fn2] https://www.redhat.com/sysadmin/beginners-guide-network-troubleshooting-linux
 
-[3] https://github.com/jbenc/plotnetcfg
+[^fn3] https://github.com/jbenc/plotnetcfg
 
-[4] https://kernelnewbies.org/KernelBuild
+[^4] https://kernelnewbies.org/KernelBuild
 
 [5] https://pcp.io/docs/guide.html
 
