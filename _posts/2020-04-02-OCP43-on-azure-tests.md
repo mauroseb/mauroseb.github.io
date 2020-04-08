@@ -79,7 +79,7 @@ The BOM to start with:
            }
 
 
-    3. Add User Access Administrator role to the SP
+    3. Add User Access Administrator role to the SP [4][5]
 
            $ az role assignment create --role "User Access Administrator" --assignee-object-id $(az ad sp list --filter "appId eq 'XXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'"  | jq '.[0].objectId' -r)
            {
@@ -170,3 +170,5 @@ I am running different tests based on the IPI documentation. The deployment with
  [3] https://docs.microsoft.com/nl-nl/cli/azure/get-started-with-azure-cli?view=azure-cli-latest
  
  [4] https://docs.openshift.com/container-platform/4.3/installing/installing_azure/installing-azure-account.html#installation-azure-increasing-limits_installing-azure-account
+ 
+ [5] https://docs.microsoft.com/en-us/azure/virtual-machines/linux/openshift-container-platform-4x
