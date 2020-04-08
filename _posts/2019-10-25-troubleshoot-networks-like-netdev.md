@@ -107,6 +107,19 @@ For ```RHEL```:
           # yum --enablerepo=elrepo-kernel install kernel-ml
           # grub2-reboot 0
 
+  * **Test linux-next kernel.** Similarly the branches that are already accepted for the next stable release can be tested as follows. 
+  
+          $ git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+          $ cd linux
+          $ git remote add linux-next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+          $ git fetch linux-next
+          $ git fetch --tags linux-next
+    
+    Now a specific ```linux-next``` tag can be checked out and built[6]. Alternatively the ```net-next``` branch can be used.
+
+          $ git remote add net git://git.kernel.org/pub/scm/linux/kernel/git/davem/net.git
+          $ git fetch net
+  
     And just like that one can retry and discard tons of already fixed bugs or include new features that could improve the situation.
 
 Similar approach could be adopted for NIC firmware, drivers or even testing with a different NIC hardware if resources permit. 
@@ -115,25 +128,12 @@ If the layout determined at step 2. is too complex. Chopping down the devices an
 
 Just by doing that one can discard hundreds of bugs and enhancements that have been already fixed and incorporated in the latests releases, hardware/firmaware/driver issues that affect a single vendor, and so forth. 
 
-Actions like these have been by far the fastest way to identify existing bugs. Just by knowing it is not happening in the kernel version X, means that we only need to backport certain fix to a downstream kernel (in case of ```RHEL```)  or that the fix will be released soon in case of using the ```linux-next``` kernel.
+Actions like these have been by far the fastest way to identify existing bugs. Just by knowing it is not happening in a given kernel version, means that we only need to backport certain fix to a downstream kernel (in case of ```RHEL```)  or that the fix will be released soon upstream in case of using the ```linux-next``` kernel.
 
-      $ git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-      $ cd linux
-      $ git remote add linux-next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
-      $ git fetch linux-next
-      $ git fetch --tags linux-next
-      
-Now a specific ```linux-next``` tag can be checked out and built[6]. Alternatively the ```net-next``` branch can be used.
-
-      $ git remote add net git://git.kernel.org/pub/scm/linux/kernel/git/davem/net.git
-      $ git fetch net
-
-
-Of course there is some extra work to identify which commit or set of commits are needed to solve the problem, like using ```git bisect```, exploring the repo logs, and some other manual tasks. However the software and hardware vendors should normally take care of that. Once the commit or commits needed are known I can get in which branch was applied (downstream):
+There is some extra work to identify which commit or set of commits are needed to solve the problem, like using ```git bisect```, exploring the repo logs, and some other manual tasks. However the software and hardware vendors should normally take care of that. Once the commit or commits needed are known I can get in which branch was applied (downstream):
 
       $ git branch --contains cc2af34db9a5b5222eefdc25fd1265e305df9f2e
-      * (HEAD detached at kernel-3.10.0-1122.el7)
-          
+      * (HEAD detached at kernel-3.10.0-1122.el7)    
 
  
 ### 4. Performance metrics
