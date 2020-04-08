@@ -15,22 +15,13 @@ It should be noted that even though most examples in the series involve OpenStac
 
 Lastly this is the first article from hopefully many, therefore will end up in the first example after covering the basics. More to follow.
 
-
-## OpenStack Network Architecture
-
-OpenStack is a dynamic product and by design fully maleable to fit one's needs. Virtually every component is plugin based and can be interchangable by something else. In regard to networking it is no differen. The main project, Neutron can handle a large range of _ML2_ plugins (core component) from different opensource projects or from different vendors, and inside every ML2 plugin most of the networking services are also designed as pluggable as long as they respect well most of the defined Neutron API. With this said, this article mainly refers to the stock network layout for Neutron which is ML2 with OpenvSwitch (OvS) mechanism driver (recently OVN has been introduced however still uncommon in the field), as it has been the one where the problems covered below arised.
-
-The architecture of ML2/OvS has been largely documented and described (just to list some references: [1][2][3][4] ) so the assumption is that the reader is already familiar with it. However a diagram like the one following is needed to illustrate to some extent what a typical OpenStack compute and networker node layout looks like in order to proceed with the cases' analysis.
-
-<img src="/images/neutron_architecture.png" alt="Compute Network Layout" style="width:1200px;"/>
-
 ## General Approach (if any?)
 
-A ton has been written on the matter and arguably many methods and techniques may compete to be proven effective under specific circumstances. But firstly it has to be acknowledged that even if one strives to abide to a method as much as possible, the complexity of modern software systems makes the process not precisely deterministic, and that at the time there is critical impact the expert may choose the tools that her/his experience is dicating in order to address the problem first in the fastest manner, and then chase the root cause. With that said, I personally find Google SRE Guide Troubleshooting section quite comprehensive[5] and references the hypothetico-deductive model as proposed method. But there are many other sources for methodologies too. There are techniques exclusive to root cause analysis like the simple _5 whys_, _RPR_, and other covered by _Problem Management_ domain in _ITILv3_ literature.
+A ton has been written on the matter and arguably many methods and techniques may compete to be proven effective under specific circumstances. But firstly it has to be acknowledged that even if one strives to abide to a method as much as possible, the complexity of modern software systems makes the process not precisely deterministic, and that at the time there is critical impact the expert may choose the tools that her/his experience is dicating in order to address the problem first in the fastest manner, and then chase the root cause. With that said, I personally find Google SRE Guide Troubleshooting section quite comprehensive[1] and references the hypothetico-deductive model as proposed method. But there are many other sources for methodologies too. There are techniques exclusive to root cause analysis like the simple _5 whys_, _RPR_, and other covered by _Problem Management_ domain in _ITILv3_ literature.
 
 The second point that has to be acknowledged is that no matter what technique it is, there is a common ground for all. Most agree that a thorough observation and data gathering has to take place first for any analysis to make any sense. Then analysis. Hypothesis. Action. Repeat.
 
-The follwoing method is assuming a basic triage on the subject problem has taken place and it is worth a deeper analysis. I do not intend to cover basic troubleshooting of network connectivity issues (for what you can also find good resources[6]), where one would normally start checking IP configuration, routing and so forth. Also it is assumed that there was a working environment in an earlier stage, and now an unsual and/or erratic behavior is manifestating. 
+The follwoing method is assuming a basic triage on the subject problem has taken place and it is worth a deeper analysis. I do not intend to cover basic troubleshooting of network connectivity issues (for what you can also find good resources[2]), where one would normally start checking IP configuration, routing and so forth. Also it is assumed that there was a working environment in an earlier stage, and now an unsual and/or erratic behavior is manifestating. 
 
 As mentioned before, methods can be slightly twisted by picking a sensitive starting point, depth of the analysis in every step, so on so forth, depending on time/resource constraints and on the overall description of the issue. However it is important not to be biased by past experiences and in general be skeptical that what is being witnessed, even if similar to previous problems, shares causality. This especially holds true for networking problems. 
 
@@ -59,7 +50,7 @@ To understand the problem we need to have a clear picture of the path the packet
 
 In the diagram above the OvS circuitry is a bit more complex because it is performing VLAN tagging/untagging of the "tenant" network on ```br-ex``` (OvS bridge) internal port, which in turn carries VxLAN traffic, that is then forwarded internally to the ```br-tun``` where the VTEP lives (with the IP address of the previously mentioned internal port), and terminates each ```VNI``` corresponding to each tenant, then the traffic is forwarded via OvS internal patches to the ```br-int``` bridge that in turn forwards the traffic to the instance's qvo veth device.
 
-For the same purpose, there is an excellent tool from Jiri Benc: **plotnetcfg**[5]. To run it needs either ```root``` ileges or ```CAP_SYS_ADMIN``` and ```CAP_NET_ADMIN``` capabilities. The tool will create an output file in ```dot``` format, that can then be converted to ```PNG``` format with the **dot** command.
+For the same purpose, there is an excellent tool from Jiri Benc: **plotnetcfg**[3]. To run it needs either ```root``` ileges or ```CAP_SYS_ADMIN``` and ```CAP_NET_ADMIN``` capabilities. The tool will create an output file in ```dot``` format, that can then be converted to ```PNG``` format with the **dot** command.
 
         # dnf install -y plotnetcfg
         # plotnetcfg > layout.out
@@ -115,7 +106,7 @@ For ```RHEL```:
           $ git fetch linux-next
           $ git fetch --tags linux-next
     
-    Now a specific ```linux-next``` tag can be checked out and built[6]. Alternatively the ```net-next``` branch can be used.
+    Now a specific ```linux-next``` tag can be checked out and built[4]. Alternatively the ```net-next``` branch can be used.
 
           $ git remote add net git://git.kernel.org/pub/scm/linux/kernel/git/davem/net.git
           $ git fetch net
@@ -140,7 +131,7 @@ There is some extra work to identify which commit or set of commits are needed t
 
 Dealing with a performance issue with a broad description like _low troughput..._, normally would involve also checking the output of performance and metrics monitoring tools, looking for stats like RX/TX packet counts and sizes in each interface involved, error counts and in general what counters are moving network wise to understand if they are or not part of the problem. 
 
-There are hundreds of command line tools to chose here but for the sake of simplicity I will focus on the readings of ```ethtool``` and ```sar``` (the later because is the most widespread accross systems). It is normal to find environments with proper performance tooling like stacks combining ```collectd```, ```prometheus```, ```grafana```, ```ganglia```, or any ```rrdtool``` based plotter. One interesting tool is also ```pcp``` (performance co-pilot [7]). It does not really matter which tool to use as long as one can get the metrics that is after (for a comprehensive list of Linux command line tools check out the mind blowing work of Brendan Gregg [8][9]).
+There are hundreds of command line tools to chose here but for the sake of simplicity I will focus on the readings of ```ethtool``` and ```sar``` (the later because is the most widespread accross systems). It is normal to find environments with proper performance tooling like stacks combining ```collectd```, ```prometheus```, ```grafana```, ```ganglia```, or any ```rrdtool``` based plotter. One interesting tool is also ```pcp``` (performance co-pilot [5]). It does not really matter which tool to use as long as one can get the metrics that is after (for a comprehensive list of Linux command line tools check out the mind blowing work of Brendan Gregg [6][7]).
 
 
 
@@ -153,7 +144,17 @@ For that more tools come handy: **perf** is probably one I used the most in this
 Lastly, I must mention ```eBPF``` (extended Barkley Packet Filter, originially named after BSD's BPF, however radically different) which is remarkably valuable and versatile kernel facility that was created for tracing purposes, but quickly became a swiss-army knife within the kernel that allows the user to create his own code and run it in a JIT compiler
 in kernel land. Scary? Of course.
 
+## OpenStack Network Architecture
 
+OpenStack is a dynamic product and by design fully maleable to fit one's needs. Virtually every component is plugin based and can be interchangable by something else. In regard to networking it is no differen. The main project, Neutron can handle a large range of _ML2_ plugins (core component) from different opensource projects or from different vendors, and inside every ML2 plugin most of the networking services are also designed as pluggable as long as they respect well most of the defined Neutron API. With this said, this article mainly refers to the stock network layout for Neutron which is ML2 with OpenvSwitch (OvS) mechanism driver (recently OVN has been introduced but still uncommon in the field), as it has been the one where the problems covered below arised.
+
+The architecture of ML2/OvS has been largely documented and described (just to list some references: [8][9][10][11] ) so the assumption is that the reader is already familiar with it. The following diagram illustrates to some extent what a typical OpenStack compute and networker node layout looks like in order to proceed with the cases' analysis.
+
+<img src="/images/neutron_architecture.png" alt="Compute Network Layout" style="width:1000px;"/>
+
+The best practices dictate to use at least 6 VLANs (+1 for management) that would be normally trunked to at least two physical node NICs so they can be bonded together, however the installer is totally flexible and allows the user to be creative, use multiple independant NICs, flat networks, etc. Typical diagram is shown in the picture below.
+
+<img src="/images/6-vlan-arch.png" alt="Node connectivity" style="width:1000px;"/>
 ## Detecting Software Segmentation
 
 During the past years I stumbled a few times upon network driver bugs that prevent ```GSO``` (generic segmentation offloading) to work properly (each time on a different driver: ```ixgbe```, ```mlx5_core```, ```mlx4_core```, can't recall the last one yet), in combination with ```VxLAN``` encapsulation on top of a ```VLAN```.
@@ -161,25 +162,24 @@ During the past years I stumbled a few times upon network driver bugs that preve
 
 ## References
 
-[1] https://www.rdoproject.org/networking/networking-in-too-much-detail/
+[1] https://landing.google.com/sre/sre-book/chapters/effective-troubleshooting/
 
-[2] https://docs.openstack.org/neutron/latest/
+[2] https://www.redhat.com/sysadmin/beginners-guide-network-troubleshooting-linux
 
-[3] https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html-single/networking_guide/index
+[3] https://github.com/jbenc/plotnetcfg
 
-[4] https://www.slideshare.net/nyechiel/neutron-networking-with-red-hat-enterprise-linux-openstack-platform
+[4] https://kernelnewbies.org/KernelBuild
 
-[5] https://landing.google.com/sre/sre-book/chapters/effective-troubleshooting/
+[5] https://pcp.io/docs/guide.html
 
-[6] https://www.redhat.com/sysadmin/beginners-guide-network-troubleshooting-linux
+[6] http://www.brendangregg.com/
 
-[5] https://github.com/jbenc/plotnetcfg
+[7] http://www.brendangregg.com/blog/2014-11-22/linux-perf-tools-2014.html
 
-[6] https://kernelnewbies.org/KernelBuild
+[8] https://www.rdoproject.org/networking/networking-in-too-much-detail/
 
-[7] https://pcp.io/docs/guide.html
+[9] https://docs.openstack.org/neutron/latest/
 
-[8] http://www.brendangregg.com/
+[10] https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html-single/networking_guide/index
 
-[9] http://www.brendangregg.com/blog/2014-11-22/linux-perf-tools-2014.html
-
+[11] https://www.slideshare.net/nyechiel/neutron-networking-with-red-hat-enterprise-linux-openstack-platform
