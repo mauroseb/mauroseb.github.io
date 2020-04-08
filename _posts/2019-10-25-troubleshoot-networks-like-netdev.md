@@ -58,7 +58,7 @@ For the same purpose, there is an excellent tool from Jiri Benc: **plotnetcfg**[
 
 The former will create a picture like the following:
 
-<img src="/images/plotnet_sample.png" alt="plotnet sample PNG" style="width:1200px;"/>
+<img src="/images/plotnet_sample.png" alt="plotnet sample PNG" style="width:1000px;"/>
 
 Actually there are many different formats to choose as output:
 
