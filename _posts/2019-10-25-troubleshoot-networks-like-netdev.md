@@ -131,7 +131,7 @@ There is some extra work to identify which commit or set of commits are needed t
 
 Dealing with a performance issue with a broad description like _low troughput..._, normally would involve also checking the output of performance and metrics monitoring tools, looking for stats like RX/TX packet counts and sizes in each interface involved, error counts and in general what counters are moving network wise to understand if they are or not part of the problem. 
 
-There are hundreds of command line tools to chose here but for the sake of simplicity I will focus on the readings of ```ethtool``` and ```sar``` (the later because is the most widespread accross systems). It is normal to find environments with proper performance tooling like stacks combining ```collectd```, ```prometheus```, ```grafana```, ```ganglia```, or any ```rrdtool``` based plotter. One interesting tool is also ```pcp``` (performance co-pilot [5]). It does not really matter which tool to use as long as one can get the metrics that is after (for a comprehensive list of Linux command line tools check out the mind blowing work of Brendan Gregg [6][7]).
+There are hundreds of command line tools to chose here but for the sake of simplicity I will focus on the readings of ```ethtool``` and ```sar``` (the later because is the most widespread accross systems). It is normal to find environments with proper performance tooling like stacks combining ```collectd```, ```prometheus```, ```grafana```, ```ganglia```, or any ```rrdtool``` based plotter. One interesting tool is also ```pcp``` (performance co-pilot [^5]). It does not really matter which tool to use as long as one can get the metrics that is after (for a comprehensive list of Linux command line tools check out the mind blowing work of Brendan Gregg [^6][^7]).
 
 
 
@@ -148,7 +148,7 @@ in kernel land. Scary? Of course.
 
 OpenStack is a dynamic product and by design fully maleable to fit one's needs. Virtually every component is plugin based and can be interchangable by something else. In regard to networking it is no differen. The main project, Neutron can handle a large range of _ML2_ plugins (core component) from different opensource projects or from different vendors, and inside every ML2 plugin most of the networking services are also designed as pluggable as long as they respect well most of the defined Neutron API. With this said, this article mainly refers to the stock network layout for Neutron which is ML2 with OpenvSwitch (OvS) mechanism driver (recently OVN has been introduced but still uncommon in the field), as it has been the one where the problems covered below arised.
 
-The architecture of ML2/OvS has been largely documented and described (just to list some references: [8][9][10][11] ) so the assumption is that the reader is already familiar with it. The following diagram illustrates to some extent what a typical OpenStack compute and networker node layout looks like in order to proceed with the cases' analysis.
+The architecture of ML2/OvS has been largely documented and described (just to list some references: [^8][^9][^10][^11] ) so the assumption is that the reader is already familiar with it. The following diagram illustrates to some extent what a typical OpenStack compute and networker node layout looks like in order to proceed with the cases' analysis.
 
 <img src="/images/neutron_architecture.png" alt="Compute Network Layout" style="width:1000px;"/>
 
@@ -172,16 +172,16 @@ During the past years I stumbled a few times upon network driver bugs that preve
 
 [^4]: https://kernelnewbies.org/KernelBuild
 
-[5] https://pcp.io/docs/guide.html
+[^5]: https://pcp.io/docs/guide.html
 
-[6] http://www.brendangregg.com/
+[^6]: http://www.brendangregg.com/
 
-[7] http://www.brendangregg.com/blog/2014-11-22/linux-perf-tools-2014.html
+[^7]: http://www.brendangregg.com/blog/2014-11-22/linux-perf-tools-2014.html
 
-[8] https://www.rdoproject.org/networking/networking-in-too-much-detail/
+[^8]: https://www.rdoproject.org/networking/networking-in-too-much-detail/
 
-[9] https://docs.openstack.org/neutron/latest/
+[^9]: https://docs.openstack.org/neutron/latest/
 
-[10] https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html-single/networking_guide/index
+[^10]: https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html-single/networking_guide/index
 
-[11] https://www.slideshare.net/nyechiel/neutron-networking-with-red-hat-enterprise-linux-openstack-platform
+[^11]: https://www.slideshare.net/nyechiel/neutron-networking-with-red-hat-enterprise-linux-openstack-platform
