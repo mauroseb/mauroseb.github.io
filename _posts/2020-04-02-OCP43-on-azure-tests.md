@@ -9,20 +9,20 @@ author: mauroseb
 
 ## Intro
 
-These are my first notes testing the official procedure to deploy OCP4.3 on Azure. [1]
+These are my first notes testing the official procedure to deploy OCP4.3 on Azure. [^1]
 
 ## Table of Contents
 
- 1. [Prerequisites](##-Prerequisites)
+ 1. [Prerequisites](##Prerequisites)
  2. [Install](##Install)
 
 
-(##-Prerequisites)
+## Prerequisites
 
 The BOM to start with:
 
  - Fedora (31) workstation I will be working with 500 MB free local disk
- - Install az CLI if not there [2][3]
+ - Install az CLI if not there [^2][^3]
  - Valid azure account with the following:
    - At least a Pay-As-You-Go Subscription
      - free-tier sub does not allow to request a resource limit increase
@@ -79,7 +79,7 @@ The BOM to start with:
            }
 
 
-    3. Add User Access Administrator role to the SP [4][5]
+    3. Add User Access Administrator role to the SP [^4][^5]
 
            $ az role assignment create --role "User Access Administrator" --assignee-object-id $(az ad sp list --filter "appId eq 'XXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'"  | jq '.[0].objectId' -r)
            {
@@ -94,7 +94,7 @@ The BOM to start with:
             }
 
 
-    4. Add Azure Active Directory Graph permission
+    4. Add Azure Active Directory Graph permission where 00000002-0000-0000-c000-000000000000 is the resource App ID for the Windows Azure AD and 824c81eb-e3f8-4ee6-8f6d-de7f50d565b7 corresponds to a defined role to manage new apps that this app creates or owns [^6]:
 
            $ az ad app permission add --id XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX --api 00000002-0000-0000-c000-000000000000 --api-permissions 824c81eb-e3f8-4ee6-8f6d-de7f50d565b7=Role
            Invoking "az ad app permission grant --id XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX --api 00000002-0000-0000-c000-000000000000" is needed to make the change effective
@@ -120,7 +120,7 @@ The BOM to start with:
  - Create a cluster in ```cloud.redhat.com```, pick Azure as infrastructure provider, method IPI and download the oc client, openshift-installer and pull-secret
 
 
-##Install
+## Install
 
 I am running different tests based on the IPI documentation. The deployment with customization requires configuration.
 
@@ -163,12 +163,14 @@ I am running different tests based on the IPI documentation. The deployment with
 
 ## References
 
- [1] https://docs.openshift.com/container-platform/4.3/installing/installing_azure/installing-azure-customizations.html#installing-azure-customizations
+ [^1]: https://docs.openshift.com/container-platform/4.3/installing/installing_azure/installing-azure-customizations.html#installing-azure-customizations
  
- [2] https://docs.microsoft.com/nl-nl/cli/azure/install-azure-cli-yum?view=azure-cli-latest
+ [^2]: https://docs.microsoft.com/nl-nl/cli/azure/install-azure-cli-yum?view=azure-cli-latest
  
- [3] https://docs.microsoft.com/nl-nl/cli/azure/get-started-with-azure-cli?view=azure-cli-latest
+ [^3]: https://docs.microsoft.com/nl-nl/cli/azure/get-started-with-azure-cli?view=azure-cli-latest
  
- [4] https://docs.openshift.com/container-platform/4.3/installing/installing_azure/installing-azure-account.html#installation-azure-increasing-limits_installing-azure-account
+ [^4]: https://docs.openshift.com/container-platform/4.3/installing/installing_azure/installing-azure-account.html#installation-azure-increasing-limits_installing-azure-account
  
- [5] https://docs.microsoft.com/en-us/azure/virtual-machines/linux/openshift-container-platform-4x
+ [^5]: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/openshift-container-platform-4x
+
+ [^6]: https://blogs.msdn.microsoft.com/aaddevsup/2018/06/06/guid-table-for-windows-azure-active-directory-permissions/
