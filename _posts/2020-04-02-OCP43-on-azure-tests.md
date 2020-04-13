@@ -22,7 +22,7 @@ These are my first notes testing the official procedure to deploy OCP4.3 on Azur
 The BOM to start with:
 
  - Fedora (31) workstation I will be working with 500 MB free local disk
- - Install az CLI if not there [^2][^3]
+ - Install az CLI if not there [^2] [^3]
  - Valid azure account with the following:
    - At least a Pay-As-You-Go Subscription
      - free-tier sub does not allow to request a resource limit increase
@@ -79,7 +79,7 @@ The BOM to start with:
            }
 
 
-    3. Add User Access Administrator role to the SP [^4][^5]
+    3. Add User Access Administrator role to the SP [^4] [^5]
 
            $ az role assignment create --role "User Access Administrator" --assignee-object-id $(az ad sp list --filter "appId eq 'XXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'"  | jq '.[0].objectId' -r)
            {
