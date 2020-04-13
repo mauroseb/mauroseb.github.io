@@ -30,7 +30,7 @@ The BOM to start with:
      - Minimally User Access Administrator
    - Proper limits set
      - The only limit that would need to change from default is [4]:
-       - Compute-VMs (vCPUs): 34 (default is 20)
+       - Compute-VMs (vCPUs): 34 (default is 10)
      - The rest of required resource amounts should be okay with defaults in place:
        - VNet: 1
        - Network Interfaces: 6
