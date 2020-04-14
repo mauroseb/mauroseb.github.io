@@ -26,10 +26,9 @@ The BOM to start with:
  - Valid azure account with the following:
    - At least a Pay-As-You-Go Subscription
      - free-tier sub does not allow to request a resource limit increase
-   - Role
-     - Minimally User Access Administrator
+   - Service Principal with "User Access Administrator" Role and a few other privileges
    - Proper limits set
-     - The only limit that would need to change from default is [4]:
+     - The only limit that would need to change from default is [^4]:
        - Compute-VMs (vCPUs): 34 (default is 10)
      - The rest of required resource amounts should be okay with defaults in place:
        - VNet: 1
