@@ -121,7 +121,7 @@ The BOM to start with:
 
 ## Install
 
-I am running different tests based on the IPI documentation. The deployment with customization requires configuration.
+I am running different tests based on the IPI documentation. 
 
  1. SSH KEY
 
