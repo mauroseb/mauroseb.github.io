@@ -29,6 +29,9 @@ The description itself can come more often than not as something utterly generic
 
 Finally even though there should definitely be a better standard approach to engage problems than the one following, for the sake of simplicity I am trying to keep the list of steps short, and I trust it should still be useful for some, as at least I have myself applied it successfully in many occasions.
 
+
+<img src="https://imgs.xkcd.com/comics/networking_problems.png" alt="plotnet sample PNG" style="width:1000px;"/>
+
 ### 1. Understand the virtual and physical layout
 
 To understand the problem we need to have a clear picture of the path the packets need to traverse. Without that, the search for a root cause will be partial and inaccurate. Taking note of **ALL** the network components, virtual or physical, is paramount. Following is a basic example of an instance running in an OpenStack compute node:
