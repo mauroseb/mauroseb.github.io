@@ -1,7 +1,7 @@
 ---
 layout: posts
 title: "Setup Container for Jenkins"
-date: 2019-10-25
+date: 2020-04-22
 categories: [blog]
 tags: [ containers, jenkins ]
 author: mauroseb
