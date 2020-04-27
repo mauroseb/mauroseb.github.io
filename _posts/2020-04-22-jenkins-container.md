@@ -14,8 +14,8 @@ Plenty of sources to achieve the same, but main is the official one[^1].
 
 1. Pull the latest official image for Jenkins
 
-        # podman pull docker.io/library/jenkins
-        Trying to pull docker.io/library/jenkins...
+        # podman pull jenkins/jenkins
+        Trying to pull jenkins/jenkins...
         Getting image source signatures
         Copying blob 1607093a898c done
         Copying blob d4eee24d4dac done
@@ -55,12 +55,14 @@ Plenty of sources to achieve the same, but main is the official one[^1].
 
        # podman ps
        CONTAINER ID  IMAGE                             COMMAND  CREATED             STATUS                 PORTS                                             NAMES
-       3f4a74966f26  docker.io/library/jenkins:latest           About a minute ago  Up About a minute ago  0.0.0.0:8070->8080/tcp, 0.0.0.0:50000->50000/tcp  jenkins-master
+       3f4a74966f26  docker.io/jenkins/jenkins:latest           About a minute ago  Up About a minute ago  0.0.0.0:8070->8080/tcp, 0.0.0.0:50000->50000/tcp  jenkins-master
 
 4. Check podman logs for the admin password to login to the webUI
 
 
 That's it!
+Jenkins now is up and running time to tweak it and add your pipelines in it.
+More on that in a future post.
 
 ## References
 
