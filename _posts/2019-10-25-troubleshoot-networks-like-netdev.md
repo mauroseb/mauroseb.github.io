@@ -19,18 +19,16 @@ Lastly this is the first article from hopefully many, therefore will end up in t
 
 A ton has been written on the matter and arguably many methods and techniques may compete to be proven effective under specific circumstances. But firstly it has to be acknowledged that even if one strives to abide to a method as much as possible, the complexity of modern software systems makes the process not precisely deterministic, and that at the time there is critical impact the expert may choose the tools that her/his experience is dicating in order to address the problem first in the fastest manner, and then chase the root cause. With that said, I personally find Google SRE Guide Troubleshooting section quite comprehensive[^1] and references the hypothetico-deductive model as proposed method. But there are many other sources for methodologies too. There are techniques exclusive to root cause analysis like the simple _5 whys_, _RPR_, and other covered by _Problem Management_ domain in _ITILv3_ literature.
 
-The second point that has to be acknowledged is that no matter what technique it is, there is a common ground for all. Most agree that a thorough observation and data gathering has to take place first for any analysis to make any sense. Then analysis. Hypothesis. Action. Repeat.
+The second point that has to be acknowledged is that no matter what technique it is, there is a common ground for all. Most agree that a thorough observation and data gathering has to take place first. Which is what I am going to focus on in the following section.
+
+<img src="https://imgs.xkcd.com/comics/networking_problems.png" alt="plotnet sample PNG" style="width:400px;align:center;"/>
+
 
 The follwoing method is assuming a basic triage on the subject problem has taken place and it is worth a deeper analysis. I do not intend to cover basic troubleshooting of network connectivity issues (for what you can also find good resources[^2]), where one would normally start checking IP configuration, routing and so forth. Also it is assumed that there was a working environment in an earlier stage, and now an unsual and/or erratic behavior is manifestating. 
 
-As mentioned before, methods can be slightly twisted by picking a sensitive starting point, depth of the analysis in every step, so on so forth, depending on time/resource constraints and on the overall description of the issue. However it is important not to be biased by past experiences and in general be skeptical that what is being witnessed, even if similar to previous problems, shares causality. This especially holds true for networking problems. 
+As mentioned before, the level of knowledge of whom applies the method matters, picking a sensitive starting point, depth of the analysis in every step, so on so forth, depending on time/resource constraints and on the overall description of the issue can be valueable. Nonetheless it is also important not to be biased by past experiences and in general be skeptical that what is being witnesses now shares causality with previous events. This especially holds true for networking problems. 
 
-The description itself can come more often than not as something utterly generic like _"low throughput between A and B"_, or more specfic isolated observations like _"packet drops in X device"_, _"retransmissions"_, _"CPU starvation in one or more cores"_, or a full analysis done by someone very experienced in the matter (these are normally the most challenging problems).
-
-Finally even though there should definitely be a better standard approach to engage problems than the one following, for the sake of simplicity I am trying to keep the list of steps short, and I trust it should still be useful for some, as at least I have myself applied it successfully in many occasions.
-
-
-<img src="https://imgs.xkcd.com/comics/networking_problems.png" alt="plotnet sample PNG" style="width:400px;align:center;"/>
+Finally the following is definitely flawed and incomplete (mea culpa) but may still come handy for my own forgetful mind and luckily some other reader.
 
 
 ### 1. Understand the virtual and physical layout
