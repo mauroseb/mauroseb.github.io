@@ -38,6 +38,7 @@ The BOM to start with:
        - Public IPs: 3
        - Private IPs: 7
 
+{% highlight %}
              $ az vm list-usage --location "westcentralus" -o table
              Name                               CurrentValue    Limit
              ---------------------------------  --------------  -------
@@ -48,7 +49,7 @@ The BOM to start with:
              Dedicated vCPUs                    0               3000
              Total Regional Low-priority vCPUs  0               10
              Standard DAv4 Family vCPUs         0               0
-
+{% endhighlight %}
 
     - Existing DNS zone created for the cluster (i.e. t1.oddi.info)
 
