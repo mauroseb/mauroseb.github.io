@@ -4,6 +4,7 @@ title: "Troubleshoot OpenStack Networking Like a Netdev Kernel Developer - Part 
 date: 2019-10-25
 categories: [blog]
 tags: [ neutron, openstack, networking, kernel ]
+excerpt_separator: "<!-- more -->"
 author: mauroseb
 ---
 
@@ -14,6 +15,7 @@ Firstly, I would like to mention that many times I had the chance to work next t
 It should be noted that even though most examples in the series involve OpenStack environments, the approaches and techniques discussed would hopefully help with networking issues in **any** linux based environment, with or without OpenvSwitch or OpenStack in the picture.
 
 Lastly this is the first article from hopefully many, therefore will end up in the first example after covering the basics. More to follow.
+<!-- more -->
 
 ## General Approach
 
