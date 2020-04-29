@@ -8,7 +8,7 @@ body {
     background-blend-mode:luminosity;
     background-repeat: no-repeat;
     background-color: #d3d3d3;
-    font-size: 9px;
+    font-size: 11px;
     font-family: 'Arial', 'Sans-Serif';
 }
 
@@ -91,7 +91,7 @@ div#nav {
 
 p {
     font-family: 'Arial', 'Sans-Serif';
-    font-size: 9px;
+    font-size: 11px;
     line-height: 1.4em;
     color: #333;
     width: 75%;
@@ -176,7 +176,7 @@ img {
 
 footer {
     border-top: 1px solid #d5d5d5;
-    font-size: .8em;
+    font-size: 10px;
     width: 75%;
 }
 
