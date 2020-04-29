@@ -12,9 +12,9 @@ author: mauroseb
 This is the first post that regards to OpenStack development.
 When you start the journey of collaborating in OpenStack upstream projects one of the ways to start helping out and learning is to do code reviews and testing.
 
-This activity is not only paramount for the community but also will position you better when you start to submit patches.
+This activity is not only paramount for the community but also will position you better when you start to submit patches. The more reviewsyou have, the more trustworthy you are.
 
-OpenStack projects use gerrit this purpose (similar to gitlab or reviewboard). This is an excellent tool that integrates into git and allows reviews, scoring and many other features. You can find all documentation you need in the _OpenStack Contributor Guide_ and if time permits I will add some post on that too.[^1][^2][^3]
+OpenStack projects use a tool called gerrit for this purpose (similar to gitlab or reviewboard). This is an excellent tool that integrates into git and allows reviews, scoring and many other features. You can find all documentation you need in the _OpenStack Contributor Guide_ and if time permits I will add some post on that too.[^1][^2][^3]
 
 But that is **not** what I am going to write about. I just want to show how can you quickly test a patch that has not been merged into the master branch in your environment with an example.
 
