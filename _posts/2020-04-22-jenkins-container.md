@@ -16,6 +16,8 @@ Plenty of sources to achieve the same, but main is the official one[^1].
 1. Pull the latest official image for Jenkins
 <!-- more -->
 
+{% highlight shell %}
+
         # podman pull jenkins/jenkins
         Trying to pull jenkins/jenkins...
         Getting image source signatures
@@ -43,6 +45,9 @@ Plenty of sources to achieve the same, but main is the official one[^1].
         Writing manifest to image destination
         Storing signatures
         cd14cecfdb3a657ba7d05bea026e7ac8b9abafc6e5c66253ab327c7211fa6281
+
+{% endhighlight %}
+
 
 2. Create a directory to use as persistent volume for Jenkins data (also ensure it matches the contianer jenkins user UID: 1000)
 
