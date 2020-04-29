@@ -5,6 +5,7 @@ date: 2020-04-22
 categories: [blog]
 tags: [ containers, jenkins ]
 author: mauroseb
+excerpt_separator: "<!-- more -->"
 ---
 
 ## Quickly setup Jenkins
@@ -13,6 +14,7 @@ I have this running in my lab as a static container.
 Plenty of sources to achieve the same, but main is the official one[^1].
 
 1. Pull the latest official image for Jenkins
+<!-- more -->
 
         # podman pull jenkins/jenkins
         Trying to pull jenkins/jenkins...
