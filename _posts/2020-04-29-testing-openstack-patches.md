@@ -5,6 +5,7 @@ date: 2020-04-29
 categories: [blog]
 tags: [ openstack, development ]
 author: mauroseb
+excerpt_separator: "<!-- more -->"
 ---
 
 ## Intro
@@ -24,7 +25,7 @@ Then you could do the community and yourself a favor and test it.
 Since we are dealing mostly with python code one could just find the package code in the test environment and apply the patch.
 
 Following is an example for some Director (TripleO) code.
-
+<!-- more -->
 
 ## The Problem
 
