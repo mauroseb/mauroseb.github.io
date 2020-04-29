@@ -5,17 +5,12 @@ date: 2020-04-02
 categories: [blog]
 tags: [ ocp, azure, kubernetes ]
 author: mauroseb
+excerpt_separator: "<!-- more -->"
 ---
 
 ## Intro
 
 These are my first notes testing the official procedure to deploy OCP4.3 on Azure. [^1]
-
-## Table of Contents
-
- 1. [Prerequisites](##Prerequisites)
- 2. [Install](##Install)
-
 
 ## Prerequisites
 
@@ -27,6 +22,7 @@ The BOM to start with:
    - At least a Pay-As-You-Go Subscription
      - free-tier sub does not allow to request a resource limit increase
    - Service Principal with "User Access Administrator" Role and a few other privileges
+<!-- more -->
    - Proper limits set
      - The only limit that would need to change from default is [^4]:
        - Compute-VMs (vCPUs): 34 (default is 10)
