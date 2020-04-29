@@ -8,7 +8,7 @@ body {
     background-blend-mode:luminosity;
     background-repeat: no-repeat;
     background-color: #d3d3d3;
-    font-size: 12px;
+    font-size: 9px;
     font-family: 'Arial', 'Sans-Serif';
 }
 
@@ -91,7 +91,7 @@ div#nav {
 
 p {
     font-family: 'Arial', 'Sans-Serif';
-    font-size: 1.5em;
+    font-size: 9px;
     line-height: 1.4em;
     color: #333;
     width: 75%;
@@ -182,7 +182,7 @@ footer {
 
 ul.posts { 
     margin: 20px auto 40px; 
-    font-size: 1.5em;
+    font-size: 12px;
     font-family: 'Arial', 'Sans-Serif';
 }
 
