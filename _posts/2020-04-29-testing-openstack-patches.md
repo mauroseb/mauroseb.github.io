@@ -14,9 +14,9 @@ When you start the journey of collaborating in OpenStack upstream projects one o
 
 This activity is not only paramount for the community but also will position you better when you start to submit patches. The more reviewsyou have, the more trustworthy you are.
 
-OpenStack projects use a tool called gerrit for this purpose (similar to gitlab or reviewboard). This is an excellent tool that integrates into git and allows reviews, scoring and many other features. You can find all documentation you need in the _OpenStack Contributor Guide_ and if time permits I will add some post on that too.[^1][^2][^3]
+OpenStack projects use a tool called gerrit for this purpose (similar to gitlab or reviewboard). This is an excellent tool that integrates into git and allows reviews, scoring and many other features. You can find all documentation you need in the _OpenStack Contributor Guide_ and if time permits I will add some post on that too.[^1] [^2] [^3]
 
-But that is **not** what I am going to write about. I just want to show how can you quickly test a patch that has not been merged into the master branch in your environment with an example.
++But that is **not** what I am going to write about today. I just want to show how can you quickly test a patch that has not been merged into the master branch in your own environment with an example.
 
 Let's say you found a bug and you look in <bugzilla.redhat.com>, <bugs.launchpad.net> or <storyoard.openstack.org> and you found someone already reported it. And even better there is a patch for it yet to be merged, but there is no package or contianer image you can download and install.
 
@@ -26,7 +26,7 @@ Since we are dealing mostly with python code one could just find the package cod
 Following is an example for some Director (TripleO) code.
 
 
-##The Problem
+## The Problem
 
 OpenStack 16 downloading container images from registry.redhat.io times out after the Bearer Token expires and starts to return ```401. Unauthorized``` for any subsequent requests. Since that is a known issue someone has kindly filed a bugzilla ticket for me:
  - <https://bugzilla.redhat.com/show_bug.cgi?id=1811798>
@@ -89,6 +89,6 @@ Happy hacking!
 
 ## References
 
-[^1]:[Setup and Learn GIT](https://docs.openstack.org/contributors/common/git.html)
-[^2]:[Setup Gerrit](https://docs.openstack.org/contributors/common/setup-gerrit.html)
-[^3]:[How to become a patch Guru ?](https://docs.openstack.org/contributors/code-and-documentation/patch-best-practices.html)
+[^1]: [Setup and Learn GIT](https://docs.openstack.org/contributors/common/git.html)
+[^2]: [Setup Gerrit](https://docs.openstack.org/contributors/common/setup-gerrit.html)
+[^3]: [How to become a patch Guru ?](https://docs.openstack.org/contributors/code-and-documentation/patch-best-practices.html)
