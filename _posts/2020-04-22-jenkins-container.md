@@ -10,7 +10,8 @@ excerpt_separator: "<!-- more -->"
 
 ## Quickly setup Jenkins
 
-I have this running in my lab as a static container.
+<!-- more -->
+I have a Jenkins master running in my lab as a static container that I use to deploy the applications I would like to test.
 Plenty of sources to achieve the same, but main is the official one[^1].
 
 1. Pull the latest official image for Jenkins
