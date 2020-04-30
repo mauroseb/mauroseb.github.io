@@ -45,7 +45,8 @@ You can notice the description, the code, that it has been reviewed, votes, comm
 
 I log in into my undercloud server, change to the directory where the code for the project ```tripleo-common``` sits. Then download (notice the URL is slightly different than before so I can get the mime-encoded version of the patch) and apply it.
 
-~~~
+{% highlight shell %}
+
 [root@undercloud-osp16 ]# cd /usr/lib/python3.6/site-packages/
 [root@undercloud-osp16 site-packages]# curl -4sSL https://review.opendev.org/changes/713923/revisions/current/patch?download | base64 -d | patch -p1
 patching file tripleo_common/image/image_export.py
@@ -55,13 +56,16 @@ patching file tripleo_common/image/image_uploader.py
 Hunk #1 succeeded at 539 (offset -4 lines).
 Hunk #2 succeeded at 551 (offset -4 lines).
 Hunk #3 succeeded at 1727 (offset -4 lines).
-~~~
+
+{% endhighlight %}
 
 In this case it complains that a hunk failed. A hunk is a segment of code in the diff formatted patch that clearly could not be applied for some reason. That reason is the irreconciliable difference between what the patch expects and what is in the code, like the fact that the downstream TripleO version I am using is a bit older. Some code could be refactored and moved elsewhere and if you need the change you would need to locate other lines or files manually where the code used to sit and apply the change manually.
 
 I check this part of code is exception handling and it is already halfly managed by the next code block so I consider can live without it:
 
-~~~
+
+{% highlight shell %}
+
  [root@undercloud-osp16 site-packages]# cat tripleo_common/image/image_export.py.rej
 --- tripleo_common/image/image_export.py
 +++ tripleo_common/image/image_export.py
@@ -79,7 +83,8 @@ I check this part of code is exception handling and it is already halfly managed
      except Exception as e:
          write_error = '[{}] Write Failure: {}'.format(image, str(e))
          LOG.error(write_error)
-~~~
+         
+{% endhighlight %}
 
 My next attempt to deploy the environment works like a charm and does not bail out while downloading the container images.
 
