@@ -57,7 +57,7 @@ Plenty of sources to achieve the same, but main is the official one[^1].
         # mkdir -m 0022 /home/jenkins
         # chown -R 1000:1000 /home/jenkins
 
-{% highlight shell %}
+{% endhighlight %}
 
 3. Test run
 
@@ -69,7 +69,7 @@ Plenty of sources to achieve the same, but main is the official one[^1].
        CONTAINER ID  IMAGE                             COMMAND  CREATED             STATUS                 PORTS                                             NAMES
        3f4a74966f26  docker.io/jenkins/jenkins:latest           About a minute ago  Up About a minute ago  0.0.0.0:8070->8080/tcp, 0.0.0.0:50000->50000/tcp  jenkins-master
 
-{% highlight shell %}
+{% endhighlight %}
 
 
 4. Check podman logs for the admin password to login to the webUI
