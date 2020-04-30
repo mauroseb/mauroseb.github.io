@@ -1,4 +1,4 @@
-.highlight pre { color: #ffffff; background-color: #404040; overflow: scroll }
+.highlight pre { color: #ffffff; background-color: #404040; overflow: auto; overflow-y: auto; }
 .highlight .hll { color: #ffffff; background-color: #404040 }
 .highlight .c { color: #999999; font-style: italic } /* Comment */
 .highlight .err { color: #a61717; background-color: #e3d2d2 } /* Error */
