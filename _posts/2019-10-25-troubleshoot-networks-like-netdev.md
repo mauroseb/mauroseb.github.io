@@ -55,10 +55,11 @@ To understand the problem we need to have a clear picture of the path the packet
 In the diagram above the OvS circuitry is a bit more complex because it is performing VLAN tagging/untagging of the "tenant" network on ```br-ex``` (OvS bridge) internal port, which in turn carries VxLAN traffic, that is then forwarded internally to the ```br-tun``` where the VTEP lives (with the IP address of the previously mentioned internal port), and terminates each ```VNI``` corresponding to each tenant, then the traffic is forwarded via OvS internal patches to the ```br-int``` bridge that in turn forwards the traffic to the instance's qvo veth device.
 
 For the same purpose, there is an excellent tool from Jiri Benc: **plotnetcfg**[^3]. To run it needs either ```root``` ileges or ```CAP_SYS_ADMIN``` and ```CAP_NET_ADMIN``` capabilities. The tool will create an output file in ```dot``` format, that can then be converted to ```PNG``` format with the **dot** command.
-
+{% highlight shell %}
         # dnf install -y plotnetcfg
         # plotnetcfg > layout.out
         # dot -Tpng layout.out > layout.png
+{% endhighlight %}
 
 The former will create a picture like the following:
 
@@ -66,10 +67,12 @@ The former will create a picture like the following:
 
 Actually there are many different formats to choose as output:
 
+{% highlight shell %}
         -Tbmp        -Tcmapx_np   -Tfig        -Timap       -Tjpeg       -Tmp         -Tplain-ext  -Tps2        -Ttiff       -Tvmlz       -Txdot1.4    
         -Tcanon      -Tdot        -Tgtk        -Timap_np    -Tjpg        -Tpdf        -Tpng        -Tsvg        -Ttk         -Tx11        -Txdot_json  
         -Tcmap       -Tdot_json   -Tgv         -Tismap      -Tjson       -Tpic        -Tpov        -Tsvgz       -Tvdx        -Txdot       -Txlib       
         -Tcmapx      -Teps        -Tico        -Tjpe        -Tjson0      -Tplain      -Tps         -Ttif        -Tvml        -Txdot1.2  
+{% endhighlight %}
 
 #### Hardware architecture
 
@@ -97,24 +100,31 @@ For ```RHEL```:
   
   * **Test lastest upstream stable kernel.** The easiest here is to leverage ```elrepo``` repository which provides an RPM for ```Centos``` and ```RHEL``` distros built from the ```mainline``` stable branch of Linux Kernel Archive and thus named ```kernel-ml``` to avoid conflict with RHEL stock kernels. In the following example I am installing the RPM for major version 7 and setting grub to boot from it only once as we just want to test a reproducer and go back to the default kernel:
   
+{% highlight shell %}
           # rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
           # yum install https://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
           # yum --enablerepo=elrepo-kernel install kernel-ml
           # grub2-reboot 0
+{% endhighlight %}
 
   * **Test linux-next kernel.** Similarly the branches that are already accepted for the next stable release can be tested as follows. 
   
+  
+{% highlight shell %}
           $ git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
           $ cd linux
           $ git remote add linux-next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
           $ git fetch linux-next
           $ git fetch --tags linux-next
-    
+{% endhighlight %}
+
     Now a specific ```linux-next``` tag can be checked out and built[^4]. Alternatively the ```net-next``` branch can be used.
 
+{% highlight shell %}
           $ git remote add net git://git.kernel.org/pub/scm/linux/kernel/git/davem/net.git
           $ git fetch net
-  
+ {% endhighlight %}
+ 
     And just like that one can retry and discard tons of already fixed bugs or include new features that could improve the situation.
 
 Similar approach could be adopted for NIC firmware, drivers or even testing with a different NIC hardware if resources permit. 
@@ -125,11 +135,12 @@ Just by doing that one can discard hundreds of bugs and enhancements that have b
 
 Actions like these have been by far the fastest way to identify existing bugs. Just by knowing it is not happening in a given kernel version, means that we only need to backport certain fix to a downstream kernel (in case of ```RHEL```)  or that the fix will be released soon upstream in case of using the ```linux-next``` kernel.
 
-There is some extra work to identify which commit or set of commits are needed to solve the problem, like using ```git bisect```, exploring the repo logs, and some other manual tasks. However the software and hardware vendors should normally take care of that. Once the commit or commits needed are known I can get in which branch was applied (downstream):
+There is some extra work to identify which commit or set of commits are needed to solve the problem, like using ```git bisect```, exploring the repo logs, and some other manual tasks. However the software and hardware vendors should normally take care of that. Once the commit or commits needed are known I can get in which branch was applied in the downstream tree:
 
+{% highlight shell %}
       $ git branch --contains cc2af34db9a5b5222eefdc25fd1265e305df9f2e
       * (HEAD detached at kernel-3.10.0-1122.el7)    
-
+{% endhighlight %}
  
 ### 4. Performance metrics
 
