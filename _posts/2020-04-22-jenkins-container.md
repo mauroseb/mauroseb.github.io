@@ -52,18 +52,25 @@ Plenty of sources to achieve the same, but main is the official one[^1].
 
 2. Create a directory to use as persistent volume for Jenkins data (also ensure it matches the contianer jenkins user UID: 1000)
 
+{% highlight shell %}
+
         # mkdir -m 0022 /home/jenkins
         # chown -R 1000:1000 /home/jenkins
 
+{% highlight shell %}
 
 3. Test run
 
+{% highlight shell %}
        # podman run --name jenkins-master --rm -d -p 8080:8080 -p 50000:50000 -v /home/jenkins:/var/jenkins_home:z jenkins/jenkins
        3f4a74966f26e4d98ac7daacf7f39f1a43f80388ce40adc7dfd067d0beb01f30
 
        # podman ps
        CONTAINER ID  IMAGE                             COMMAND  CREATED             STATUS                 PORTS                                             NAMES
        3f4a74966f26  docker.io/jenkins/jenkins:latest           About a minute ago  Up About a minute ago  0.0.0.0:8070->8080/tcp, 0.0.0.0:50000->50000/tcp  jenkins-master
+
+{% highlight shell %}
+
 
 4. Check podman logs for the admin password to login to the webUI
 
