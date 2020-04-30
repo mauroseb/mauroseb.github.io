@@ -48,7 +48,7 @@ Standard MSv2 Family vCPUs         0               0
 Basic A Family vCPUs               0               10
 Standard A0-A7 Family vCPUs        0               10
 Standard A8-A11 Family vCPUs       0               10
-
+...
 {% endhighlight %}
 
     - Existing DNS zone created for the cluster (i.e. t1.oddi.info)
