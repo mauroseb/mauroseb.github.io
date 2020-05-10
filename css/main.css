@@ -110,6 +110,8 @@ p.post {
     color: #333;
     width: 75%;
     margin-left: 20px;
+    text-align: justify;
+    text-justify: inter-word;
 }
 
 p.navi {
