@@ -63,12 +63,17 @@ a:hover {
       text-decoration: underline;
 }
 
-nav ul li a:hover {
+a.navi {
+    text-decoration: none;
+    color: #999;
+}
+
+a.navi:hover {
       background-color: rgba(0, 0, 0, 0.25);
       text-decoration: none;
 }
 
-nav ul li a:active {
+a.navi:active {
       background-color: rgba(0, 0, 0, 0.5);
       text-decoration: none;
 }
@@ -82,14 +87,23 @@ div#rest {
     width: 75%;
 }
 
-div#nav {
+div.navi {
     position:absolute;
     top: 25px;
     right: 50px;
     width: 50%;
 }
 
-p {
+p.meta {
+    font-family: 'Arial', 'Sans-Serif';
+    font-size: 9px;
+    line-height: 1.4em;
+    color: #333;
+    width: 75%;
+    margin-left: 20px;
+}
+
+p.post {
     font-family: 'Arial', 'Sans-Serif';
     font-size: 12px;
     line-height: 1.4em;
@@ -98,7 +112,7 @@ p {
     margin-left: 20px;
 }
 
-p#nav {
+p.navi {
     font-family: 'Arial', 'Sans-Serif';
     font-size: 16px;
     color: #ffffff;
@@ -119,7 +133,7 @@ h1 {
     margin-left: 20px;
 }
 
-h1#main {
+h1.navi {
     font-size: 36px;
     font-family:'Arial', 'Sans-Serif';
     font-weight: 300;
@@ -140,7 +154,7 @@ h2 {
     margin-left: 20px;
 }
 
-h2#main {
+h2.navi {
     font-size: 10px;
     font-family:'Arial', 'Sans-Serif';
     font-weight: 300;
