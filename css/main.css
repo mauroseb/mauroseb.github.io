@@ -84,7 +84,7 @@ div {
     margin-left: 20px;
 }
 
-div#rest {
+div.rest {
     padding-top: 80px;
     width: 75%;
 }
@@ -151,6 +151,7 @@ h1.navi {
 h2 {
     font-size: 36px;
     font-family:'Arial', 'Sans-Serif';
+    text-transform: uppercase;
     font-weight: 300;
     color: #000000;
     width: 75%;
