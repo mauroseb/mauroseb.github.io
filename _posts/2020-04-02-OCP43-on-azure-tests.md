@@ -158,12 +158,14 @@ I am running different tests based on the IPI documentation.
         ? Pull Secret [? for help] ***************************************
 {% endhighlight %}
 
+
+
     3.b. Edit install-config.yaml to add customizations
     
     3.c. Make a backup of the modified file
     
     3.d. Deploy
-    
+
 {% highlight bash %}
         $ openshift-install create cluster --dir=ocp4-on-azure-test2 --log-level=info
 {% endhighlight %}
