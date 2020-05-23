@@ -51,7 +51,7 @@ Standard A8-A11 Family vCPUs       0               10
 ...
 {% endhighlight %}
 
-    - Existing DNS zone created for the cluster (i.e. t1.oddi.info)
+   - Existing DNS zone created for the cluster (i.e. t1.oddi.info)
 
 {% highlight bash %}
           $ dig +short t1.oddi.info ns
@@ -61,13 +61,13 @@ Standard A8-A11 Family vCPUs       0               10
 
   - Create Service Principal
 
-    1. Choose the right subscription for the account
+   1. Choose the right subscription for the account
     
 {% highlight bash %}
            $ az account set -s XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 {% endhighlight %}
 
-    2. Create SP
+   2. Create SP
     
 {% highlight bash %}
            $ az ad sp create-for-rbac --role Contributor --name ocp43
@@ -83,7 +83,7 @@ Standard A8-A11 Family vCPUs       0               10
            }
 {% endhighlight %}
 
-    3. Add User Access Administrator role to the SP [^4] [^5]
+   3. Add User Access Administrator role to the SP [^4] [^5]
     
 {% highlight bash %}
            $ az role assignment create --role "User Access Administrator" --assignee-object-id $(az ad sp list --filter "appId eq 'XXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'"  | jq '.[0].objectId' -r)
@@ -99,14 +99,14 @@ Standard A8-A11 Family vCPUs       0               10
             }
 {% endhighlight %}
 
-    4. Add Azure Active Directory Graph permission where 00000002-0000-0000-c000-000000000000 is the resource App ID for the Windows Azure AD and 824c81eb-e3f8-4ee6-8f6d-de7f50d565b7 corresponds to a defined role to manage new apps that this app creates or owns [^6]:
+   4. Add Azure Active Directory Graph permission where 00000002-0000-0000-c000-000000000000 is the resource App ID for the Windows Azure AD and 824c81eb-e3f8-4ee6-8f6d-de7f50d565b7 corresponds to a defined role to manage new apps that this app creates or owns [^6]:
     
 {% highlight bash %}
            $ az ad app permission add --id XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX --api 00000002-0000-0000-c000-000000000000 --api-permissions 824c81eb-e3f8-4ee6-8f6d-de7f50d565b7=Role
            Invoking "az ad app permission grant --id XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX --api 00000002-0000-0000-c000-000000000000" is needed to make the change effective
 {% endhighlight %}
 
-    5. Approve permissions
+   5. Approve permissions
     
 {% highlight bash %}
            $ az ad app permission grant --id XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX --api 00000002-0000-0000-c000-000000000000
@@ -146,7 +146,7 @@ I am running different tests based on the IPI documentation.
 
  3. Run intsallation with customizations
  
-    3.a. Create install config
+   3.a. Create install config
     
 {% highlight bash %}
         $ openshift-install create install-config --dir=ocp4-on-azure-test2
@@ -158,19 +158,17 @@ I am running different tests based on the IPI documentation.
         ? Pull Secret [? for help] ***************************************
 {% endhighlight %}
 
-
-
-    3.b. Edit install-config.yaml to add customizations
+   3.b. Edit install-config.yaml to add customizations
     
-    3.c. Make a backup of the modified file
+   3.c. Make a backup of the modified file
     
-    3.d. Deploy
+   3.d. Deploy
 
 {% highlight bash %}
         $ openshift-install create cluster --dir=ocp4-on-azure-test2 --log-level=info
 {% endhighlight %}
 
-    Alternatively for step 3. the default configuration with 3 masters and 3 worker nodes can be deployed without any of the above substeps.
+   Alternatively for step 3. the default configuration with 3 masters and 3 worker nodes can be deployed without any of the above substeps.
     
 {% highlight bash %}
         $ openshift-install create cluster --dir=ocp4-on-azure-test1 --log-level=info
