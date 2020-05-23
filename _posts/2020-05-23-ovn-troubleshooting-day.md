@@ -17,9 +17,10 @@ Follwing is the troubleshooting that took me to arrive to conclusions.
 
 While testing the just released RHOSP 16.0.2 platform, I deployed as usual a testing tenant to verify all works as expected, when realized that only when floating IPs are associated to the instances they cannot reach further than the external gateway.
 The logical layout looks somewhat like the following:
-~~~
+
+{% highlight bash %}
 < Tenant Network > --- < Neutron vRouter > --- < External Physical Router > --- < Internet >
-~~~
+{% endhighlight %}
 
 The first important fact is that when the instance does not have a floating IP associated (in other words, is using default tenant vrouter SNAT) to reach the outside all connectivity works well.
 However as soon as a floating IP is associated we can reach up to the External Physical Router but not to the Internet.
@@ -201,7 +202,7 @@ Chassis "7f4067b7-b0e9-43e7-885b-10a69b1aa0d8"
 
 ### 2. Understanding the flow logic
 
-We can traverse the OvS OpenFlow tables one by one and try to follow which rules the packet will cross. But this requres some experience in the matter.
+One can traverse the OvS OpenFlow tables and try to follow which rules the packet will cross. But this requires some experience in the matter. The starting point is to determine the instance compute node and TAP interface. This can be easily captured by checking the instance libvirt XML file. In my case it is __tapab12213e-3c__. With this I check the br-int table 0 where all starts:
 
 {% highlight bash %}
 [root@ice-com-02 ~]# ovs-ofctl dump-flows br-int table=0 --no-stats
@@ -214,11 +215,135 @@ We can traverse the OvS OpenFlow tables one by one and try to follow which rules
  priority=100,in_port="ovn-365b3c-0" actions=move:NXM_NX_TUN_ID[0..23]->OXM_OF_METADATA[0..23],move:NXM_NX_TUN_METADATA0[16..30]->NXM_NX_REG14[0..14],move:NXM_NX_TUN_METADATA0[0..15]->NXM_NX_REG15[0..15],resubmit(,33)
  priority=100,in_port="tape169efcb-d4" actions=load:0x8->NXM_NX_REG13[],load:0x7->NXM_NX_REG11[],load:0x6->NXM_NX_REG12[],load:0x2->OXM_OF_METADATA[],load:0x4->NXM_NX_REG14[],resubmit(,8)
  priority=100,in_port="tap4f1711d6-70" actions=load:0x9->NXM_NX_REG13[],load:0x7->NXM_NX_REG11[],load:0x6->NXM_NX_REG12[],load:0x2->OXM_OF_METADATA[],load:0x1->NXM_NX_REG14[],resubmit(,8)
- priority=100,in_port="tapab12213e-3c" actions=load:0xe->NXM_NX_REG13[],load:0xc->NXM_NX_REG11[],load:0xd->NXM_NX_REG12[],load:0xa->OXM_OF_METADATA[],load:0x6->NXM_NX_REG14[],resubmit(,8)
+ __priority=100,in_port="tapab12213e-3c" actions=load:0xe->NXM_NX_REG13[],load:0xc->NXM_NX_REG11[],load:0xd->NXM_NX_REG12[],load:0xa->OXM_OF_METADATA[],load:0x6->NXM_NX_REG14[],resubmit(,8)__
  priority=100,in_port="tap531c4daa-10" actions=load:0xf->NXM_NX_REG13[],load:0xc->NXM_NX_REG11[],load:0xd->NXM_NX_REG12[],load:0xa->OXM_OF_METADATA[],load:0x1->NXM_NX_REG14[],resubmit(,8)
  priority=100,in_port="tapc997f6f2-c8" actions=load:0x10->NXM_NX_REG13[],load:0xc->NXM_NX_REG11[],load:0xd->NXM_NX_REG12[],load:0xa->OXM_OF_METADATA[],load:0x9->NXM_NX_REG14[],resubmit(,8)
  priority=100,in_port="patch-br-int-to",dl_vlan=0 actions=strip_vlan,load:0x5->NXM_NX_REG13[],load:0x2->NXM_NX_REG11[],load:0x3->NXM_NX_REG12[],load:0x1->OXM_OF_METADATA[],load:0x1->NXM_NX_REG14[],resubmit(,8)
  priority=100,in_port="patch-br-int-to",vlan_tci=0x0000/0x1000 actions=load:0x5->NXM_NX_REG13[],load:0x2->NXM_NX_REG11[],load:0x3->NXM_NX_REG12[],load:0x1->OXM_OF_METADATA[],load:0x1->NXM_NX_REG14[],resubmit(,8)
+{% endhighlight %}
+
+The rules in this table depend on the ingress port, the name for the instance's port matches the TAP device name __in_port="tapab12213e-3c"__ (there is also a numerical value to it - 15 in this case).
+The actions taken are to load some values in some registers (can be ignored for now) and resubmitted to table 8.
+
+Checking table 8:
+
+{% highlight bash %}
+[root@ice-com-02 ~]# ovs-ofctl dump-flows br-int table=8 --no-stats
+ cookie=0x45c9b514, table=8, priority=100,metadata=0x3,vlan_tci=0x1000/0x1000 actions=drop
+ cookie=0xa0dfbc17, table=8, priority=100,metadata=0x1,vlan_tci=0x1000/0x1000 actions=drop
+ cookie=0x741dbebb, table=8, priority=100,metadata=0x2,vlan_tci=0x1000/0x1000 actions=drop
+ cookie=0x870d8275, table=8, priority=100,metadata=0xb,vlan_tci=0x1000/0x1000 actions=drop
+ cookie=0x3d7bf566, table=8, priority=100,metadata=0xa,vlan_tci=0x1000/0x1000 actions=drop
+ cookie=0x45c9b514, table=8, priority=100,metadata=0x3,dl_src=01:00:00:00:00:00/01:00:00:00:00:00 actions=drop
+ cookie=0xda98272a, table=8, priority=100,metadata=0x1,dl_src=01:00:00:00:00:00/01:00:00:00:00:00 actions=drop
+ cookie=0xf546d6b5, table=8, priority=100,metadata=0x2,dl_src=01:00:00:00:00:00/01:00:00:00:00:00 actions=drop
+ cookie=0x870d8275, table=8, priority=100,metadata=0xb,dl_src=01:00:00:00:00:00/01:00:00:00:00:00 actions=drop
+ cookie=0x8f4868ca, table=8, priority=100,metadata=0xa,dl_src=01:00:00:00:00:00/01:00:00:00:00:00 actions=drop
+ cookie=0x2c2341, table=8, priority=50,reg14=0x1,metadata=0x1 actions=resubmit(,9)
+ cookie=0xb987da46, table=8, priority=50,reg14=0x3,metadata=0x1 actions=resubmit(,9)
+ cookie=0x1ee84a52, table=8, priority=50,reg14=0x2,metadata=0x1 actions=resubmit(,9)
+ cookie=0xcd2cfb18, table=8, priority=50,reg14=0x1,metadata=0x2 actions=resubmit(,9)
+ cookie=0xa929ae55, table=8, priority=50,reg14=0x2,metadata=0x2 actions=resubmit(,9)
+ cookie=0x7311ab3a, table=8, priority=50,reg14=0x3,metadata=0x2 actions=resubmit(,9)
+ cookie=0x1250dcb1, table=8, priority=50,reg14=0x4,metadata=0x1 actions=resubmit(,9)
+ cookie=0x7eba3fa9, table=8, priority=50,reg14=0x1,metadata=0xa actions=resubmit(,9)
+ cookie=0x86e5f0f0, table=8, priority=50,reg14=0x2,metadata=0xa actions=resubmit(,9)
+ cookie=0xd7380714, table=8, priority=50,reg14=0x1,metadata=0x3,dl_dst=01:00:00:00:00:00/01:00:00:00:00:00 actions=resubmit(,9)
+ cookie=0xc8f90bc8, table=8, priority=50,reg14=0x3,metadata=0x3,dl_dst=01:00:00:00:00:00/01:00:00:00:00:00 actions=resubmit(,9)
+ cookie=0x65841c3f, table=8, priority=50,reg14=0x4,metadata=0x3,dl_dst=01:00:00:00:00:00/01:00:00:00:00:00 actions=resubmit(,9)
+ cookie=0xfc955284, table=8, priority=50,reg14=0x1,metadata=0xb,dl_dst=01:00:00:00:00:00/01:00:00:00:00:00 actions=resubmit(,9)
+ cookie=0x8ad5172e, table=8, priority=50,reg14=0x3,metadata=0xb,dl_dst=01:00:00:00:00:00/01:00:00:00:00:00 actions=resubmit(,9)
+ cookie=0x442a9af3, table=8, priority=50,reg14=0x3,metadata=0x3,dl_dst=fa:16:3e:b2:d4:43 actions=resubmit(,9)
+ cookie=0xb9db9c7b, table=8, priority=50,reg14=0x4,metadata=0x3,dl_dst=fa:16:3e:6c:ff:d4 actions=resubmit(,9)
+ cookie=0xb2d4772b, table=8, priority=50,reg14=0x1,metadata=0x3,dl_dst=fa:16:3e:94:4a:9b actions=resubmit(,9)
+ cookie=0xcfe68a77, table=8, priority=50,reg14=0x3,metadata=0xb,dl_dst=fa:16:3e:44:22:9d actions=resubmit(,9)
+ cookie=0xd81159b7, table=8, priority=50,reg14=0x1,metadata=0xb,dl_dst=fa:16:3e:c2:be:99 actions=resubmit(,9)
+ cookie=0x942a2974, table=8, priority=50,reg14=0x1,metadata=0xb,dl_dst=fa:16:3e:55:f0:8a actions=resubmit(,9)
+ cookie=0xaed209e2, table=8, priority=50,reg14=0x4,metadata=0x2,dl_src=fa:16:3e:33:03:7a actions=resubmit(,9)
+ __cookie=0x51155ce9, table=8, priority=50,reg14=0x6,metadata=0xa,dl_src=fa:16:3e:09:3e:f1 actions=resubmit(,9)__
+ cookie=0x3721ef07, table=8, priority=50,reg14=0x9,metadata=0xa,dl_src=fa:16:3e:e5:1d:3c actions=resubmit(,9)
+{% endhighlight %}
+
+This table basically drops some unwanted traffic and resumbit traffic to table 9 if it matches some characteristics. In my case that the __dl_dst__ (datalink destination) is the MAC of the tenant router in question (had to check manually).
+
+Then check table 9... an so on so forth. You see the picture and it's not beautiful. That is why OvS tracing comes handy here. We can check what OpenFlow rules the packet will cross by providing some input similar to what a problematic packet may look like (source and dest MAC / IPs , for instance, and the ingress port):
+
+{% highlight bash %}
+[root@ice-com-02 ~]# ovs-appctl ofproto/trace br-int in_port=15,icmp,dl_src=fa:16:3e:09:3e:f1,nw_src=10.0.3.222,nw_dst=192.168.122.119
+Flow: icmp,in_port=15,vlan_tci=0x0000,dl_src=fa:16:3e:09:3e:f1,dl_dst=00:00:00:00:00:00,nw_src=10.0.3.222,nw_dst=192.168.122.119,nw_tos=0,nw_ecn=0,nw_ttl=0,icmp_type=0,icmp_code=0
+
+bridge("br-int")
+----------------
+ 0. in_port=15, priority 100
+    set_field:0xe->reg13
+    set_field:0xc->reg11
+    set_field:0xd->reg12
+    set_field:0xa->metadata
+    set_field:0x6->reg14
+    resubmit(,8)
+ 8. reg14=0x6,metadata=0xa,dl_src=fa:16:3e:09:3e:f1, priority 50, cookie 0x51155ce9
+    resubmit(,9)
+ 9. ip,reg14=0x6,metadata=0xa,dl_src=fa:16:3e:09:3e:f1,nw_src=10.0.3.222, priority 90, cookie 0xb3a17d75
+    resubmit(,10)
+10. metadata=0xa, priority 0, cookie 0x556a736d
+    resubmit(,11)
+11. ip,metadata=0xa, priority 100, cookie 0x2b0fd59f
+    load:0x1->NXM_NX_XXREG0[96]
+    resubmit(,12)
+12. metadata=0xa, priority 0, cookie 0xdeb132b7
+    resubmit(,13)
+13. ip,reg0=0x1/0x1,metadata=0xa, priority 100, cookie 0xc54c1ac2
+    ct(table=14,zone=NXM_NX_REG13[0..15])
+    drop
+     -> A clone of the packet is forked to recirculate. The forked pipeline will be resumed at table 14.
+     -> Sets the packet to an untracked state, and clears all the conntrack fields.
+
+Final flow: icmp,reg0=0x1,reg11=0xc,reg12=0xd,reg13=0xe,reg14=0x6,metadata=0xa,in_port=15,vlan_tci=0x0000,dl_src=fa:16:3e:09:3e:f1,dl_dst=00:00:00:00:00:00,nw_src=10.0.3.222,nw_dst=192.168.122.119,nw_tos=0,nw_ecn=0,nw_ttl=0,icmp_type=0,icmp_code=0
+Megaflow: recirc_id=0,eth,icmp,in_port=15,vlan_tci=0x0000/0x1000,dl_src=fa:16:3e:09:3e:f1,dl_dst=00:00:00:00:00:00,nw_src=10.0.3.222,nw_frag=no,icmp_type=0x0/0xff
+Datapath actions: ct(zone=14),recirc(0x8ff5)
+
+===============================================================================
+recirc(0x8ff5) - resume conntrack with default ct_state=trk|new (use --ct-next to customize)
+===============================================================================
+
+Flow: recirc_id=0x8ff5,ct_state=new|trk,ct_zone=14,eth,icmp,reg0=0x1,reg11=0xc,reg12=0xd,reg13=0xe,reg14=0x6,metadata=0xa,in_port=15,vlan_tci=0x0000,dl_src=fa:16:3e:09:3e:f1,dl_dst=00:00:00:00:00:00,nw_src=10.0.3.222,nw_dst=192.168.122.119,nw_tos=0,nw_ecn=0,nw_ttl=0,icmp_type=0,icmp_code=0
+
+bridge("br-int")
+----------------
+    thaw
+        Resuming from table 14
+14. ct_state=+new-est+trk,ip,reg14=0x6,metadata=0xa, priority 2002, cookie 0x5e6b2ce6
+    load:0x1->NXM_NX_XXREG0[97]
+    resubmit(,15)
+15. metadata=0xa, priority 0, cookie 0x22ca4285
+    resubmit(,16)
+16. metadata=0xa, priority 0, cookie 0xc01f3cd9
+    resubmit(,17)
+17. metadata=0xa, priority 0, cookie 0x576ed5a2
+    resubmit(,18)
+18. ip,reg0=0x2/0x2,metadata=0xa, priority 100, cookie 0xcc7a350d
+    ct(commit,zone=NXM_NX_REG13[0..15],exec(load:0->NXM_NX_CT_LABEL[0]))
+    load:0->NXM_NX_CT_LABEL[0]
+     -> Sets the packet to an untracked state, and clears all the conntrack fields.
+    resubmit(,19)
+19. metadata=0xa, priority 0, cookie 0x7159fca6
+    resubmit(,20)
+20. metadata=0xa, priority 0, cookie 0x3c57b2c6
+    resubmit(,21)
+21. metadata=0xa, priority 0, cookie 0x749944d2
+    resubmit(,22)
+22. metadata=0xa, priority 0, cookie 0xcfea7be8
+    resubmit(,23)
+23. metadata=0xa, priority 0, cookie 0xdbbe17b0
+    resubmit(,24)
+24. metadata=0xa, priority 0, cookie 0xfc61b723
+    resubmit(,25)
+25. No match.
+    drop
+
+Final flow: recirc_id=0x8ff5,eth,icmp,reg0=0x3,reg11=0xc,reg12=0xd,reg13=0xe,reg14=0x6,metadata=0xa,in_port=15,vlan_tci=0x0000,dl_src=fa:16:3e:09:3e:f1,dl_dst=00:00:00:00:00:00,nw_src=10.0.3.222,nw_dst=192.168.122.119,nw_tos=0,nw_ecn=0,nw_ttl=0,icmp_type=0,icmp_code=0
+Megaflow: recirc_id=0x8ff5,ct_state=+new-est-rel-rpl-inv+trk,ct_label=0/0x1,eth,ip,in_port=15,dl_src=fa:16:3e:09:3e:f1,dl_dst=00:00:00:00:00:00,nw_dst=192.168.0.0/17,nw_frag=no
+Datapath actions: ct(commit,zone=14,label=0/0x1)
 {% endhighlight %}
 
 
