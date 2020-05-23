@@ -1,7 +1,7 @@
 ---
 layout: posts
 title: "OVN troubleshooting day"
-date: 2020-04-02
+date: 2020-05-23
 categories: [blog]
 tags: [ openstack, ovn, networking ]
 author: mauroseb
