@@ -44,8 +44,7 @@ Third point is that according to the documentation the _NON DVR_ mode should hav
 
 ### 1. Understanding OVN configuration and status
 
-OVN creates the configuration in a logical plane (stored in northbound DB) that then is translated by _ovn-northd_  into what needs to be applied in the physical nodes
-(stored in the southbound DB). But first lets see how this looks from neutron point of view. 
+OVN creates the configuration in a logical plane (stored in northbound DB) that then is translated by _ovn-northd_  into the logical flows (stored in the southbound DB), which in turn _ovn-controller_ then uses as input to set OvS DB in the physical nodes. But first lets see how this looks from neutron point of view. 
 I basically have two tenant routers (yes, one is for OpenShift) connected to respective tenant netowrks and both use as gateway _T01_external_ network.
 
 {% highlight bash %}
