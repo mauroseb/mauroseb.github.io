@@ -22,13 +22,15 @@ The logical layout looks somewhat like the following:
 < Tenant Network > --- < Neutron vRouter > --- < External Physical Router > --- < Internet >
 {% endhighlight %}
 
-The first important fact is that when the instance does not have a floating IP associated (in other words, is using default tenant vrouter SNAT) to reach the outside all connectivity works well.
+The first important fact that concerns to the problem is that when the instance does not have a floating IP associated (in other words, is using default tenant vrouter SNAT) to reach the outside all connectivity works well.
 However as soon as a floating IP is associated we can reach up to the External Physical Router but not to the Internet.
 
 The second remark is that default SDN in RHOSP16 is OpenVirtual Networking (OVN) which replaces the ever lasting Neutron/OVS ML2 plugin which has been there for several years.
 The plugin can operate in two modes: _DVR_ or _NON DVR_. 
 
-A brief explanation of the traffic flows that are shared and that are different between the two:
+Third point is that according to the documentation the _NON DVR_ mode should have been the default.
+
+Following there is a brief explanation of the traffic flows that are shared and that are different between the two:
 
   1. All east-west traffic is always distributed no matter which mode we choose. That means that if an instance needs to talk to another instnace within openstack there is no need to reach the _gateway nodes_ (which in OVN speak is the analog to a Networker node in pre OVN setups).
   
@@ -36,9 +38,8 @@ A brief explanation of the traffic flows that are shared and that are different 
   
   3. Finally the north-south traffic from instances that _DO_ have a floating IP associated with them differs in each mode. DVR mode will mean that the traffic will use the compute nodes as gateway nodes, thus distruting this kind of traffic. Mode means that this traffic is expected to traverse the gateway nodes in the controllers just like SNAT traffic.
 
+In OVN speak every node that runs an __ovn-controller__ is called a chassis.
 
-
-Third point is that according to the documentation the _NON DVR_ mode should have been the default.
 
 ## Steps taken
 
