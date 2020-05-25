@@ -1,3 +1,12 @@
 
 <script src="/src/js/jquery-3.2.1.min.js"></script>
-<script> $(document).ready(function() {  console.log( "ready!" ); });</script>
+<script> 
+$(document).ready(function() {  console.log( "ready!" ); });
+$(window).scroll(function() {
+    if ($(window).scrollTop() > 10) {
+        $('#navBar').addClass('floatNav');
+    } else {
+        $('#navBar').removeClass('floatNav');
+    }
+});
+</script>
