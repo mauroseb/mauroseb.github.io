@@ -1,7 +1,7 @@
 
 <script src="/scripts/js/jquery-3.2.1.min.js"></script>
 <script> 
-$(document).ready(function() {  console.log( "ready!" ); });
+$(document).ready(function() {  if ( $(document).title == 'HOME') { $("#home").addClass('activeL') } });
 $(window).scroll(function() {
     if ($(window).scrollTop() > 10) {
         $('#navBar').addClass('floatNav');
