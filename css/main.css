@@ -38,6 +38,11 @@ nav {
     box-shadow: 0px 2px 12px #000000;
 }
 
+.activeL {
+    color: #39FF14
+    transition: 0.2s;
+}
+
 footer ul {
     font-family: 'Arial', 'Sans-Serif';
     padding: 0px;
@@ -83,9 +88,12 @@ a.navi:hover {
       transition: 0.2s;
 }
 
-a.navi:active {
+
+
+.activeL {
       background-color: rgba(0, 0, 0, 0.5);
-      text-decoration: none;
+      text-decoration: bold;
+      color: #39FF14
 }
 
 div {
@@ -167,7 +175,8 @@ h2 {
 h2.navi {
     font-size: 10px;
     font-family:'Arial', 'Sans-Serif';
-    font-weight: 300;
+    font-
+    weight: 300;
     text-transform: uppercase;
     color: #ffffff;
     align: center;
