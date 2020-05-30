@@ -45,8 +45,9 @@ In OVN speak every node that runs an __ovn-controller__ is called a chassis.
 
 ### 1. Understanding OVN configuration and status
 
-OVN creates the configuration in a logical plane (stored in northbound DB) that then is translated by _ovn-northd_  into the logical flows (stored in the southbound DB), which in turn _ovn-controller_ then uses as input to set OvS DB in the physical nodes. But first lets see how this looks from neutron point of view. 
-I basically have two tenant routers (yes, one is for OpenShift) connected to respective tenant netowrks and both use as gateway _T01_external_ network.
+Long story short, OVN interprets Neutron resources and creates the configuration of the networking logical plane (stored in northbound DB), which is then is translated by _ovn-northd_  into the logical flows (stored in the southbound DB), which in turn _ovn-controller_ then uses as input to set OvS DB in the physical nodes. 
+
+First lets see how this looks from neutron point of view. I basically have two tenant routers (yes, one is for OpenShift) connected to respective tenant netowrks and both use as gateway _T01_external_ network.
 
 {% highlight bash %}
 (admin)(overcloud) [stack@undercloud-osp16 ~]$ openstack router list
