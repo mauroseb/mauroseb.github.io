@@ -395,5 +395,5 @@ So after redeploying the environment explicitly setting in TripleO templates __N
 
 ### References
 
-[^1] https://bugzilla.redhat.com/show_bug.cgi?id=1839139
+[^1]: https://bugzilla.redhat.com/show_bug.cgi?id=1839139
 
