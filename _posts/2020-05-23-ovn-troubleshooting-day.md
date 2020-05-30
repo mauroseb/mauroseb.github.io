@@ -163,7 +163,7 @@ router 081b5bb7-cda0-4d43-a3c6-09e8012f71a1 (neutron-420fc376-5a71-4d19-8cc3-391
 
 {% endhighlight %}
 
-Coversely the southbound DB looks as follows:
+Similarly the southbound DB looks as follows:
 
 {% highlight bash %}
 ()[root@ice-ctl-01 /]# ovn-sbctl show
@@ -204,11 +204,12 @@ Chassis "7f4067b7-b0e9-43e7-885b-10a69b1aa0d8"
     Port_Binding "cr-lrp-a104502b-66eb-4aee-aeca-6dd38f6b021d"
 {% endhighlight %}
 
-**NOTE:** This commands have to be run in the container for ovn-db.
+**NOTE:** This commands have to be run in the container __ovn-dbs-bundle-podman-0__ which runs the OVN DB and is the master.
+
 
 ### 2. Understanding the flow logic
 
-One can traverse the OvS OpenFlow tables and try to follow which rules the packet will cross. But this requires some experience in the matter. The starting point is to determine the instance compute node and TAP interface that corresponds to the instance. This can be easily captured by checking the instance libvirt XML file. In my case it is __tapab12213e-3c__. With this infromation, check the br-int table 0 where all starts:
+One can traverse the OvS OpenFlow tables and try to follow which rules the packet will cross, but this requires some experience in the matter. The starting point is to determine the instance compute node and TAP interface that corresponds to the instance. Once logged into the right compute node, the tap device name can be easily captured by checking the instance libvirt XML file. In my case it is __tapab12213e-3c__. With this infromation, check the _br-int_ table 0 where all starts:
 
 {% highlight bash %}
 [root@ice-com-02 ~]# ovs-ofctl dump-flows br-int table=0 --no-stats
@@ -221,7 +222,7 @@ One can traverse the OvS OpenFlow tables and try to follow which rules the packe
  priority=100,in_port="ovn-365b3c-0" actions=move:NXM_NX_TUN_ID[0..23]->OXM_OF_METADATA[0..23],move:NXM_NX_TUN_METADATA0[16..30]->NXM_NX_REG14[0..14],move:NXM_NX_TUN_METADATA0[0..15]->NXM_NX_REG15[0..15],resubmit(,33)
  priority=100,in_port="tape169efcb-d4" actions=load:0x8->NXM_NX_REG13[],load:0x7->NXM_NX_REG11[],load:0x6->NXM_NX_REG12[],load:0x2->OXM_OF_METADATA[],load:0x4->NXM_NX_REG14[],resubmit(,8)
  priority=100,in_port="tap4f1711d6-70" actions=load:0x9->NXM_NX_REG13[],load:0x7->NXM_NX_REG11[],load:0x6->NXM_NX_REG12[],load:0x2->OXM_OF_METADATA[],load:0x1->NXM_NX_REG14[],resubmit(,8)
- __priority=100,in_port="tapab12213e-3c" actions=load:0xe->NXM_NX_REG13[],load:0xc->NXM_NX_REG11[],load:0xd->NXM_NX_REG12[],load:0xa->OXM_OF_METADATA[],load:0x6->NXM_NX_REG14[],resubmit(,8)__
+ priority=100,in_port="tapab12213e-3c" actions=load:0xe->NXM_NX_REG13[],load:0xc->NXM_NX_REG11[],load:0xd->NXM_NX_REG12[],load:0xa->OXM_OF_METADATA[],load:0x6->NXM_NX_REG14[],resubmit(,8)       <=====
  priority=100,in_port="tap531c4daa-10" actions=load:0xf->NXM_NX_REG13[],load:0xc->NXM_NX_REG11[],load:0xd->NXM_NX_REG12[],load:0xa->OXM_OF_METADATA[],load:0x1->NXM_NX_REG14[],resubmit(,8)
  priority=100,in_port="tapc997f6f2-c8" actions=load:0x10->NXM_NX_REG13[],load:0xc->NXM_NX_REG11[],load:0xd->NXM_NX_REG12[],load:0xa->OXM_OF_METADATA[],load:0x9->NXM_NX_REG14[],resubmit(,8)
  priority=100,in_port="patch-br-int-to",dl_vlan=0 actions=strip_vlan,load:0x5->NXM_NX_REG13[],load:0x2->NXM_NX_REG11[],load:0x3->NXM_NX_REG12[],load:0x1->OXM_OF_METADATA[],load:0x1->NXM_NX_REG14[],resubmit(,8)
@@ -266,13 +267,13 @@ Checking table 8:
  cookie=0xd81159b7, table=8, priority=50,reg14=0x1,metadata=0xb,dl_dst=fa:16:3e:c2:be:99 actions=resubmit(,9)
  cookie=0x942a2974, table=8, priority=50,reg14=0x1,metadata=0xb,dl_dst=fa:16:3e:55:f0:8a actions=resubmit(,9)
  cookie=0xaed209e2, table=8, priority=50,reg14=0x4,metadata=0x2,dl_src=fa:16:3e:33:03:7a actions=resubmit(,9)
- **cookie=0x51155ce9, table=8, priority=50,reg14=0x6,metadata=0xa,dl_src=fa:16:3e:09:3e:f1 actions=resubmit(,9)**
+ cookie=0x51155ce9, table=8, priority=50,reg14=0x6,metadata=0xa,dl_src=fa:16:3e:09:3e:f1 actions=resubmit(,9)       <=====
  cookie=0x3721ef07, table=8, priority=50,reg14=0x9,metadata=0xa,dl_src=fa:16:3e:e5:1d:3c actions=resubmit(,9)
 {% endhighlight %}
 
-This table basically drops some unwanted traffic and resumbit traffic to table 9 if it matches some characteristics. In my case that the __dl_dst__ (datalink destination) is the MAC of the tenant router in question (had to check manually).
+This table basically drops some unwanted traffic (like multicast, tagged vlan traffic, etc) and resumbit the rest of the traffic to table 9 if it matches some characteristics. In my case that the __dl_dst__ (datalink destination) is the MAC of the tenant router in question (had to check manually).
 
-Then check table 9... an so on so forth. You see the picture and it's not beautiful. That is why OvS tracing comes handy here. We can check what OpenFlow rules the packet will cross by providing some input similar to what a problematic packet may look like (source and dest MAC / IPs , for instance, and the ingress port):
+Then check table 9... and so on so forth. You can see the picture. It is quite complex to follow them manually. That is where OvS tracing comes to the rescue. We can check what OpenFlow rules the packet will cross by providing some input similar to what a problematic packet may look like (source and dest MAC / IPs, protocol, type, the ingress port, etc.):
 
 {% highlight bash %}
 [root@ice-com-02 ~]# ovs-appctl ofproto/trace br-int in_port=15,icmp,dl_src=fa:16:3e:09:3e:f1,nw_src=10.0.3.222,nw_dst=192.168.122.119
@@ -352,11 +353,12 @@ Megaflow: recirc_id=0x8ff5,ct_state=+new-est-rel-rpl-inv+trk,ct_label=0/0x1,eth,
 Datapath actions: ct(commit,zone=14,label=0/0x1)
 {% endhighlight %}
 
-Therefore after crossing multiple tables the packet is finally dropped at table 25. The purpose of most tables is documented for the curious mind. Given that the packet is not going out of the compute node is not even reaching the gateway nodes. Remember floating IPs should still be created there in _non DVR_ mode. Next step is to determine which should be the gateway node for this network to inspect the other end.
+Therefore after crossing multiple tables the packet is finally dropped at table 25. The purpose of most tables is documented for the curious mind. The packet is not going out of the compute node which means is not even reaching the gateway nodes. Remember floating IPs should still be created in them in _non DVR_ mode. So a reasonable next step is to determine which should be the gateway node for this network to check both ends of the communication.
+
 
 ### 3. Resolution
 
- - Find the port from the router in the external network.
+Find the port from the router in the external network.
 
 {% highlight bash %}
 (admin)(overcloud) [stack@undercloud-osp16 ~]$ openstack port list --device-id 420fc376-5a71-4d19-8cc3-39160764a08c --device-owner 'network:router_gateway'
@@ -387,9 +389,9 @@ To clarify, each row corresponds to a chassis that can manage the logical port, 
 "ice-com-01.lab.local"
 {% endhighlight %}
 
-And the owner is a compute node! This is unexpected since this deployment is not DVR enabled (__NeutronEnabledDVR__ default is documented as false in RHOSP16.0), and the port should be managed by a controller node. Since a compute is listed there it makes it look like DVR is indeed enabled but the compute nodes have no external network connectivity resulting in a communication error for floating IP traffic.
+And the gateway node managing the port is a compute node! This is pretty much unexpected since this deployment is not DVR enabled (__NeutronEnabledDVR__ default is documented as false in RHOSP16.0), and the port should be managed by a controller node. Since a compute is listed there it starts to look like DVR is indeed enabled but naturally the compute nodes have no external network connectivity like a _NON DVR_ deployment, resulting in a communication error for floating IP traffic.
 
-I can further probe that by checking Neutron configuration:
+I can further bear that out by checking Neutron configuration:
 
 {% highlight bash %}
 # grep -r distributed_floating /var/lib/config-data/puppet-generated/
