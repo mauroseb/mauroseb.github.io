@@ -12,7 +12,8 @@ excerpt_separator: "<!-- more -->"
 
 Hello again. While testing RHOSP 16.0 I ran into a connectivity issue to the outside world that turned out to be a documentation bug.
 
-So What is OVN anyway? Probably a good place to start is:
+So What is OVN anyway? 
+Probably a good place to start is:
  - https://github.com/ovn-org/ovn
  
 In a nutshell, OpenVirtual Networking (OVN) the brand new default SDN in Red Hat OpenStack which replaces the ever lasting Neutron/OvS ML2 plugin which has been there for several years and still is the default in uptream. OVN is developed and maintained upstream by the same group that maintains OpenvSwitch (OvS). While there was nothing wrong with the previous approach, the new one allows to have external control of the software defined networking and potentially manage not only a single deployment of OpenStack but other products like Red Hat Virtualization, OpenShift and other. The current state only allows to manage the products independently but the way is open for future development in that area.
