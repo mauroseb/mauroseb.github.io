@@ -10,7 +10,7 @@ excerpt_separator: "<!-- more -->"
 
 ## Intro
 
-Hello again. While testing RHOSP 16 I ran into a connectivity issue to the outside world that turned out to be a documentation bug.
+Hello again. While testing RHOSP 16.0 I ran into a connectivity issue to the outside world that turned out to be a documentation bug.
 Follwing is the troubleshooting that took me to arrive to conclusions.
 
 ## Problem description
@@ -202,7 +202,7 @@ Chassis "7f4067b7-b0e9-43e7-885b-10a69b1aa0d8"
 
 ### 2. Understanding the flow logic
 
-One can traverse the OvS OpenFlow tables and try to follow which rules the packet will cross. But this requires some experience in the matter. The starting point is to determine the instance compute node and TAP interface. This can be easily captured by checking the instance libvirt XML file. In my case it is __tapab12213e-3c__. With this I check the br-int table 0 where all starts:
+One can traverse the OvS OpenFlow tables and try to follow which rules the packet will cross. But this requires some experience in the matter. The starting point is to determine the instance compute node and TAP interface that corresponds to the instance. This can be easily captured by checking the instance libvirt XML file. In my case it is __tapab12213e-3c__. With this infromation, check the br-int table 0 where all starts:
 
 {% highlight bash %}
 [root@ice-com-02 ~]# ovs-ofctl dump-flows br-int table=0 --no-stats
@@ -260,7 +260,7 @@ Checking table 8:
  cookie=0xd81159b7, table=8, priority=50,reg14=0x1,metadata=0xb,dl_dst=fa:16:3e:c2:be:99 actions=resubmit(,9)
  cookie=0x942a2974, table=8, priority=50,reg14=0x1,metadata=0xb,dl_dst=fa:16:3e:55:f0:8a actions=resubmit(,9)
  cookie=0xaed209e2, table=8, priority=50,reg14=0x4,metadata=0x2,dl_src=fa:16:3e:33:03:7a actions=resubmit(,9)
- __cookie=0x51155ce9, table=8, priority=50,reg14=0x6,metadata=0xa,dl_src=fa:16:3e:09:3e:f1 actions=resubmit(,9)__
+ **cookie=0x51155ce9, table=8, priority=50,reg14=0x6,metadata=0xa,dl_src=fa:16:3e:09:3e:f1 actions=resubmit(,9)**
  cookie=0x3721ef07, table=8, priority=50,reg14=0x9,metadata=0xa,dl_src=fa:16:3e:e5:1d:3c actions=resubmit(,9)
 {% endhighlight %}
 
@@ -346,9 +346,54 @@ Megaflow: recirc_id=0x8ff5,ct_state=+new-est-rel-rpl-inv+trk,ct_label=0/0x1,eth,
 Datapath actions: ct(commit,zone=14,label=0/0x1)
 {% endhighlight %}
 
+Therefore after crossing multiple tables the packet is finally dropped at table 25. The purpose of most tables is documented for the curious mind. Given that the packet is not going out of the compute node is not even reaching the gateway nodes. Remember floating IPs should still be created there in _non DVR_ mode. Next step is to determine which should be the gateway node for this network to inspect the other end.
 
-### 3. Identify which node is the actual gateway node for this tenant vrouter
+### 3. Resolution
 
-### 4. Resolution
+ - Find the port from the router in the external network.
 
+{% highlight bash %}
+(admin)(overcloud) [stack@undercloud-osp16 ~]$ openstack port list --device-id 420fc376-5a71-4d19-8cc3-39160764a08c --device-owner 'network:router_gateway'
++--------------------------------------+------+-------------------+--------------------------------------------------------------------------------+--------+
+| ID                                   | Name | MAC Address       | Fixed IP Addresses                                                             | Status |
++--------------------------------------+------+-------------------+--------------------------------------------------------------------------------+--------+
+| a104502b-66eb-4aee-aeca-6dd38f6b021d |      | fa:16:3e:9b:b7:06 | ip_address='192.168.122.119', subnet_id='706ab6cc-c98d-44a4-9fa6-f581c8311cc7' | ACTIVE |
++--------------------------------------+------+-------------------+--------------------------------------------------------------------------------+--------+
+{% endhighlight %}
+
+ - Once the logical router port id is known get OVN list of gateway nodes for this port  (prepending lrp- to the port ID above):
+ 
+{% highlight bash %}
+()[root@ice-ctl-01 /]# ovn-nbctl lrp-get-gateway-chassis lrp-a104502b-66eb-4aee-aeca-6dd38f6b021d
+lrp-a104502b-66eb-4aee-aeca-6dd38f6b021d_7f4067b7-b0e9-43e7-885b-10a69b1aa0d8     5
+lrp-a104502b-66eb-4aee-aeca-6dd38f6b021d_190c75d4-bb66-4367-9442-69694c5cbf73     4
+lrp-a104502b-66eb-4aee-aeca-6dd38f6b021d_3fc4fc28-1888-4287-bd78-62840b97d2dd     3
+lrp-a104502b-66eb-4aee-aeca-6dd38f6b021d_365b3cf7-14c8-43e1-a198-90209c1d77f9     2
+lrp-a104502b-66eb-4aee-aeca-6dd38f6b021d_1b9c5ca7-e479-4232-89e6-8956fc086e94     1
+{% endhighlight %}
+
+This result is hinting an issue already, as with 3 controllers I would only expect 3 chassis to be listed there.
+
+To clarify, each row corresponds to a chassis that can manage the logical port, the highest priority (number at the end) is the one in control of the logical port at the moment. To translate to a node name we need to use the last UUID of the long string with highest priority. In this example _7f4067b7-b0e9-43e7-885b-10a69b1aa0d8_.
+
+{% highlight bash %}
+()[root@ice-ctl-01 /]# ovn-sbctl get Chassis 7f4067b7-b0e9-43e7-885b-10a69b1aa0d8 hostname
+"ice-com-01.lab.local"
+{% endhighlight %}
+
+And the owner is a compute node! This is unexpected since this deployment is not DVR enabled (__NeutronEnabledDVR__ default is documented as false in RHOSP16.0), and the port should be managed by a controller node. Since a compute is listed there it makes it look like DVR is indeed enabled but the compute nodes have no external network connectivity resulting in a communication error for floating IP traffic.
+
+I can further probe that by checking Neutron configuration:
+
+{% highlight bash %}
+# grep -r distributed_floating /var/lib/config-data/puppet-generated/
+/var/lib/config-data/puppet-generated/neutron/etc/neutron/plugins/ml2/ml2_conf.ini:enable_distributed_floating_ip=True
+{% endhighlight %}
+
+After further analysis it turned out to be a documentation bug which is now filed and corrected [^1].
+So after redeploying the environment explicitly setting in TripleO templates __NeutronEnableDVR: false__ the behavior is correct and works as expected.
+
+### References
+
+[^1] https://bugzilla.redhat.com/show_bug.cgi?id=1839139
 
