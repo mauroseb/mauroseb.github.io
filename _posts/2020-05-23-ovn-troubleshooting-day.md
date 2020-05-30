@@ -11,7 +11,11 @@ excerpt_separator: "<!-- more -->"
 ## Intro
 
 Hello again. While testing RHOSP 16.0 I ran into a connectivity issue to the outside world that turned out to be a documentation bug.
-Follwing is the troubleshooting that took me to arrive to conclusions.
+
+So What is OVN anyway? Probably a good place to start is:
+ - https://github.com/ovn-org/ovn
+ 
+In a nutshell, OpenVirtual Networking (OVN) the brand new default SDN in Red Hat OpenStack which replaces the ever lasting Neutron/OvS ML2 plugin which has been there for several years and still is the default in uptream. OVN is developed and maintained upstream by the same group that maintains OpenvSwitch (OvS). While there was nothing wrong with the previous approach, the new one allows to have external control of the software defined networking and potentially manage not only a single deployment of OpenStack but other products like Red Hat Virtualization, OpenShift and other. The current state only allows to manage the products independently but the way is open for future development in that area.
 
 ## Problem description
 
@@ -25,8 +29,7 @@ The logical layout looks somewhat like the following:
 The first important fact that concerns to the problem is that when the instance does not have a floating IP associated (in other words, is using default tenant vrouter SNAT) to reach the outside all connectivity works well.
 However as soon as a floating IP is associated we can reach up to the External Physical Router but not to the Internet.
 
-The second remark is that default SDN in RHOSP16 is OpenVirtual Networking (OVN) which replaces the ever lasting Neutron/OVS ML2 plugin which has been there for several years.
-The plugin can operate in two modes: _DVR_ or _NON DVR_. 
+The second remark the ML2 plugin can operate in two modes: _DVR_ or _NON DVR_. 
 
 Third point is that according to the documentation the _NON DVR_ mode should have been the default.
 
