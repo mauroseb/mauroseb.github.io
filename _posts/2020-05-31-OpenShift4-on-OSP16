@@ -3,7 +3,7 @@ layout: posts
 title: "OCP 4.3 on OpenStack 16.0"
 date: 2020-05-31
 categories: [blog]
-tags: [ ocp, azure, kubernetes ]
+tags: [ ocp, openstack, kubernetes, ipi ]
 author: mauroseb
 excerpt_separator: "<!-- more -->"
 ---
@@ -66,4 +66,4 @@ $ openstack image create rhcos-43 --conatiner-format bare --disk-format=raw --fi
 ## Install
 
   - PART 3
-<a href="https://asciinema.org/a/2W7lnuvonF31lR5WLWCwTmadO"><img src="https://asciinema.org/a/2W7lnuvonF31lR5WLWCwTmadO.png" width="836"/></a>
+<a href="https://asciinema.org/a/2W7lnuvonF31lR5WLWCwTmadO?speed=2&theme=tango"><img src="https://asciinema.org/a/2W7lnuvonF31lR5WLWCwTmadO.png" width="836"/></a>
