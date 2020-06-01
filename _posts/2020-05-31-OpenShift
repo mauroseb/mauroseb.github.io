@@ -1,0 +1,69 @@
+---
+layout: posts
+title: "OCP 4.3 on OpenStack 16.0"
+date: 2020-05-31
+categories: [blog]
+tags: [ ocp, azure, kubernetes ]
+author: mauroseb
+excerpt_separator: "<!-- more -->"
+---
+
+## Intro
+
+I have been testing OCP4.3 IPI installer in OpenStack 16.0 and created some screencasts on it.
+
+In case you do not know what IPI is, it stands for Installer Provisioned Infrastructure, and means that the installer will take care of creating most
+of the resources for the OCP installation to work (aso known as full stack automation).
+
+
+## Prerequisites
+
+Some forewords before starting.
+The installer will assume some resources are already in place when it runs. It may bail out if some of them are missing and sometimes the error is not descriptive enough to make it obvious.
+There is already some engineering work ongoing in order to amend this and even allow to create the resources if missing during the installation.
+Until then make sure you have:
+
+  1. The tenant created with a user that has __swiftoperator__ role (it does not need admin role)
+{% highlight bash %}
+$ openstack role add --project-domain T01_domain --user-domain T01_domain --user T01_user --project T01_project swiftoperator
+{% endhighligh %}
+
+  2. One floating IP created for the tenant in the external network (also make sure that the DNS records for the OCP API and the APPS wildcard records point to it
+{% highlight bash %}
+$ openstack floating ip create T01_external
+{% endhighligh %}
+
+  3. Extend the quotas for the tenant (security groups 3, security group rules 70)
+{% highlight bash %}
+$ openstack quota set --secgroups 3 --secgroup-rules 70 T01_project
+{% endhighligh %}
+
+  4. A flavor with 16 GB RAM, 25 GB DISK and at least 4 vCPUs
+{% highlight bash %}
+$ openstack flavor create --public m1.xlarge --id auto --ram 16384 --disk 25 --vcpus 4
+{% endhighligh %}
+
+  5. Create a clouds.yaml file with the tenant information where the installer will be run and export OS_CLOUD environment variable to the cloud name (shiftstack in my case).
+
+  6. Optional create the image for RHCOS in advance in glance. Which means you have to download it in QCOW2 format, convert it to RAW and upload to glance
+{% highlight bash %}
+$ openstack image create rhcos-43 --conatiner-format bare --disk-format=raw --file  rhcos-43.raw
+{% endhighligh %}
+
+## Notes
+
+1. I normally use Ceph as storage backend for OpenStack however I had to re-deploy OpenStack without Ceph because it was too slow to maintain replicas of data and run openshift on top. Etcd would just timeout during deployment which makes many random services to fail.
+
+2. Since my environment is all virtual and has a RAID 0 of two 5400 RPM disks beneath the openstack overcloud nodes, which in turn is used by the OCP nodes it becomes quickly a bottleneck at install time. Therefore I moved from 3 masters and 3 workers to 1 master and 1 master for the sake of the test.
+
+3. Also during deployment you will need 25 GB of disk space for each node (one master, one worker and also the bootstrap node). So having at least 75 GB of available disk for instances is preferred.
+
+4. At installation time Nova will be downloading the 25GB RAW rhcos image from Glance into the compute node image cache, which then will use that as underlay for the rhcos instances spawned in that node. While this happens the bootstrap node may already be running and trying to install with considerable I/O load in the same storage backend, potentially leading to time outs and failure to install. To help here I have pre-populated the compute node's image cache by spawning a single rhcos server there and then deleting it. The image cache will now have the rhcos image already in the compute node reducing the load considerably.
+
+5. I had to increate the amount of resources I normally dedicate to OpenStack compute nodes (12 CPUs/96GB RAM) and controller nodes (12 CPUs/32 GB RAM)
+
+
+## Install
+
+  - PART 3
+<a href="https://asciinema.org/a/2W7lnuvonF31lR5WLWCwTmadO"><img src="https://asciinema.org/a/2W7lnuvonF31lR5WLWCwTmadO.png" width="836"/></a>
