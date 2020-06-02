@@ -14,11 +14,12 @@ Hello again. While testing RHOSP 16.0 I ran into a connectivity issue to the out
 
 So What is OVN anyway? 
 Probably a good place to start is:
+ - http://www.openvswitch.org//support/dist-docs/ovn-architecture.7.html (yes... a man page)
  - https://github.com/ovn-org/ovn
  
 In a nutshell, OpenVirtual Networking (OVN) the brand new default SDN in Red Hat OpenStack which replaces the ever lasting Neutron/OvS ML2 plugin which has been there for several years and still is the default in uptream. OVN is developed and maintained upstream by the same group that maintains OpenvSwitch (OvS). While there was nothing wrong with the previous approach, the new one allows to have external control of the software defined networking and potentially manage not only a single deployment of OpenStack but other products like Red Hat Virtualization, OpenShift and other. The current state only allows to manage the products independently but the way is open for future development in that area.
 
-For OpenStack specifically carries also some extra advantages as using the security groups driver based on pure OvS, which gives us the ability to take away some virtual devices: the _qbr_ bridge (linux bridge) that was there mainly to implement security groups through iptables and also a veth pair to connect it to the integration bridge (_br-int_). Now with the driver the instance's tap device can connect directly to _br-int_ and the rules are implemented as OpenFlow rules. In summary it simplifies the virtual devices layout and removes the associated overhead.
+For OpenStack specifically carries also some extra advantages as native DHCP server (thus eliminating the need of dnsmasq for this purpose), or as using the security groups driver based on pure OvS, which gives us the ability to take away some virtual devices: the _qbr_ bridge (linux bridge) that was there mainly to implement security groups through iptables, and also a veth pair to connect it to the integration bridge (_br-int_). Now with the openvswitch driver the instance's tap device can connect directly to _br-int_ and the rules are implemented as OpenFlow rules. In summary it simplifies the virtual devices layout and removes the associated overhead.
 
 ## Problem description
 
