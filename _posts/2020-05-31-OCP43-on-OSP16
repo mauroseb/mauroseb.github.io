@@ -16,29 +16,33 @@ In case you do not know what IPI is, it stands for Installer Provisioned Infrast
 of the resources for the OCP installation to work (aso known as full stack automation).
 
 
-## Prerequisites
+## Prereqs
 
 Some forewords before starting.
-The installer will assume some resources are already in place when it runs. It may bail out if some of them are missing and sometimes the error is not descriptive enough to make it obvious.
-There is already some engineering work ongoing in order to amend this and even allow to create the resources if missing during the installation.
-Until then make sure you have:
+The installer will assume some resources are already in place when it runs. It may bail out if some of them are missing and sometimes the error is not descriptive enough.
+There is already some engineering work ongoing in order to amend these error messages and even allow to create the resources if missing during the installation.
+Until then make sure you have the following in place before starting:
 
   1. The tenant created with a user that has __swiftoperator__ role (it does not need admin role)
+  
 {% highlight bash %}
 $ openstack role add --project-domain T01_domain --user-domain T01_domain --user T01_user --project T01_project swiftoperator
 {% endhighlight %}
 
   2. One floating IP created for the tenant in the external network (also make sure that the DNS records for the OCP API and the APPS wildcard records point to it
+  
 {% highlight bash %}
 $ openstack floating ip create T01_external
 {% endhighlight %}
 
   3. Extend the quotas for the tenant (security groups 3, security group rules 70)
+  
 {% highlight bash %}
 $ openstack quota set --secgroups 3 --secgroup-rules 70 T01_project
 {% endhighlight %}
 
   4. A flavor with 16 GB RAM, 25 GB DISK and at least 4 vCPUs
+  
 {% highlight bash %}
 $ openstack flavor create --public m1.xlarge --id auto --ram 16384 --disk 25 --vcpus 4
 {% endhighlight %}
@@ -46,6 +50,7 @@ $ openstack flavor create --public m1.xlarge --id auto --ram 16384 --disk 25 --v
   5. Create a clouds.yaml file with the tenant information where the installer will be run and export OS_CLOUD environment variable to the cloud name (shiftstack in my case).
 
   6. Optional create the image for RHCOS in advance in glance. Which means you have to download it in QCOW2 format, convert it to RAW and upload to glance
+  
 {% highlight bash %}
 $ openstack image create rhcos-43 --conatiner-format bare --disk-format=raw --file  rhcos-43.raw
 {% endhighlight %}
@@ -65,6 +70,12 @@ $ openstack image create rhcos-43 --conatiner-format bare --disk-format=raw --fi
 
 
 ## Install
+
+  - PART 1
+<a href="https://asciinema.org/a/UKMV4e28IVgfbUbvSf7EKCr8O?speed=2&theme=tango"><img src="https://asciinema.org/a/UKMV4e28IVgfbUbvSf7EKCr8O.png" width="836"/></a>
+
+  - PART 2
+<a href="https://asciinema.org/a/2v7MlzyREfsU4S00mLHFe5vjP?speed=2&theme=tango"><img src="https://asciinema.org/a/2v7MlzyREfsU4S00mLHFe5vjP.png" width="836"/></a>
 
   - PART 3
 <a href="https://asciinema.org/a/2W7lnuvonF31lR5WLWCwTmadO?speed=2&theme=tango"><img src="https://asciinema.org/a/2W7lnuvonF31lR5WLWCwTmadO.png" width="836"/></a>
