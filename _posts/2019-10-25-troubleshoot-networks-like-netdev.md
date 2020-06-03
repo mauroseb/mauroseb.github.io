@@ -92,38 +92,38 @@ Some times it is just enough to use **iperf3** , **netperf** or similar tools to
 
 The reproduction of the problem can depend on multiple factors like hardware architecture, NIC vendor/model, firmware version, OS version, kernel version, NIC driver version, physical network devices (switches, load balancers and routers). Many times permutation of any of these components is helpful to narrow down the problem to a particular component before delving deeper into the analysis. 
 
-One of the first actions I normally try is to try to reproduce with the latest kernel available (downstream in case of ```RHEL```), then the latest upstream kernel, also sometimes the latest kernel in ```net-next``` tree of the linux kernel (which will become part of the next upstream linux kernel release) if there is any promising commit. 
+One of the first actions I normally try is to try to reproduce with the latest kernel available (downstream in case of _RHEL_), then the latest upstream kernel, also sometimes the latest kernel in __net-next__ tree of the linux kernel (which will become part of the next upstream linux kernel release) if there is any promising commit. 
 
-For ```RHEL```:
+For _RHEL_:
 
   * **Test latest downstream kernel.** You can check easily in CDN for the latest and update it if it is newer than the version in the system.
   
   * **Test lastest upstream stable kernel.** The easiest here is to leverage ```elrepo``` repository which provides an RPM for ```Centos``` and ```RHEL``` distros built from the ```mainline``` stable branch of Linux Kernel Archive and thus named ```kernel-ml``` to avoid conflict with RHEL stock kernels. In the following example I am installing the RPM for major version 7 and setting grub to boot from it only once as we just want to test a reproducer and go back to the default kernel:
   
-{% highlight shell %}
-          # rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
-          # yum install https://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
-          # yum --enablerepo=elrepo-kernel install kernel-ml
-          # grub2-reboot 0
-{% endhighlight %}
+  {% highlight shell %}
+      # rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+      # yum install https://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
+      # yum --enablerepo=elrepo-kernel install kernel-ml
+      # grub2-reboot 0
+  {% endhighlight %}
 
   * **Test linux-next kernel.** Similarly the branches that are already accepted for the next stable release can be tested as follows. 
   
   
-{% highlight shell %}
-          $ git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-          $ cd linux
-          $ git remote add linux-next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
-          $ git fetch linux-next
-          $ git fetch --tags linux-next
-{% endhighlight %}
+  {% highlight shell %}
+     $ git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+     $ cd linux
+     $ git remote add linux-next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+     $ git fetch linux-next
+     $ git fetch --tags linux-next
+  {% endhighlight %}
 
     Now a specific ```linux-next``` tag can be checked out and built[^4]. Alternatively the ```net-next``` branch can be used.
 
-{% highlight shell %}
+  {% highlight shell %}
           $ git remote add net git://git.kernel.org/pub/scm/linux/kernel/git/davem/net.git
           $ git fetch net
- {% endhighlight %}
+  {% endhighlight %}
  
     And just like that one can retry and discard tons of already fixed bugs or include new features that could improve the situation.
 
@@ -135,28 +135,45 @@ Just by doing that one can discard hundreds of bugs and enhancements that have b
 
 Actions like these have been by far the fastest way to identify existing bugs. Just by knowing it is not happening in a given kernel version, means that we only need to backport certain fix to a downstream kernel (in case of ```RHEL```)  or that the fix will be released soon upstream in case of using the ```linux-next``` kernel.
 
-There is some extra work to identify which commit or set of commits are needed to solve the problem, like using ```git bisect```, exploring the repo logs, and some other manual tasks. However the software and hardware vendors should normally take care of that. Once the commit or commits needed are known I can get in which branch was applied in the downstream tree:
+There is some extra work to identify which commit or set of commits are needed to solve the problem. To start with, one could list the commits between the problematic and the fixed kernel:
 
 {% highlight shell %}
-      $ git branch --contains cc2af34db9a5b5222eefdc25fd1265e305df9f2e
-      * (HEAD detached at kernel-3.10.0-1122.el7)    
+$ git log --oneline v5.6-rc2..v5.6-rc3 net/ include/net/
+3dc55dba6723 Merge git://git.kernel.org/pub/scm/linux/kernel/git/netdev/net
+3a20773beeee net: netlink: cap max groups which will be considered in netlink_bind()
+98bda63e20da net: disable BRIDGE_NETFILTER by default
+16a556eeb7ed openvswitch: Distribute switch variables for initialization
+46d30cb1045c net: ip6_gre: Distribute switch variables for initialization
+161d179261f9 net: core: Distribute switch variables for initialization
+41f57cfde186 Merge git://git.kernel.org/pub/scm/linux/kernel/git/bpf/bpf
+303d0403b8c2 udp: rehash on disconnect
+06f5201c6392 net/tls: Fix to avoid gettig invalid tls record
+33c4acbe2f4e bridge: br_stp: Use built-in RCU list checking
+...
 {% endhighlight %}
- 
+
+Git also provides __git bisect__ which helps in pinpointing the culprit out of those commits by testing good and bad versions. Nevertheless the software and hardware vendors would normally take care of the search at this level. Once the commit or commits needed are known I can get in which branch was applied in the downstream tree:
+
+{% highlight shell %}
+  $ git branch --contains cc2af34db9a5b5222eefdc25fd1265e305df9f2e
+  * (HEAD detached at kernel-3.10.0-1122.el7)    
+{% endhighlight %}
+
+
 ### 4. Performance metrics
 
-Dealing with a performance issue with a broad description like _low troughput..._, normally would involve also checking the output of performance and metrics monitoring tools, looking for stats like RX/TX packet counts and sizes in each interface involved, error counts and in general what counters are moving network wise to understand if they are or not part of the problem. 
+Dealing with a performance issue with a broad description, normally would involve also checking the output of performance and metrics monitoring tools, looking for stats like RX/TX packet counts and sizes in each interface involved, error counts and in general what counters are moving network wise to understand if they are or not part of the problem. 
 
-There are hundreds of command line tools to chose here but for the sake of simplicity I will focus on the readings of ```ethtool``` and ```sar``` (the later because is the most widespread accross systems). It is normal to find environments with proper performance tooling like stacks combining ```collectd```, ```prometheus```, ```grafana```, ```ganglia```, or any ```rrdtool``` based plotter. One interesting tool is also ```pcp``` (performance co-pilot [^5]). It does not really matter which tool to use as long as one can get the metrics that is after (for a comprehensive list of Linux command line tools check out the mind blowing work of Brendan Gregg [^6][^7]).
-
+There are hundreds of command line tools to chose here but for the sake of simplicity I will focus on the readings of __ethtool__ and __sar__ (the later because is the most widespread accross systems). It is normal to find environments with proper performance tooling like stacks combining __collectd__, __prometheus__, __grafana__, __ganglia__, or any __rrdtool__ derivative. One interesting tool to consider is __pcp__ (performance co-pilot [^5]). It does not really matter which tool to use as long as one can get the metrics that is after (for a comprehensive list of Linux command line tools check out the mind blowing work of Brendan Gregg [^6][^7]).
 
 
 ### 5. Tracing
 
 Once we have identified that a bottleneck resides in certain userland process or kernel thread, what happens next? Understanding what that task is doing is a fair next step which will reveal which part of the code is generating the noise. 
 
-For that more tools come handy: **perf** is probably one I used the most in this cases. Also facilities like dynamic kernel tracing or ```ftrace```, either through scripting directly or through **trace-cmd** command line tool.
+For that more tools come handy: **perf** is probably one I used the most in this cases. Also facilities like dynamic kernel tracing or **ftrace**, either through scripting directly or through **trace-cmd** command line tool.
 
-Lastly, I must mention ```eBPF``` (extended Barkley Packet Filter, originially named after BSD's BPF, however radically different) which is remarkably valuable and versatile kernel facility that was created for tracing purposes, but quickly became a swiss-army knife within the kernel that allows the user to create his own code and run it in a JIT compiler
+Lastly, I must mention **eBPF** (extended Barkley Packet Filter, originially named after BSD's BPF, however radically different) which is remarkably valuable and versatile kernel facility that was created for tracing purposes, but quickly became a swiss-army knife within the kernel that allows the user to create his own code and run it in a JIT compiler
 in kernel land. Scary? Of course.
 
 ## OpenStack Network Architecture
@@ -167,7 +184,7 @@ The architecture of ML2/OvS has been largely documented and described (just to l
 
 <img src="/images/neutron_architecture.png" alt="Compute Network Layout" style="width:1000px;"/>
 
-The best practices dictate to use at least 6 VLANs (+1 for management) that would be normally trunked to at least two physical node NICs so they can be bonded together, however the installer is totally flexible and allows the user to be creative, use multiple independant NICs, flat networks, etc. Typical diagram is shown in the picture below.
+The best practices dictate to use at least 6 VLANs (+1 optional for management) that would be normally trunked to at least two physical node NICs so they can be bonded together, however the installer is totally flexible and allows the user to be creative, use multiple independant NICs, flat networks, etc. Typical diagram is shown in the picture below.
 
 <img src="/images/6-vlan-arch.png" alt="Node connectivity" style="width:1000px;"/>
 
