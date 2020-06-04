@@ -37,18 +37,22 @@ Finally the following is definitely flawed and incomplete (mea culpa) but may st
 
 To understand the problem we need to have a clear picture of the path the packets need to traverse. Without that, the search for a root cause will be partial and inaccurate. Taking note of **ALL** the network components, virtual or physical, is paramount. Following is a basic example of an instance running in an OpenStack compute node:
 
-        +-------+
-        |       |
-        | PF 0  +---+++++++++     +++++++++++++  +++++++++++++   +++++++++++++   +++++++++++++
-        | (eth0)|   +       +     +           +  +           +   +           +   +           +
-        +-------+   +       +     +   (VLAN)  +  +  (VxLAN)  +   +  linux    +   +           +
-        +-------+   + bond0 +---- +    OvS    +--+-   OvS    +---+  bridge   +---+  virtio   +
-        |       |   +       +     +           +  +           +   +  (qbr)    +   +  guest    +
-        | PF 1  +---+++++++++     +++++++++++++  +++++++++++++   +++++++++++++   +++++++++++++
-        | (eth1)|                            (patch)    (qbo-qbv veths)      (tap)
-        +-------+
 
-        COMPUTE HOST
+{% highlight shell %}
+   +-------+
+   |       |
+   | PF 0  +---+++++++++     +++++++++++++  +++++++++++++   +++++++++++++   +++++++++++++
+   | (eth0)|   +       +     +           +  +           +   +           +   +           +
+   +-------+   +       +     +   (VLAN)  +  +  (VxLAN)  +   +  linux    +   +           +
+   +-------+   + bond0 +---- +    OvS    +--+-   OvS    +---+  bridge   +---+  virtio   +
+   |       |   +       +     +           +  +           +   +  (qbr)    +   +  guest    +
+   | PF 1  +---+++++++++     +++++++++++++  +++++++++++++   +++++++++++++   +++++++++++++
+   | (eth1)|                            (patch)    (qbo-qbv veths)      (tap)
+   +-------+
+   
+   COMPUTE HOST
+   
+{% endhighlight %}
 
 
 
