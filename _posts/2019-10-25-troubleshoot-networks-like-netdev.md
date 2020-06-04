@@ -101,10 +101,10 @@ For _RHEL_:
   * **Test lastest upstream stable kernel.** The easiest here is to leverage ```elrepo``` repository which provides an RPM for ```Centos``` and ```RHEL``` distros built from the ```mainline``` stable branch of Linux Kernel Archive and thus named ```kernel-ml``` to avoid conflict with RHEL stock kernels. In the following example I am installing the RPM for major version 7 and setting grub to boot from it only once as we just want to test a reproducer and go back to the default kernel:
   
   {% highlight shell %}
-      # rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
-      # yum install https://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
-      # yum --enablerepo=elrepo-kernel install kernel-ml
-      # grub2-reboot 0
+     # rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+     # yum install https://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
+     # yum --enablerepo=elrepo-kernel install kernel-ml
+     # grub2-reboot 0
   {% endhighlight %}
 
   * **Test linux-next kernel.** Similarly the branches that are already accepted for the next stable release can be tested as follows. 
@@ -121,8 +121,8 @@ For _RHEL_:
   Now a specific ```linux-next``` tag can be checked out and built[^4]. Alternatively the ```net-next``` branch can be used.
 
   {% highlight shell %}
-          $ git remote add net git://git.kernel.org/pub/scm/linux/kernel/git/davem/net.git
-          $ git fetch net
+     $ git remote add net git://git.kernel.org/pub/scm/linux/kernel/git/davem/net.git
+     $ git fetch net
   {% endhighlight %}
  
   And just like that one can retry and discard tons of already fixed bugs or include new features that could improve the situation.
