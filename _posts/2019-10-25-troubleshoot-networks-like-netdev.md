@@ -43,9 +43,9 @@ To understand the problem we need to have a clear picture of the path the packet
    |       |
    | PF 0  +---+++++++++     +++++++++++++  +++++++++++++   +++++++++++++   +++++++++++++
    | (eth0)|   +       +     +           +  +           +   +           +   +           +
-   +-------+   +       +     +   (VLAN)  +  +  (VxLAN)  +   +  linux    +   +           +
-   +-------+   + bond0 +---- +    OvS    +--+-   OvS    +---+  bridge   +---+  virtio   +
-   |       |   +       +     +           +  +           +   +  (qbr)    +   +  guest    +
+   +-------+   +       +     +   (VLAN)  +  +  (VxLAN)  +   +  linux    +   +   virtio  +
+   +-------+   + bond0 +---- +    OvS    +--+-   OvS    +---+  bridge   +---+   guest   +
+   |       |   +       +     +           +  +           +   +  (qbr)    +   +           +
    | PF 1  +---+++++++++     +++++++++++++  +++++++++++++   +++++++++++++   +++++++++++++
    | (eth1)|                            (patch)    (qbo-qbv veths)      (tap)
    +-------+
