@@ -118,14 +118,14 @@ For _RHEL_:
      $ git fetch --tags linux-next
   {% endhighlight %}
 
-    Now a specific ```linux-next``` tag can be checked out and built[^4]. Alternatively the ```net-next``` branch can be used.
+  Now a specific ```linux-next``` tag can be checked out and built[^4]. Alternatively the ```net-next``` branch can be used.
 
   {% highlight shell %}
           $ git remote add net git://git.kernel.org/pub/scm/linux/kernel/git/davem/net.git
           $ git fetch net
   {% endhighlight %}
  
-    And just like that one can retry and discard tons of already fixed bugs or include new features that could improve the situation.
+  And just like that one can retry and discard tons of already fixed bugs or include new features that could improve the situation.
 
 Similar approach could be adopted for NIC firmware, drivers or even testing with a different NIC hardware if resources permit. 
 
