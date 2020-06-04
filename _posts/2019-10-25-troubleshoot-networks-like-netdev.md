@@ -138,17 +138,17 @@ Actions like these have been by far the fastest way to identify existing bugs. J
 There is some extra work to identify which commit or set of commits are needed to solve the problem. To start with, one could list the commits between the problematic and the fixed kernel:
 
 {% highlight shell %}
-$ git log --oneline v5.6-rc2..v5.6-rc3 net/ include/net/
-3dc55dba6723 Merge git://git.kernel.org/pub/scm/linux/kernel/git/netdev/net
-3a20773beeee net: netlink: cap max groups which will be considered in netlink_bind()
-98bda63e20da net: disable BRIDGE_NETFILTER by default
-16a556eeb7ed openvswitch: Distribute switch variables for initialization
-46d30cb1045c net: ip6_gre: Distribute switch variables for initialization
-161d179261f9 net: core: Distribute switch variables for initialization
-41f57cfde186 Merge git://git.kernel.org/pub/scm/linux/kernel/git/bpf/bpf
-303d0403b8c2 udp: rehash on disconnect
-06f5201c6392 net/tls: Fix to avoid gettig invalid tls record
-33c4acbe2f4e bridge: br_stp: Use built-in RCU list checking
+  $ git log --oneline v5.6-rc2..v5.6-rc3 net/ include/net/
+  3dc55dba6723 Merge git://git.kernel.org/pub/scm/linux/kernel/git/netdev/net
+  3a20773beeee net: netlink: cap max groups which will be considered in netlink_bind()
+  98bda63e20da net: disable BRIDGE_NETFILTER by default
+  16a556eeb7ed openvswitch: Distribute switch variables for initialization
+  46d30cb1045c net: ip6_gre: Distribute switch variables for initialization
+  161d179261f9 net: core: Distribute switch variables for initialization
+  41f57cfde186 Merge git://git.kernel.org/pub/scm/linux/kernel/git/bpf/bpf
+  303d0403b8c2 udp: rehash on disconnect
+  06f5201c6392 net/tls: Fix to avoid gettig invalid tls record
+  33c4acbe2f4e bridge: br_stp: Use built-in RCU list checking
 ...
 {% endhighlight %}
 
