@@ -12,14 +12,37 @@ excerpt_separator: "<!-- more -->"
 
 Hello again. While testing RHOSP 16.0 I ran into a connectivity issue to the outside world that turned out to be a documentation bug.
 
-So What is OVN anyway? 
-Probably a good place to start is:
+### So What is OVN anyway? 
+
+A good place to start is:
  - http://www.openvswitch.org//support/dist-docs/ovn-architecture.7.html (yes... a man page)
  - https://github.com/ovn-org/ovn
- 
-In a nutshell, OpenVirtual Networking (OVN) the brand new default SDN in Red Hat OpenStack 16 replacing the ever lasting Neutron/OvS ML2 plugin which has been there for several years and still is the default in uptream. OVN is developed and maintained upstream by the same group that maintains OpenvSwitch (OvS). While there was nothing wrong with the previous approach, the new one allows to have external control of the software defined networking and potentially manage not only a single deployment of OpenStack but other products like Red Hat Virtualization, OpenShift and other. The current state only allows to manage the products independently but the way is open for future development in that area.
+ - https://blogs.rdoproject.org/2016/08/native-dhcp-support-in-ovn/
+
+
+In a nutshell, OpenVirtual Networking (OVN) the brand new default SDN in Red Hat OpenStack 16 replacing the ever lasting Neutron/OvS ML2 plugin which has been there for several years and still is the default in uptream. 
+
+OVN is developed and maintained upstream by the same group that maintains OpenvSwitch (OvS). While there was nothing wrong with the previous approach, the new one allows to have external control of the software defined networking and potentially manage not only a single deployment of OpenStack but other products like Red Hat Virtualization, OpenShift and other. The current state only allows to manage the products independently but the way is open for future development in that area.
+
+Regarding the architecture, OVN interprets Neutron (considered the CMS - cloud management system) requests and creates the configuration of the networking logical plane (stored in northbound DB). To store information centrally and at this level of abstraction is a fundamental addition by OVN and enables far better interoperability and manageability. The data model is not exactly 1:1 with Neutron. The following table summarizes the differences.
+
+<table align="center">
+  <tr><th align="center">NEUTRON</th><th align="center">OVN</th></tr>
+  <tr><td>Network</td><td>Logical Switch</td></tr>
+  <tr><td>Subnet</td><td>Native DHCP option*</td></tr>
+  <tr><td>Router</td><td>Logical Router</td></tr>
+  <tr><td>Port</td><td>Logical Switch Port | Logical Router Port</td></tr>
+  <tr><td>Security Group</td><td>Port Group</td></tr>
+  <tr><td>Security Group Rule</td><td>ACL</td></tr>
+  <tr><td>Floating IP</td><td>NAT</td></tr>
+</table>
+[*] If Native DHCP is enabled.
+
+Then also these logical network resources are translated by _ovn-northd_  into the logical flows (stored in the southbound DB), which in turn _ovn-controller_ uses as input to create OpenFlow flows and set OvS DB in the physical nodes. OpenvSwitch does the rest as usual.
 
 For OpenStack specifically carries also some extra advantages as native DHCP server (thus eliminating the need of dnsmasq for this purpose), or as using the security groups driver based on pure OvS, which gives us the ability to take away some virtual devices: the _qbr_ bridge (linux bridge) that was there mainly to implement security groups through iptables, and also a veth pair to connect it to the integration bridge (_br-int_). Now with the openvswitch driver the instance's tap device can connect directly to _br-int_ and the rules are implemented as OpenFlow rules. In summary it simplifies the virtual devices layout and removes the associated overhead.
+
+Lastly, not all is roses. In some cornere cases there are still feature gaps with Neutron/OvS ML2 that are quickly closing but need have to be acknowledged. This specific use cases need still to rely in the previous model.
 
 ## Problem description
 
@@ -51,8 +74,6 @@ In OVN speak every node that runs an __ovn-controller__ is called a chassis.
 ## Steps taken
 
 ### 1. Understanding OVN configuration and status
-
-Long story short, OVN interprets Neutron resources and creates the configuration of the networking logical plane (stored in northbound DB), which is then is translated by _ovn-northd_  into the logical flows (stored in the southbound DB), which in turn _ovn-controller_ then uses as input to set OvS DB in the physical nodes. 
 
 First lets see how this looks from neutron point of view. I basically have two tenant routers (yes, one is for OpenShift) connected to respective tenant netowrks and both use as gateway _T01_external_ network.
 
