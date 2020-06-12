@@ -11,6 +11,7 @@ excerpt_separator: "<!-- more -->"
 ## Intro
 
 Hello again. While testing RHOSP 16.0 I ran into a connectivity issue to the outside world that turned out to be a documentation bug.
+<!-- more -->
 
 ### So What is OVN anyway? 
 
@@ -40,7 +41,7 @@ Regarding the architecture, OVN interprets Neutron (considered the CMS - cloud m
 
 Then also these logical network resources are translated by _ovn-northd_  into the logical flows (stored in the southbound DB), which in turn _ovn-controller_ uses as input to create OpenFlow flows and set OvS DB in the physical nodes. OpenvSwitch does the rest as usual.
 
-For OpenStack specifically carries also some extra advantages as native DHCP server (thus eliminating the need of dnsmasq for this purpose), or as using the security groups driver based on pure OvS, which gives us the ability to take away some virtual devices: the _qbr_ bridge (linux bridge) that was there mainly to implement security groups through iptables, and also a veth pair to connect it to the integration bridge (_br-int_). Now with the openvswitch driver the instance's tap device can connect directly to _br-int_ and the rules are implemented as OpenFlow rules. In summary it simplifies the virtual devices layout and removes the associated overhead.
+For OpenStack specifically carries also some extra advantages as native DHCP server (thus eliminating the need of dnsmasq for this purpose), or as using the security groups driver based on pure OvS, which gives us the ability to take away some virtual devices: the _qbr_ bridge (linux bridge) that was there mainly to implement security groups through iptables, and also a veth pair to connect it to the integration bridge (_br-int_). Now with the openvswitch driver the instance's tap device can connect directly to _br-int_ and the rules are implemented as OpenFlow rules. In summary it simplifies the virtual devices layout and removes the associated overhead. One important change is that OVN is not using VRRP anymore for high availability of the routers but relies on BFD instead, more on that later.
 
 Lastly, not all is roses. In some cornere cases there are still feature gaps with Neutron/OvS ML2 that are quickly closing but need have to be acknowledged. This specific use cases need still to rely in the previous model.
 
@@ -87,8 +88,11 @@ First lets see how this looks from neutron point of view. I basically have two t
 +--------------------------------------+----------------------------------+--------+-------+----------------------------------+
 {% endhighlight %}
 
-One thing to note at this point is that the routers are no longer highly available using _VRRP_, instead OVN uses _BFD_ protocol. Also this HA configuration is internal for OVN and not visible from OpenStack point of view.
-Then from the northbound DB looks like this:
+One thing to note at this point is that as I mentioned earlier the routers are no longer highly available using _VRRP_, instead OVN uses _BFD_ protocol, but this HA configuration is internal for OVN and not visible from OpenStack point of view. This means that we do see or set **ha** property for every router in Neutron anymore. It will be just the default for every router.
+
+**NOTE:** All OVN related commands have to be run in the container __ovn-dbs-bundle-podman-0__ which runs the OVN DB and is the master in my case.
+
+The northbound DB looks like this:
 
 {% highlight bash %}
 ()[root@ice-ctl-01 /]# ovn-nbctl show
@@ -226,8 +230,6 @@ Chassis "7f4067b7-b0e9-43e7-885b-10a69b1aa0d8"
     Port_Binding "c997f6f2-c83f-4c5a-b8a5-60c9bda1c2b5"
     Port_Binding "cr-lrp-a104502b-66eb-4aee-aeca-6dd38f6b021d"
 {% endhighlight %}
-
-**NOTE:** This commands have to be run in the container __ovn-dbs-bundle-podman-0__ which runs the OVN DB and is the master.
 
 
 ### 2. Understanding the flow logic
