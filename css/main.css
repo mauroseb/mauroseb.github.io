@@ -103,6 +103,7 @@ div {
 div.content {
     padding-top: 80px;
     width: 75%;
+    align: center;
 }
 
 div.navi {
@@ -111,6 +112,12 @@ div.navi {
     right: 50px;
     width: 50%;
 }
+
+div.nav {
+    width: 75%;
+    align: center;
+}
+
 
 p.meta {
     font-family: 'Arial', 'Sans-Serif';
