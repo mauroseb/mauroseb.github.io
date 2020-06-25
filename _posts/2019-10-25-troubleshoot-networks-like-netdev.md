@@ -103,7 +103,7 @@ For _RHEL_:
 
   * **Test latest downstream kernel.** You can check easily in CDN for the latest and update it if it is newer than the version in the system.
   
-  * **Test lastest upstream stable kernel.** The easiest here is to leverage ```elrepo``` repository which provides an RPM for ```Centos``` and ```RHEL``` distros built from the ```mainline``` stable branch of Linux Kernel Archive and thus named ```kernel-ml``` to avoid conflict with RHEL stock kernels. In the following example I am installing the RPM for major version 7 and setting grub to boot from it only once as we just want to test a reproducer and go back to the default kernel:
+  * **Test lastest upstream stable kernel.** The easiest here is to leverage **elrepo** repository which provides an RPM for Centos and RHEL distros built from the **mainline** stable branch of Linux Kernel Archive and thus named **kernel-ml** to avoid conflict with RHEL stock kernels. In the following example I am installing the RPM for major version 7 and setting grub to boot from it only once as we just want to test a reproducer and go back to the default kernel:
   
   {% highlight shell %}
     # rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
@@ -123,7 +123,7 @@ For _RHEL_:
     $ git fetch --tags linux-next
   {% endhighlight %}
 
-  Now a specific ```linux-next``` tag can be checked out and built[^4]. Alternatively the ```net-next``` branch can be used.
+  Now a specific **linux-next** tag can be checked out and built[^4]. Alternatively the **net-next** branch can be used.
 
   {% highlight shell %}
     $ git remote add net git://git.kernel.org/pub/scm/linux/kernel/git/davem/net.git
@@ -138,7 +138,7 @@ If the layout determined at step 2. is too complex. Chopping down the devices an
 
 Just by doing that one can discard hundreds of bugs and enhancements that have been already fixed and incorporated in the latests releases, hardware/firmaware/driver issues that affect a single vendor, and so forth. 
 
-Actions like these have been by far the fastest way to identify existing bugs. Just by knowing it is not happening in a given kernel version, means that we only need to backport certain fix to a downstream kernel (in case of ```RHEL```)  or that the fix will be released soon upstream in case of using the ```linux-next``` kernel.
+Actions like these have been by far the fastest way to identify existing bugs. Just by knowing it is not happening in a given kernel version, means that we only need to backport certain fix to a downstream kernel (in case of RHEL)  or that the fix will be released soon upstream in case of using the **linux-next** kernel.
 
 There is some extra work to identify which commit or set of commits are needed to solve the problem. To start with, one could list the commits between the problematic and the fixed kernel:
 
@@ -157,7 +157,7 @@ There is some extra work to identify which commit or set of commits are needed t
 ...
 {% endhighlight %}
 
-Git also provides __git bisect__ which helps in pinpointing the culprit out of those commits by testing good and bad versions. Nevertheless the software and hardware vendors would normally take care of the search at this level. Once the commit or commits needed are known I can get in which branch was applied in the downstream tree:
+In case you missed it, git also provides __bisect__ subcommand which helps in pinpointing the culprit out of those commits by testing good and bad versions. Nevertheless the software and hardware vendors would normally take care of the search at this level. Once the commit or commits needed are known I can get in which branch was applied in the downstream tree:
 
 {% highlight shell %}
   $ git branch --contains cc2af34db9a5b5222eefdc25fd1265e305df9f2e
@@ -196,7 +196,7 @@ The best practices dictate to use at least 6 VLANs (+1 optional for management) 
 
 ## Detecting Software Segmentation
 
-During the past years I stumbled a few times upon network driver bugs that prevent ```GSO``` (generic segmentation offloading) to work properly (each time on a different driver: ```ixgbe```, ```mlx5_core```, ```mlx4_core```, can't recall the last one yet), in combination with ```VxLAN``` encapsulation on top of a ```VLAN```.
+During the past years I stumbled a few times upon network driver bugs that prevent _GSO_ (generic segmentation offloading) to work properly each time on a different driver: __ixgbe__, __mlx5_core__ , __mlx4_core__ in combination with VxLAN encapsulation on top of a VLAN frame.
 
 
 ## References
