@@ -88,8 +88,6 @@ a.navi:hover {
       transition: 0.2s;
 }
 
-
-
 .activeL {
       background-color: rgba(0, 0, 0, 0.5);
       text-decoration: bold;
@@ -110,8 +108,8 @@ div.content {
 
 div.navi {
     position:absolute;
-    top: 20px;
-    right: 50px;
+    top: 15px;
+    right: 70px;
 }
 
 div.nav {
@@ -125,8 +123,6 @@ p.meta {
     font-size: 9px;
     line-height: 1.4em;
     color: #333;
-    width: 75%;
-    margin-left: 20px;
 }
 
 p.post {
@@ -134,7 +130,6 @@ p.post {
     font-size: 12px;
     line-height: 1.4em;
     color: #333;
-    margin-left: 20px;
     text-align: justify;
     text-justify: inter-word;
 }
@@ -173,13 +168,11 @@ h2 {
     text-transform: uppercase;
     font-weight: 300;
     color: #000000;
-    width: 75%;
 }
 
 h2.navi {
     font-size: 10px;
     font-family:'Arial', 'Sans-Serif';
-    font-
     weight: 300;
     text-transform: uppercase;
     color: #ffffff;
@@ -193,7 +186,6 @@ h3 {
     font-weight: 300;
     text-transform: uppercase;
     color: #000000;
-    width: 75%;
 }
 
 h4 {
@@ -202,8 +194,6 @@ h4 {
     font-weight: 300;
     text-transform: uppercase;
     color: #000000;
-    width: 75%;
-    margin-left: 20px;
 }
 
 img {
@@ -213,7 +203,7 @@ img {
 footer {
     border-top: 1px solid #d5d5d5;
     font-size: 11px;
-    width: 75%;
+    width: 80%;
 }
 
 ul.posts { 
@@ -224,7 +214,7 @@ ul.posts {
 
 ul.posts li {
     list-style: none;
-    width: 75%;
+    width: 80%;
 }
 
 table {
