@@ -102,8 +102,10 @@ div {
 
 div.content {
     padding-top: 80px;
-    width: 75%;
+    width: 80%;
     align: center;
+    text-align: justify;
+    text-justify: inter-word;
 }
 
 div.navi {
@@ -113,7 +115,7 @@ div.navi {
 }
 
 div.nav {
-    width: 75%;
+    width: 80%;
     align: center;
 }
 
@@ -152,7 +154,6 @@ h1 {
     line-height: 50px;
     text-transform: uppercase;
     color: #696969;
-    width: 75%;
 }
 
 h1.navi {
