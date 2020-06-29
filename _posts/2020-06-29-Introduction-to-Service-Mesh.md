@@ -12,7 +12,7 @@ excerpt_separator: "<!-- more -->"
 
 ### What is that ? 
 
-After moving from a monolithic application to a microservice oriented architecture, what previously was an RPC call within the application itself now has become a request that has to travel on the network where the microservices are running, which creates security concerns and also increases the network usage considerably. In addition to that, multi-tenant environments also expose this networks to multiple consumers.
+After moving from a monolithic application to a microservice oriented architecture, what previously was an RPC call within the application itself now has become a request that has to travel on the network where the microservices are running on, which creates security concerns and also increases the network usage considerably. In addition to that, multi-tenant environments also expose this networks to multiple consumers.
 
 Moreover microservices architectures are often design to let the microservice itself take care of things like locating the services it needs to interact with, routing between different services, routing traffic between different api version (even asymetrically), decoupling load balancing from infrastructure scaling, and many other. All these aspects are a common factor in most microservices, which makes their code bloated an unnecesarily repeated.
 
@@ -87,9 +87,9 @@ storage                                    4.3.3     True        False         F
 ### Install
 
 The standard way to install Service Mesh is through its operator. But first one also has to install the operators that correspond to its dependencies: 
-  - Elasticsearch
-  - Jaeger: Profiling component of the service mesh implementing the OpenTracing standard.
-  - Kiali: The WebUI to visualize the service mesh.
+  - __Elasticsearch__
+  - __Jaeger:__ Profiling component of the service mesh implementing the OpenTracing standard.
+  - __Kiali:__ The WebUI to visualize the service mesh.
 
 #### Elasticsearch
 
@@ -174,15 +174,14 @@ istio-operator-568849cc4f-zw4nh   1/1     Running   0          2m4s   10.130.0.1
 
 #### Install Service Mesh Control Plane
 
- 1. Create SM control plane project
+1. Create SM control plane project
 
 {% highlight bash %}
 $ oc adm new-project istio-system --display-name="Service Mesh System"
 Created project istio-system
-
 {% endhighlight %}
 
- 2. Create a CRD definition like the follwoing:
+2. Create a CRD definition like the follwoing:
 
 {% highlight bash %}
 apiVersion: maistra.io/v1
@@ -242,7 +241,7 @@ $ oc apply -f service-mesh.yaml -n istio-system
 servicemeshcontrolplane.maistra.io/service-mesh-installation created
 {% endhighlight %}
 
-Wait for containers to come up 5 to 10 minutes.
+Wait for containers to come up from 5 to 10 minutes.
 
 {% highlight bash %}
 $  oc get po -o wide -n istio-system
@@ -259,7 +258,6 @@ istio-telemetry-57d749b69-6nns6           2/2     Running   0          9m28s   1
 jaeger-5f4666947c-rxbr4                   2/2     Running   0          10m     10.129.0.18   ip-10-0-146-42.eu-west-1.compute.internal    <none>           <none>
 kiali-64cd8b9bbc-dpkhb                    1/1     Running   0          5m35s   10.130.0.24   ip-10-0-143-141.eu-west-1.compute.internal   <none>           <none>
 prometheus-7ddcc755fb-q9n6l               2/2     Running   0          10m     10.130.0.17   ip-10-0-143-141.eu-west-1.compute.internal   <none>           <none>
-
 {% endhighlight %}
 
 - Create ServiceMeshMemberRoll with the projects which need to take part of the service mesh
@@ -281,7 +279,6 @@ servicemeshmemberroll.maistra.io/default created
 $ oc adm policy add-role-to-user edit user1 -n istio-system
 clusterrole.rbac.authorization.k8s.io/edit added: "user1"
 ...
-
 {% endhighlight %}
 
 ### Deploying Test Workload
@@ -334,7 +331,6 @@ kind: List
 metadata:
   resourceVersion: ""
   selfLink: ""
-
 {% endhighlight %}
 
  - Create the coolapp namespace to deploy the microservices
@@ -342,7 +338,6 @@ metadata:
 {% highlight bash %}
 $ oc new-project coolapp
 Now using project "coolapp" on server "https://api.cluster-f2a8.f2a8.sandbox663.opentlc.com:6443".
-
 
 You can add applications to this project with the 'new-app' command. For example, try:
 
@@ -354,7 +349,7 @@ to build a new example application in Python. Or use kubectl to deploy a simple 
 
 {% endhighlight %}
 
- - Create the catalog microservice:
+ - Create the catalog microservice
 
 {% highlight bash %}
 $ oc create -f lab/ocp-service-mesh-foundations/catalog/kubernetes/catalog-service-template.yml -n coolapp
@@ -704,7 +699,8 @@ deployment.apps/partner-v1   0/1     1            0           34s
 NAME                                    DESIRED   CURRENT   READY   AGE
 replicaset.apps/catalog-v1-6d6b478456   1         1         1       6m44s
 replicaset.apps/partner-v1-77bd558948   1         1         0       34s
-[moddi-redhat.com@clientvm 0 ~]$ oc get all -n coolapp
+
+$ oc get all -n coolapp
 NAME                              READY   STATUS    RESTARTS   AGE
 pod/catalog-v1-6d6b478456-9vsm2   2/2     Running   0          7m12s
 pod/partner-v1-77bd558948-zskt5   2/2     Running   0          62s
@@ -981,7 +977,6 @@ spec:
         subset: version-v1
       weight: 100
 ---
-{% endhighlight %}
 
 $ oc replace -f ~/lab/ocp-service-mesh-foundations/istiofiles/virtual-service-catalog-v1.yml
 virtualservice.networking.istio.io/catalog replace
@@ -1027,7 +1022,7 @@ spec:
 ---
 $ oc replace -f  ~/lab/ocp-service-mesh-foundations/istiofiles/virtual-service-catalog-v1_and_v2_70_30.yml  -n coolapp
 virtualservice.networking.istio.io/catalog replaced
-[moddi-redhat.com@clientvm 0 ~]$ oc describe VirtualService catalog -n coolapp
+$ oc describe VirtualService catalog -n coolapp
 Name:         catalog
 Namespace:    coolapp
 Labels:       <none>
