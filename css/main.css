@@ -108,7 +108,9 @@ div.content {
 }
 
 div.navi {
-    float: right;
+    position: absolute;
+    top: 25px;
+    right: 300px;
 }
 
 div.nav {
