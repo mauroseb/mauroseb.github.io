@@ -12,6 +12,7 @@ excerpt_separator: "<!-- more -->"
 After moving from a monolithic application to a microservice oriented architecture, what previously was an RPC call within the application itself now has become a request that has to travel on the network where the microservices are running on, which creates security concerns and also increases the network usage considerably. In addition to that, multi-tenant environments also expose this networks to multiple consumers.
 
 Moreover microservices architectures are often design to let the microservice itself take care of things like locating the services it needs to interact with, routing between different services, routing traffic between different api version (even asymetrically), decoupling load balancing from infrastructure scaling, and many other. All these aspects are a common factor in most microservices, which makes their code bloated an unnecesarily repeated.
+<!-- more -->
 
 A service mesh aims to provide a solution to the problems described by providing an enriched control plane. Provides for instance encrypted communication for inter pod traffic, micro segmentation to only permit communication within certain projects or pods, routing, service to service authentication, load-balancing. rate-limiting, monitoring and more.
 
