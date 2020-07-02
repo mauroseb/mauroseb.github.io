@@ -7,10 +7,7 @@ tags: [ ocp, kubernetes, istio, ossm, servicemesh ]
 author: mauroseb
 excerpt_separator: "<!-- more -->"
 ---
-
-## Intro to Service Mesh
-
-### What is that ? 
+### What's that ? 
 
 After moving from a monolithic application to a microservice oriented architecture, what previously was an RPC call within the application itself now has become a request that has to travel on the network where the microservices are running on, which creates security concerns and also increases the network usage considerably. In addition to that, multi-tenant environments also expose this networks to multiple consumers.
 
