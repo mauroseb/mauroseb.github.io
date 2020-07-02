@@ -108,7 +108,6 @@ div.content {
 }
 
 div.navi {
-    position:absolute;
     float: right;
 }
 
@@ -119,6 +118,11 @@ div.nav {
     margin-right: auto;
 }
 
+div.footer {
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
 
 p.meta {
     font-family: 'Arial', 'Sans-Serif';
