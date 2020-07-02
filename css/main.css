@@ -109,6 +109,8 @@ div.content {
 
 div.navi {
     float: right;
+    top: 50%;
+
 }
 
 div.nav {
