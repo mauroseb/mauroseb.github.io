@@ -179,6 +179,7 @@ $ oc adm new-project istio-system --display-name="Service Mesh System"
 Created project istio-system
 {% endhighlight %}
 
+{:start="2"}
 2. Create a CRD definition like the follwoing:
 
 {% highlight bash %}
@@ -258,7 +259,8 @@ kiali-64cd8b9bbc-dpkhb                    1/1     Running   0          5m35s   1
 prometheus-7ddcc755fb-q9n6l               2/2     Running   0          10m     10.130.0.17   ip-10-0-143-141.eu-west-1.compute.internal   <none>           <none>
 {% endhighlight %}
 
-- Create ServiceMeshMemberRoll with the projects which need to take part of the service mesh
+{:start="3"}
+3. Create ServiceMeshMemberRoll with the projects which need to take part of the service mesh
 
 {% highlight bash %}
 $ echo "apiVersion: maistra.io/v1
