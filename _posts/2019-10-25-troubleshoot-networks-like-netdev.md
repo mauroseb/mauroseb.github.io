@@ -51,7 +51,7 @@ To understand the problem we need to have a clear picture of the path the packet
    +-------+   + bond0 +---- +    OvS    +--+-   OvS    +---+  bridge   +---+   guest   +
    |       |   +       +     +           +  +           +   +  (qbr)    +   +           +
    | PF 1  +---+++++++++     +++++++++++++  +++++++++++++   +++++++++++++   +++++++++++++
-   | (eth1)|                            (patch)    (qbo-qbv veths)      (tap)
+   | (eth1)|                            (patch)  (qvo-qvb veth pair)    (tap)
    +-------+
    
    COMPUTE HOST
