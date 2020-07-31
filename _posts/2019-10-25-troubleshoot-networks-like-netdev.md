@@ -12,9 +12,9 @@ author: mauroseb
 
 Firstly, I would like to mention that it gave me some hard time to find good comprehensive literature in regard to linux networking internals. In general for this specific topic one ends up crawling https://lkml.org/. Most common kernel related books like _"Understanding the Linux Kernel"_ or _"Linux Device Drivers"_ (which dedicates one chapter) do not cover this topic extensively. So I will start by noting the following book as the best source I found so far:
 
-  - "Linux Kernel Networking" - Rami Rosen
+  - ["Linux Kernel Networking: Implementation and Theory" - Rami Rosen](https://www.amazon.nl/Linux-Kernel-Networking-Implementation-Theory/dp/143026196X/ref=sr_1_1?__mk_nl_NL=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=Linux+Kernel+Networking&qid=1596125842&sr=8-1)
   
-Moreover, many times I had the chance to work next to some very bright people at Red Hat who are and have been for ages active contributors to the kernel networking stack, and during the process could learn some interesting techniques when it comes to troubleshoot network issues in complex environments like OpenStack, where there are dozens or even hundreds of virtual devices, overlay networks involved, featured smart NICs, and more. Hopefully this article can help to give not just a boring collection of front line tales but also give shape to an approach that would help to sort out similar problems.
+Moreover, many times I had the chance to work next to some real experts in the matter at Red Hat who are and have been for ages active contributors to the kernel networking stack, and during the process could learn some interesting techniques when it comes to troubleshoot network issues in complex environments like OpenStack, where there are dozens or even hundreds of virtual devices, overlay networks involved, featured smart NICs, and more. Hopefully this article can help to give not just a boring collection of front line tales but also give shape to an approach that would help to sort out similar problems.
 
 It should be noted that even though most examples in the series involve OpenStack environments, the approaches and techniques discussed would hopefully help with networking issues in **any** linux based environment, with or without OpenvSwitch or OpenStack in the picture.
 
