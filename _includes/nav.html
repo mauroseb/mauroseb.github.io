@@ -6,7 +6,7 @@
              </h1>
           </div>
 	<ul>      
-           <li><a id='HOME' class="navi" href="/">HOME</a>
+           <li><a id='HOME' class={% if page.url == "/" %}"navi-active"{% else %}"navi"{% endif %} href="/">HOME</a>
            <li><a id='BLOG' class="navi" href="/blog">BLOG</a></li>
 	   <li><a id='WHOAMI' class="navi" href="/about">WHOAMI</a></li>
 	</ul>
