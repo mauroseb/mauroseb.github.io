@@ -82,6 +82,7 @@ a.navi {
     text-decoration: none;
     color: #999;
     border-radius: 8px;
+    transition: 0.4s;
 }
 
 a.navi-active {
