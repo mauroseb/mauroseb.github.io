@@ -81,12 +81,14 @@ a:hover {
 a.navi {
     text-decoration: none;
     color: #999;
+    border-radius: 8px;
 }
 
 a.navi:hover {
       background-color: rgba(0, 0, 0, 0.25);
       text-decoration: none;
-      transition: 0.2s;
+      transition: 0.4s;
+      border-radius: 8px;
 }
 
 .activeL {
