@@ -23,7 +23,7 @@ Lastly this is the first article from hopefully many, therefore will end up in t
 
 ## General Approach
 
-A ton has been written on the matter and arguably many methods and techniques may compete to be proven effective under specific circumstances. But firstly it has to be acknowledged that even if one strives to abide to a method as much as possible, the complexity of modern software systems makes the process not precisely deterministic, and that at the time there is critical impact the expert may choose the tools that her/his experience is dicating in order to address the problem first in the fastest manner, and then chase the root cause. With that said, I personally find Google SRE Guide Troubleshooting section quite comprehensive[^1] and references the hypothetico-deductive model as proposed method. But there are many other sources for methodologies too. There are techniques exclusive to root cause analysis like the simple _5 whys_, _RPR_, and other covered by _Problem Management_ domain in _ITILv3_ literature.
+A ton has been written on the matter and arguably many methods and techniques may compete to be proven effective under specific circumstances. But firstly it has to be acknowledged that even if one strives to abide to a method as much as possible, the complexity of modern software systems makes the process not precisely deterministic, and that at the time there is critical impact the expert may choose the tools that her/his experience is dicating in order to address the problem first in the fastest manner, and then chase the root cause. With that said, I personally find Google SRE Guide Troubleshooting section quite comprehensive[^1] and references the hypothetico-deductive model as proposed method, which is basically, observing, creating an hypothesis, creating predictions on that hypothesis and put it to test. While from a logical standpoint this is obviously flawed with positive confirmation/reinforcement of the hypothesis, in the empirical world is the way to go. But hey, there are many other sources for methodologies too. There are techniques exclusive to root cause analysis like the simple _5 whys_, _RPR_, and other covered by _Problem Management_ domain in _ITILv3_ literature.
 
 The second point that has to be acknowledged is that no matter what technique it is, there is a common ground for all. Most agree that a thorough observation and data gathering has to take place first. Which is what I am going to focus on in the following section.
 
@@ -34,8 +34,9 @@ The follwoing method is assuming a basic triage on the subject problem has taken
 
 As mentioned before, the level of knowledge of whom applies the method matters, picking a sensitive starting point, depth of the analysis in every step, so on so forth, depending on time/resource constraints and on the overall description of the issue can be valueable. Nonetheless it is also important not to be biased by past experiences and in general be skeptical that what is being witnesses now shares causality with previous events. This especially holds true for networking problems. 
 
-Finally the following is definitely flawed and incomplete (mea culpa) but may still come handy for my own forgetful mind and luckily some other reader.
+Finally the following is definitely also flawed and incomplete (mea culpa) but may still come handy for my own forgetful mind and luckily some other reader.
 
+## Observation Phase
 
 ### 1. Understand the virtual and physical layout
 
@@ -168,16 +169,49 @@ What regards to the NIC configuration, it is useful to observe the statistics of
 
 ### 2. Reproduce it
 
-One of the first questions I normally ask is if there is a clear set of steps that can reproduce the problem. If so, it will simplify the witch hunt considerably for you and any other involved party. This is a little short cut which is part of the initial observation. If there is one, great. 
+One of the first questions I normally ask is if there is a clear set of steps that can reproduce the problem. If so, it will simplify the formulation of an hypothesis considerably for you and any other involved party. This is a little short cut which is part of the initial observation phase. If there is one, great. 
 
 Determine which recurrence, if it happens in only one system, in many, time patterns, etc. Sometimes this is not possible as the problem only shows up sporadically and under unknown, apparently non-deterministic conditions. 
 
 Some times it is just enough to use **iperf3** , **netperf** or similar tools to display the problem. Also often times is difficult to locate resources to reproduce a _production-like_ environment as it may use expensive equipment. Hence the use of virtual reproducers is a common case, unless the involved pieces of hardware are also part of the problem.
+
+For example lets say we have two running instances inside two different compute nodes and we want to measure the throughput between them as we suspect there is an anomaly. They belong to the same tenant and virtual network. In the simplest test I would run a single TCP_STREAM test as follows to measure the baseline throughput between the compute nodes.
+
+On the _server_ instance:
+{% highlight shell %}
+[root@hostb~]# iperf3 -s
+{% endhighlight %}
+  
+On the _client_ instance:
+{% highlight shell %}
+[root@hosta~]# iperf3 -c 172.16.0.2
+Connecting to host 172.16.0.2, port 5201
+[  4] local 172.16.0.1 port 43488 connected to 172.16.0.2 port 5201
+[ ID] Interval           Transfer     Bandwidth       Retr  Cwnd
+[  4]   0.00-1.00   sec   904 MBytes  7.58 Gbits/sec    0    820 KBytes       
+[  4]   1.00-2.00   sec  1.08 GBytes  9.25 Gbits/sec    0    834 KBytes       
+[  4]   2.00-3.00   sec  1.08 GBytes  9.24 Gbits/sec    0    840 KBytes       
+[  4]   3.00-4.00   sec  1.08 GBytes  9.24 Gbits/sec    0    848 KBytes       
+[  4]   4.00-5.00   sec  1.08 GBytes  9.24 Gbits/sec    0    863 KBytes       
+[  4]   5.00-6.00   sec  1.08 GBytes  9.25 Gbits/sec    0    868 KBytes       
+[  4]   6.00-7.00   sec  1.08 GBytes  9.24 Gbits/sec    0    871 KBytes       
+[  4]   7.00-8.00   sec  1.08 GBytes  9.24 Gbits/sec    0    875 KBytes       
+[  4]   8.00-9.00   sec  1.08 GBytes  9.24 Gbits/sec    0    877 KBytes       
+[  4]   9.00-10.00  sec  1.08 GBytes  9.25 Gbits/sec    0    881 KBytes       
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bandwidth       Retr
+[  4]   0.00-10.00  sec  10.6 GBytes  9.08 Gbits/sec    0             sender
+[  4]   0.00-10.00  sec  10.6 GBytes  9.07 Gbits/sec                  receiver
+
+iperf Done.
+{% endhighlight %}
  
- 
+Here we can observe throughput, numer of retries, the TCP Congestion Windown (Cwnd) size along the test and averages. This test can be further extended by using _iperf3_ options like: multiple parallel streams (-P<#>), UDP traffic (-u), bandwidth/bitrate (-b), buffer size (-w), time length (-t), intervals (-i), reverse (-R), and so on so forth.
+
+
 ### 3. Test initial conditions
 
-The reproduction of the problem can depend on multiple factors like hardware architecture, NIC vendor/model, firmware version, OS version, kernel version, NIC driver version, physical network devices (switches, load balancers and routers). Many times permutation of any of these components is helpful to narrow down the problem to a particular component before delving deeper into the analysis. 
+The reproduction of the problem can depend on multiple factors like hardware architecture, NIC vendor/model, firmware version, OS version, kernel version, NIC driver version, physical network devices (switches, load balancers and routers), virtual devices that have to be crossed. Many times permutation or removal of any of these components is helpful to narrow down the problem to a particular component before delving deeper into the analysis. 
 
 One of the first actions I normally try is to try to reproduce with the latest kernel available (downstream in case of _RHEL_), then the latest upstream kernel, also sometimes the latest kernel in __net-next__ tree of the linux kernel (which will become part of the next upstream linux kernel release) if there is any promising commit. 
 
@@ -247,7 +281,7 @@ In case you missed it, git also provides __bisect__ subcommand which helps in pi
 {% endhighlight %}
 
 
-### 4. Performance metrics
+### 4. Performance Metrics
 
 Dealing with a performance issue with a broad description, normally would involve also checking the output of performance and metrics monitoring tools, looking for stats like RX/TX packet counts and sizes in each interface involved, error counts and in general what counters are moving network wise to understand if they are or not part of the problem. 
 
