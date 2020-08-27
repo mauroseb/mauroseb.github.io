@@ -233,7 +233,7 @@ footer {
     font-size: 11px;
     width: 100%;
     margin: auto;
-    position: fixed;
+    position: static;
     left: 0;
     bottom: 0;
     background-color: #B2B2B2;
