@@ -90,7 +90,7 @@ My next attempt to deploy the environment works like a charm and does not bail o
 
 I could add my ```+1``` (good review) in gerrit and leave a comment of my test if there is some remark. Or if it went wrong, explain what happened and leave a negative review.  The patch in question, however, is already merged so no need for that.
 
-Lastly since this is python the tests use **tox** [^4] as standard way to test the code. You can run this tests in your local branch if you like.
+Lastly since this is python the OpenStack community uses **tox** [^4] as standard way to test the code. You can run this tests in your local branch if you like.
 
 {% highlight shell %}
 $ tox -e py36
