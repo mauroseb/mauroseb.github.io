@@ -149,7 +149,7 @@ div.footer {
 }
 
 p.meta {
-    align: center;
+    text-align: center;
     font-family: 'Arial', 'Sans-Serif';
     font-size: 9px;
     line-height: 1.4em;
@@ -180,7 +180,7 @@ h1 {
     line-height: 50px;
     text-transform: uppercase;
     color: #696969;
-    align: center;
+    text-align: center;
 }
 
 h1.navi {
