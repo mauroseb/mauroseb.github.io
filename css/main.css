@@ -179,6 +179,9 @@ h1 {
     line-height: 50px;
     text-transform: uppercase;
     color: #696969;
+    width: 75%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 h1.navi {
