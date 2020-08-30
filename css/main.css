@@ -123,6 +123,7 @@ div.content {
     margin-right: auto;
     text-align: justify;
     text-justify: inter-word;
+    display: none;
 }
 
 div.navi {
