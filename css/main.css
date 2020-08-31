@@ -123,6 +123,7 @@ div.content {
     text-align: justify;
     text-justify: inter-word;
     display: none;
+    padding-top: 80;
 }
 
 div.navi {
@@ -180,7 +181,6 @@ h1 {
     text-transform: uppercase;
     color: #696969;
     text-align: center;
-    padding-top: 80;
 }
 
 h1.navi {
@@ -192,7 +192,6 @@ h1.navi {
     color:  #ffffff;
     align: center;
     vertical-align: middle;
-    padding-top: 0;
 }
 
 h2 {
