@@ -148,6 +148,13 @@ div.footer {
     margin-right: auto;
 }
 
+div {
+    width: 75%;
+    align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 p.meta {
     text-align: center;
     font-family: 'Arial', 'Sans-Serif';
