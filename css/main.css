@@ -44,6 +44,13 @@ nav {
     transition: 0.2s;
 }
 
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
+
 footer ul {
     font-family: 'Arial', 'Sans-Serif';
     padding: 0px;
