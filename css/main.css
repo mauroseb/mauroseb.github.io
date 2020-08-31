@@ -180,6 +180,15 @@ p.navi {
     align: center;
 }
 
+p.gen {
+    font-family: 'Arial', 'Sans-Serif';
+    font-size: 20 px;
+    line-height: 1.4em;
+    color: #333;
+    text-align: center;
+    text-justify: inter-word;
+}
+
 h1 {
     font-size: 40px;
     font-family:'Arial', 'Sans-Serif';
