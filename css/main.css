@@ -143,10 +143,12 @@ div.nav {
 }
 
 div.footer {
-    width: 30%;
+    width: 100%;
     align: center;
     margin-left: auto;
     margin-right: auto;
+    right: -50%;
+    
 }
 
 p.meta {
