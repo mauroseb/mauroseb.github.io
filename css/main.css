@@ -45,10 +45,9 @@ nav {
 }
 
 .center {
-  display: block;
   margin-left: auto;
   margin-right: auto;
-  width: 50%;
+  align: center;
 }
 
 footer ul {
@@ -114,13 +113,6 @@ a.navi:active {
       transition: 0.4s;
       border-radius: 8px;
       color: #00e500
-}
-
-
-.activeL {
-      background-color: rgba(0, 0, 0, 0.5);
-      text-decoration: bold;
-      color: #39FF14
 }
 
 div.content {
