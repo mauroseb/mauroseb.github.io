@@ -145,11 +145,8 @@ div.nav {
 
 div.footer {
     width: 100%;
-    float:right;
+    float:center;
     position:relatve;
-    left:-50%;
-    text-align:left;
-    
 }
 
 p.meta {
