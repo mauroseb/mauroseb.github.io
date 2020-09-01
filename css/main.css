@@ -224,7 +224,7 @@ img {
 }
 
 div.footer {
-    width: 100%;
+    width: calc(100% + 176px);
     float: right;
     position: relative;
     left: -50%;
