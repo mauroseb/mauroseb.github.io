@@ -225,18 +225,18 @@ img {
 
 div.footer {
     width: 100%;
-    float:right;
-    position:relative;
-    left:-50%;
-    text-align:left;
+    float: right;
+    position: relative;
+    left: -50%;
+    text-align: left;
 }
 
 ul.footer {
     font-family: 'Arial', 'Sans-Serif';
     font-weight: bold;
     list-style: none;
-    position:relative;
-    left:0;
+    position: relative;
+    right: 0;
 }
 
 li.footer {
