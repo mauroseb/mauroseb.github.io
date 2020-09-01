@@ -53,14 +53,6 @@ nav {
   border-radius: 20%;
 }
 
-footer ul {
-    font-family: 'Arial', 'Sans-Serif';
-    font-weight: bold;
-    list-style: none;
-    position:relative;
-    left:50%;
-}
-
 nav ul li {
    float: left;
    list-style: none;
@@ -72,11 +64,6 @@ nav ul li a {
     text-align: center;
     text-decoration: none;
     color: #ffffff;
-}
-
-footer ul li {
-    display: inline;
-    float: left;
 }
 
 a {
@@ -141,14 +128,6 @@ div.nav {
     margin-right: auto;
     top: 0;
     height: 50px; 
-}
-
-div.footer {
-    width: 100%;
-    float:right;
-    position:relative;
-    left:-50%;
-    text-align:left;
 }
 
 p.meta {
@@ -242,6 +221,27 @@ h4 {
 
 img {
     margin-left: 20px;
+}
+
+div.footer {
+    width: 100%;
+    float:right;
+    position:relative;
+    left:-50%;
+    text-align:left;
+}
+
+ul.footer {
+    font-family: 'Arial', 'Sans-Serif';
+    font-weight: bold;
+    list-style: none;
+    position:relative;
+    left:50%;
+}
+
+li.footer {
+    display: inline;
+    float: left;
 }
 
 footer {
