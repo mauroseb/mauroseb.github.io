@@ -236,7 +236,7 @@ ul.footer {
     font-weight: bold;
     list-style: none;
     position:relative;
-    left:50%;
+    left:0;
 }
 
 li.footer {
