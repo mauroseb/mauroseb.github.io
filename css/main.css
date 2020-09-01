@@ -114,6 +114,9 @@ div.content {
     text-justify: inter-word;
     display: none;
     padding-top: 100px;
+    overflow-y: scroll;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
 }
 
 div.navi {
