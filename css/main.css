@@ -55,10 +55,10 @@ nav {
 
 footer ul {
     font-family: 'Arial', 'Sans-Serif';
-    padding: 0px;
-    list-style: none;
     font-weight: bold;
-    align: center;
+    list-style: none;
+    position:relative;
+    left:50%;
 }
 
 nav ul li {
@@ -76,7 +76,7 @@ nav ul li a {
 
 footer ul li {
     display: inline;
-    float: center;
+    float: left;
 }
 
 a {
@@ -145,8 +145,10 @@ div.nav {
 
 div.footer {
     width: 100%;
-    float:center;
-    position:relatve;
+    float:right;
+    position:relative;
+    left:-50%;
+    text-align:left;
 }
 
 p.meta {
