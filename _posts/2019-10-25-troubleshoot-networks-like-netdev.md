@@ -290,12 +290,75 @@ There are hundreds of command line tools to chose here but for the sake of simpl
 
 ### 5. Tracing
 
-Once we have identified that a bottleneck resides in certain userland process or kernel thread, what happens next? Understanding what that task is doing is a fair next step which will reveal which part of the code is generating the noise. 
+Once we have identified that a bottleneck resides in certain userland or kernel thread, what happens next? Understanding what that task is doing is a fair next step which will reveal which part of the code is generating the noise. 
 
 For that more tools come handy: **perf** is probably one I used the most in this cases. Also facilities like dynamic kernel tracing or **ftrace**, either through scripting directly or through **trace-cmd** command line tool.
 
+Lets say we see **ksoftirqd/X** kernel thread consuming 100% while the issue is reproducing and I want to find out what is happening within that thread. Note that we will need the kernel-debuginfo package in order for perf to display useful information, otherwise the hex addresses are not translated to function names. Also note that we usually have to enable the channel that contains the debug packages for that (i.e. for RHEL7 is **rhel-7-server-debug-rpms**)
+
+{% highlight shell %}
+# yum install -y perf kernel-debuginfo kernel-debuginfo-common
+# perf record --call-graph dwarf -p <PID> sleep 1
+{% endhighlight %}
+
+The previous command will create a perf.data file in the working directory.
+This file can be analyzed as follows.
+{% highlight shell %}
+# perf report -i perf.data
+{% endhighlight %}
+
+The perf report can be navigated in the command line, and it basically shows how much CPU is being consumed in each function in a break-down tree.
+{% highlight shell %}
+-   96.77%     0.00%  ovs-vswitchd    [kernel.kallsyms]   [k] system_call_fastpath           
+   - system_call_fastpath                
+      - 96.49% sys_sendmsg             
+           __sys_sendmsg               
+           ___sys_sendmsg               
+           sock_sendmsg                  
+         - netlink_sendmsg                   
+            - 95.02% security_netlink_send    
+                 selinux_netlink_send          
+                 printk                                  
+                 vprintk_default                        
+               + vprintk_emit                                                                        
+            + 1.42% netlink_unicast 
+...
+{% endhighlight %}
+
+So in the previous example it can be observed that the process being checked is **ovs-vswitchd** and the funciton **security_netlink_send()** is consuming 95% of the CPU that the process is using. In this case it turned out to be a bug in openvswitch miscalculating the size of a netlink message.
+
+Another versatile tool to trace packets being dropped is **dropwatch**. This tool will basically report every time the **skb_free()** function is called and from which function. An SKB is the representation of a packet in the kernel space, buffer which needs to be released after it is no longer useful (like when is dropped).
+
+{% highlight shell %}
+# yum install -y dropwatch dropwatch-debuginfo
+# dropwatch -l kas
+Initalizing kallsyms db
+
+dropwatch> start
+Enabling monitoring...
+Kernel monitoring activated.
+Issue Ctrl-C to stop monitoring
+1 drops at skb_queue_purge+18 (0xffffffffadc3c808)
+21 drops at nf_hook_slow+f3 (0xffffffffadc93e33)
+1 drops at __sme_end+11505a88 (0xffffffffc0705a88)
+7 drops at nf_hook_slow+f3 (0xffffffffadc93e33)
+21 drops at nf_hook_slow+f3 (0xffffffffadc93e33)
+8 drops at nf_hook_slow+f3 (0xffffffffadc93e33)
+1 drops at __sme_end+11505a88 (0xffffffffc0705a88)
+21 drops at nf_hook_slow+f3 (0xffffffffadc93e33)
+8 drops at nf_hook_slow+f3 (0xffffffffadc93e33)
+21 drops at nf_hook_slow+f3 (0xffffffffadc93e33)
+1 drops at nf_hook_slow+f3 (0xffffffffadc93e33)
+7 drops at nf_hook_slow+f3 (0xffffffffadc93e33)
+1 drops at __sme_end+11505a88 (0xffffffffc0705a88)
+...
+{% endhighlight %}
+
+There is nothing fancy going on in the output above though.
+
 Lastly, I must mention **eBPF** (extended Barkley Packet Filter, originially named after BSD's BPF, however radically different) which is remarkably valuable and versatile kernel facility that was created for tracing purposes, but quickly became a swiss-army knife within the kernel that allows the user to create his own code and run it in a JIT compiler
 in kernel land. Scary? Of course.
+
 
 ## OpenStack Network Architecture
 
