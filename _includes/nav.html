@@ -7,7 +7,7 @@
           </div>
 	<ul>      
            <li><a id='HOME' class={% if page.url == "/" %}"navi-active"{% else %}"navi"{% endif %} href="/">HOME</a>
-           <li><a id='BLOG' class={% if page.url == "/blog/" %}"navi-active"{% else %}"navi"{% endif %}  href="/blog">BLOG</a></li>
+           <li><a id='BLOG' class={% if "/blog/" in page.url %}"navi-active"{% else %}"navi"{% endif %}  href="/blog">BLOG</a></li>
 	   <li><a id='WHOAMI' class={% if page.url == "/about/" %}"navi-active"{% else %}"navi"{% endif %}  href="/about">WHOAMI</a></li>
 	</ul>
 	</div>
