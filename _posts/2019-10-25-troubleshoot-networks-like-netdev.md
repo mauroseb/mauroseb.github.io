@@ -152,14 +152,32 @@ If one wanted to test how the performance would improve matching the NUMA node, 
 {% highlight shell %}
 # taskset -p 520733
 pid 520733's current affinity mask: ffffff
-# sudo  taskset -p  000002 520733
+# taskset -p  000002 520733
 pid 520733's current affinity mask: ffffff
 pid 520733's new affinity mask: 2
 {% endhighlight %}
 
- - Similarly __migratepages__ command will move the memory pages from a set of source NUMA nodes to a given destination
+ - Similarly __migratepages__ command will move the memory pages from a set of source NUMA nodes to a given destination node
 {% highlight shell %}
-# sudo migratepages 520733 0 1
+# numastat -c qemu-kvm
+Per-node process memory usage (in MBs)
+PID              Node 0 Node 1 Total
+---------------  ------ ------ -----
+2947 (qemu-kvm)    1802      0  1802
+333578 (qemu-kvm   4904   3382  8286
+---------------  ------ ------ -----
+Total              6706   3382 10088
+
+# migratepages 2947 0 1
+# migratepages 333578 0 1
+# numastat -c qemu-kvm
+Per-node process memory usage (in MBs)
+PID              Node 0 Node 1 Total
+---------------  ------ ------ -----
+2947 (qemu-kvm)       0   1802  1802
+333578 (qemu-kvm      0   3522  3522
+---------------  ------ ------ -----
+Total                 0   5324  5324
 {% endhighlight %}
 
 Then again this is just for testing purposes and have a better grasp of what could improve the behavior observed.
@@ -294,7 +312,7 @@ Once we have identified that a bottleneck resides in certain userland or kernel 
 
 For that more tools come handy: **perf** is probably one I used the most in this cases. Also facilities like dynamic kernel tracing or **ftrace**, either through scripting directly or through **trace-cmd** command line tool.
 
-Lets say we see **ksoftirqd/X** kernel thread consuming 100% while the issue is reproducing and I want to find out what is happening within that thread. Note that we will need the kernel-debuginfo package in order for perf to display useful information, otherwise the hex addresses are not translated to function names. Also note that we usually have to enable the channel that contains the debug packages for that (i.e. for RHEL7 is **rhel-7-server-debug-rpms**)
+Lets say we see **ksoftirqd/X** kernel thread consuming 100% CPU while the issue is reproducing (that means that there are either too many softirqs being processed by the same CPU or each softirq is taking too much to be serviced, and in turn there could be packet drops), and I want to find out what is happening within that thread. Note that we will need the kernel-debuginfo package in order for perf to display useful information, otherwise the hex addresses are not translated to function names. Also note that we usually have to enable the channel that contains the debug packages for that (i.e. for RHEL7 is **rhel-7-server-debug-rpms**)
 
 {% highlight shell %}
 # yum install -y perf kernel-debuginfo kernel-debuginfo-common
@@ -327,7 +345,7 @@ The perf report can be navigated in the command line, and it basically shows how
 
 So in the previous example it can be observed that the process being checked is **ovs-vswitchd** and the funciton **security_netlink_send()** is consuming 95% of the CPU that the process is using. In this case it turned out to be a bug in openvswitch miscalculating the size of a netlink message.
 
-Another versatile tool to trace packets being dropped is **dropwatch**. This tool will basically report every time the **skb_free()** function is called and from which function. An SKB is the representation of a packet in the kernel space, buffer which needs to be released after it is no longer useful (like when is dropped).
+Another versatile tool to trace packets being dropped is **dropwatch**. This tool will basically report every time the **skb_free()** function is called and from which function. An **SKB** is the data structure that represents a packet in the kernel space, buffer which needs to be released after it is no longer useful when the packet dropped. There are many valid reasons why the **SKB** memory should be freed, however when there is an spurious drop it will also show up in the list.
 
 {% highlight shell %}
 # yum install -y dropwatch dropwatch-debuginfo
