@@ -312,7 +312,8 @@ Once we have identified that a bottleneck resides in certain userland or kernel 
 
 For that more tools come handy: **perf** is probably one I used the most in this cases. Also facilities like dynamic kernel tracing or **ftrace**, either through scripting directly or through **trace-cmd** command line tool.
 
-Lets say we see **ksoftirqd/X** kernel thread consuming 100% CPU while the issue is reproducing (that means that there are either too many softirqs being processed by the same CPU or each softirq is taking too much to be serviced, and in turn there could be packet drops), and I want to find out what is happening within that thread. Note that we will need the kernel-debuginfo package in order for perf to display useful information, otherwise the hex addresses are not translated to function names. Also note that we usually have to enable the channel that contains the debug packages for that (i.e. for RHEL7 is **rhel-7-server-debug-rpms**)
+Lets see some examples.
+Say we see **ksoftirqd/X** kernel thread consuming 100% CPU while the issue is reproducing (that means that there are either too many softirqs being processed by the same CPU or each softirq is taking too much to be serviced, and in turn there could be packet drops), and I want to find out what is happening within that thread. Note that we will need the kernel-debuginfo package in order for perf to display useful information, otherwise the hex addresses are not translated to function names. Also note that we usually have to enable the channel that contains the debug packages for that (i.e. for RHEL7 is **rhel-7-server-debug-rpms**)
 
 {% highlight shell %}
 # yum install -y perf kernel-debuginfo kernel-debuginfo-common
@@ -325,7 +326,7 @@ This file can be analyzed as follows.
 # perf report -i perf.data
 {% endhighlight %}
 
-The perf report can be navigated in the command line, and it basically shows how much CPU is being consumed in each function in a break-down tree.
+The perf report can be navigated interactively in the command line (or it can also be non-interactive using --stdio flag), and it basically shows how much CPU is being consumed in each function in a break-down tree.
 {% highlight shell %}
 -   96.77%     0.00%  ovs-vswitchd    [kernel.kallsyms]   [k] system_call_fastpath           
    - system_call_fastpath                
@@ -344,6 +345,15 @@ The perf report can be navigated in the command line, and it basically shows how
 {% endhighlight %}
 
 So in the previous example it can be observed that the process being checked is **ovs-vswitchd** and the funciton **security_netlink_send()** is consuming 95% of the CPU that the process is using. In this case it turned out to be a bug in openvswitch miscalculating the size of a netlink message.
+
+The tool is extremely powerful. One can also check what a CPU is doing (also interactively) at a given point in time with **-C** flag.
+
+{% highlight shell %}
+# perf top -C 0 -g
+{% endhighlight %}
+
+A similar outcome can be generated using the **ftrace** facility directly by configuring **/sys/kernel/debug**. I have created a small script called [ftrace-2.sh](https://gist.githubusercontent.com/mauroseb/29d2e8664899aa2e1206e3a55b334aba/raw/5b462e5028bc17ca31e29559cd35b7157dc9bbb9/ftrace-2.sh
+) to help me capture this data. This can come handy specially in **NFV** troubleshooting where for instance a CPU has a single task of processing packets (running poll-mode driver thread) and any interruption or interfering thread could bring packet drops. Hence if I see a packet drop, I want to know exactly what threads kernel or userspace are being ran in that CPU.
 
 Another versatile tool to trace packets being dropped is **dropwatch**. This tool will basically report every time the **skb_free()** function is called and from which function. An **SKB** is the data structure that represents a packet in the kernel space, buffer which needs to be released after it is no longer useful when the packet dropped. There are many valid reasons why the **SKB** memory should be freed, however when there is an spurious drop it will also show up in the list.
 
