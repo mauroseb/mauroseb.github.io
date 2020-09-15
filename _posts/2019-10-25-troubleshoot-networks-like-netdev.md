@@ -224,7 +224,7 @@ Connecting to host 172.16.0.2, port 5201
 iperf Done.
 {% endhighlight %}
  
-Here we can observe throughput, numer of retries, the TCP Congestion Windown (Cwnd) size along the test and averages. This test can be further extended by using _iperf3_ options like: multiple parallel streams (-P<#>), UDP traffic (-u), bandwidth/bitrate (-b), buffer size (-w), time length (-t), intervals (-i), reverse (-R), and so on so forth.
+Here we can observe throughput, numer of retries, the TCP Congestion Windown (Cwnd) size along the test and averages. This test can be further extended by using _iperf3_ options like: multiple parallel streams (-P<#>), port (-p), UDP traffic (-u), bandwidth/bitrate (-b), buffer size (-w), time length (-t), intervals (-i), reverse direction (-R), binding address (-B), and so on so forth.
 
 
 ### 3. Test initial conditions
