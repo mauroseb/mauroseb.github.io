@@ -27,7 +27,7 @@ A ton has been written on the matter and arguably many methods and techniques ma
 
 The second point that has to be acknowledged is that no matter what technique it is, there is a common ground for all. Most agree that a thorough observation and data gathering has to take place first. Which is what I am going to focus on in the following section.
 
-<img src="https://imgs.xkcd.com/comics/networking_problems.png" alt="plotnet sample PNG" style="width:400px;align:center;"/>
+<img src="https://imgs.xkcd.com/comics/networking_problems.png" alt="plotnet sample PNG" style="width:50%;align:center;"/>
 
 
 The follwoing method is assuming a basic triage on the subject problem has taken place and it is worth a deeper analysis. I do not intend to cover basic troubleshooting of network connectivity issues (for what you can also find good resources[^2]), where one would normally start checking IP configuration, routing and so forth. Also it is assumed that there was a working environment in an earlier stage, and now an unsual and/or erratic behavior is manifestating. 
@@ -73,7 +73,7 @@ For the same purpose, there is an excellent tool from Jiri Benc: **plotnetcfg**[
 
 The former will create a picture like the following:
 
-<img src="/images/plotnet_sample.png" alt="plotnet sample PNG" style="width:1000px;"/>
+<img src="/images/plotnet_sample.png" alt="plotnet sample PNG" style="width:75%;"/>
 
 Actually there are many different formats to choose as output:
 
@@ -246,7 +246,7 @@ For _RHEL_:
     # grub2-reboot 0
   {% endhighlight %}
 
-  * **Test linux-next kernel.** Similarly the branches that are already accepted for the next stable release can be tested as follows. 
+  * **Test linux-next kernel.** Similarly, when I expect some commit to solve my problem but it is not yet released upstream, I can test with the branches that are already accepted for the next stable release as follows. 
   
   
   {% highlight shell %}
@@ -257,7 +257,7 @@ For _RHEL_:
     $ git fetch --tags linux-next
   {% endhighlight %}
 
-  Now a specific **linux-next** tag can be checked out and built[^4]. Alternatively the **net-next** branch can be used.
+  Now a specific **linux-next** tag can be checked out and built[^4]. Alternatively the **net-next** branch can also be used.
 
   {% highlight shell %}
     $ git remote add net git://git.kernel.org/pub/scm/linux/kernel/git/davem/net.git
@@ -268,11 +268,9 @@ For _RHEL_:
 
 Similar approach could be adopted for NIC firmware, drivers or even testing with a different NIC hardware if resources permit. 
 
-If the layout determined at step 2. is too complex. Chopping down the devices and test if the issue can still be reproduced will remove false positives from the way. In example, if the issue happens with a bond device, does it still happen if we use directly one leg, or without bond at all ?  If the answer is yes, then we continue with the next piece to chop.
+If the layout determined at step 2. is too complex. Cut down the devices involved and test if the issue can still be reproduced is also a good technique that will remove false suspects from the way. In example, if the issue happens with a bond device, does it still happen if we use directly one leg, or without bond at all ?  If the answer is yes, then we continue with the next piece to chop.
 
-Just by doing that one can discard hundreds of bugs and enhancements that have been already fixed and incorporated in the latests releases, hardware/firmaware/driver issues that affect a single vendor, and so forth. 
-
-Actions like these have been by far the fastest way to identify existing bugs. Just by knowing it is not happening in a given kernel version, means that we only need to backport certain fix to a downstream kernel (in case of RHEL)  or that the fix will be released soon upstream in case of using the **linux-next** kernel.
+Actions like these have been the fastest way to identify existing bugs. Just by knowing it is not happening in a given kernel version, means that we only need to backport certain fix to a downstream kernel (in case of RHEL) or that the fix will be released soon upstream in case of using the **linux-next** kernel.
 
 There is some extra work to identify which commit or set of commits are needed to solve the problem. To start with, one could list the commits between the problematic and the fixed kernel:
 
@@ -316,14 +314,14 @@ Lets see some examples.
 Say we see **ksoftirqd/X** kernel thread consuming 100% CPU while the issue is reproducing (that means that there are either too many softirqs being processed by the same CPU or each softirq is taking too much to be serviced, and in turn there could be packet drops), and I want to find out what is happening within that thread. Note that we will need the kernel-debuginfo package in order for perf to display useful information, otherwise the hex addresses are not translated to function names. Also note that we usually have to enable the channel that contains the debug packages for that (i.e. for RHEL7 is **rhel-7-server-debug-rpms**)
 
 {% highlight shell %}
-# yum install -y perf kernel-debuginfo kernel-debuginfo-common
-# perf record --call-graph dwarf -p <PID> sleep 1
+$ yum install -y perf kernel-debuginfo kernel-debuginfo-common
+$ perf record --call-graph dwarf -p <PID> sleep 1
 {% endhighlight %}
 
 The previous command will create a perf.data file in the working directory.
 This file can be analyzed as follows.
 {% highlight shell %}
-# perf report -i perf.data
+$ perf report -i perf.data
 {% endhighlight %}
 
 The perf report can be navigated interactively in the command line (or it can also be non-interactive using --stdio flag), and it basically shows how much CPU is being consumed in each function in a break-down tree.
@@ -346,14 +344,13 @@ The perf report can be navigated interactively in the command line (or it can al
 
 So in the previous example it can be observed that the process being checked is **ovs-vswitchd** and the funciton **security_netlink_send()** is consuming 95% of the CPU that the process is using. In this case it turned out to be a bug in openvswitch miscalculating the size of a netlink message.
 
-The tool is extremely powerful. One can also check what a CPU is doing (also interactively) at a given point in time with **-C** flag.
-
+The tool is extremely powerful. One can also see what a given CPU or group of CPUs is doing at a given point in time with **-C** flag.
 {% highlight shell %}
-# perf top -C 0 -g
+$ perf top -C 0-2,3 -g
 {% endhighlight %}
 
-A similar outcome can be generated using the **ftrace** facility directly by configuring **/sys/kernel/debug**. I have created a small script called [ftrace-2.sh](https://gist.githubusercontent.com/mauroseb/29d2e8664899aa2e1206e3a55b334aba/raw/5b462e5028bc17ca31e29559cd35b7157dc9bbb9/ftrace-2.sh
-) to help me capture this data. This can come handy specially in **NFV** troubleshooting where for instance a CPU has a single task of processing packets (running poll-mode driver thread) and any interruption or interfering thread could bring packet drops. Hence if I see a packet drop, I want to know exactly what threads kernel or userspace are being ran in that CPU.
+A similar result can be achieved using the **ftrace** facility directly by configuring **/sys/kernel/debug**. I have created a small script called [ftrace-2.sh](https://gist.githubusercontent.com/mauroseb/29d2e8664899aa2e1206e3a55b334aba/raw/5b462e5028bc17ca31e29559cd35b7157dc9bbb9/ftrace-2.sh
+) to help me capture this data. This can come handy specially in **NFV** troubleshooting where a CPU has a single task of processing packets (running poll-mode driver thread) and any interruption or preemption from ot thread could bring packet drops. Hence if I see a packet drop, I want to know exactly what kernel or userspace threads are taking that CPU.
 
 Another versatile tool to trace packets being dropped is **dropwatch**. This tool will basically report every time the **skb_free()** function is called and from which function. An **SKB** is the data structure that represents a packet in the kernel space, buffer which needs to be released after it is no longer useful when the packet dropped. There are many valid reasons why the **SKB** memory should be freed, however when there is an spurious drop it will also show up in the list.
 
@@ -394,11 +391,11 @@ OpenStack is a dynamic product and by design fully maleable to fit one's needs. 
 
 The architecture of ML2/OvS has been largely documented and described (just to list some references: [^8][^9][^10][^11] ) so the assumption is that the reader is already familiar with it. The following diagram illustrates to some extent what a typical OpenStack compute and networker node layout looks like in order to proceed with the cases' analysis.
 
-<img src="/images/neutron_architecture.png" alt="Compute Network Layout" style="width:1000px;"/>
+<img src="/images/neutron_architecture.png" alt="Compute Network Layout" style="width:75%;"/>
 
 The best practices dictate to use at least 6 VLANs (+1 optional for management) that would be normally trunked to at least two physical node NICs so they can be bonded together, however the installer is totally flexible and allows the user to be creative, use multiple independant NICs, flat networks, etc. Typical diagram is shown in the picture below.
 
-<img src="/images/6-vlan-arch.png" alt="Node connectivity" style="width:1000px;"/>
+<img src="/images/6-vlan-arch.png" alt="Node connectivity" style="width:75%;"/>
 
 
 ## Detecting Software Segmentation
