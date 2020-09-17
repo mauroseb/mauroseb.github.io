@@ -67,6 +67,7 @@ Standard A8-A11 Family vCPUs       0               10
            $ az account set -s XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 {% endhighlight %}
 
+{:start="2"}
    2. Create SP
     
 {% highlight bash %}
@@ -83,6 +84,7 @@ Standard A8-A11 Family vCPUs       0               10
            }
 {% endhighlight %}
 
+{:start="3"}
    3. Add User Access Administrator role to the SP [^4] [^5]
     
 {% highlight bash %}
@@ -99,6 +101,7 @@ Standard A8-A11 Family vCPUs       0               10
             }
 {% endhighlight %}
 
+{:start="4"}
    4. Add Azure Active Directory Graph permission where 00000002-0000-0000-c000-000000000000 is the resource App ID for the Windows Azure AD and 824c81eb-e3f8-4ee6-8f6d-de7f50d565b7 corresponds to a defined role to manage new apps that this app creates or owns [^6]:
     
 {% highlight bash %}
@@ -106,6 +109,7 @@ Standard A8-A11 Family vCPUs       0               10
            Invoking "az ad app permission grant --id XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX --api 00000002-0000-0000-c000-000000000000" is needed to make the change effective
 {% endhighlight %}
 
+{:start="5"}
    5. Approve permissions
     
 {% highlight bash %}
@@ -142,8 +146,10 @@ I am running different tests based on the IPI documentation.
         $ ssh-add ~/.ssh/id_rsa
 {% endhighlight %}
 
+{:start="2"}
  2. Ensure you already have downloaded and added the oc client and installer current version (4.3.8) in your path
 
+{:start="3"}
  3. Run intsallation with customizations
  
    3.a. Create install config
