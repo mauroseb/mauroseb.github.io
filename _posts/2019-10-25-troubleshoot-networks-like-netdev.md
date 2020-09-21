@@ -75,14 +75,7 @@ The former will create a picture like the following:
 
 <img src="/images/plotnet_sample.png" alt="plotnet sample PNG" style="width:75%;"/>
 
-Actually there are many different formats to choose as output:
-
-{% highlight shell %}
-  -Tbmp        -Tcmapx_np   -Tfig        -Timap       -Tjpeg       -Tmp         -Tplain-ext  -Tps2        -Ttiff       -Tvmlz       -Txdot1.4    
-  -Tcanon      -Tdot        -Tgtk        -Timap_np    -Tjpg        -Tpdf        -Tpng        -Tsvg        -Ttk         -Tx11        -Txdot_json  
-  -Tcmap       -Tdot_json   -Tgv         -Tismap      -Tjson       -Tpic        -Tpov        -Tsvgz       -Tvdx        -Txdot       -Txlib       
-  -Tcmapx      -Teps        -Tico        -Tjpe        -Tjson0      -Tplain      -Tps         -Ttif        -Tvml        -Txdot1.2  
-{% endhighlight %}
+Actually there are many other different formats to choose as output.
 
 #### Hardware Architecture
 
@@ -101,18 +94,33 @@ So to start with, lets see if the PCI port is proper for the NIC or NICs.
     ... 
 {% endhighlight %}
 
+ - Check the NIC driver and Firmware
+{% highlight shell %}
+# ethtool -i p2p1 
+driver: qede
+version: 8.10.10.21
+firmware-version: mfw 8.25.7.0 storm 8.20.0.0
+expansion-rom-version: 
+bus-info: 0000:5f:00.0
+supports-statistics: yes
+supports-test: yes
+supports-eeprom-access: no
+supports-register-dump: yes
+supports-priv-flags: yes
+{% endhighlight %}
+
  - Check the NIC NUMA node
 {% highlight shell %}
-    # lspci -s 03:00.1 -vv | grep NUMA
-    NUMA node: 1
-    # cat /sys/bus/pci/devices/0000\:03\:00.1/numa_node
-    1   
+# lspci -s 03:00.1 -vv | grep NUMA
+NUMA node: 1
+# cat /sys/bus/pci/devices/0000\:03\:00.1/numa_node
+1   
 {% endhighlight %}
 
  - Now I can check the PCI Bus speed. For more than one 10Gbps NIC in the same bus (like dual-por NICs) at least PCI __Gen3__ (Width x8/x16) is recommended.
 {% highlight shell %}
-    # lspci -s 03:00.1 -vv | grep LnkSta
-    LnkSta: Speed 8GT/s, Width x8, TrErr- Train- SlotClk+ DLActive- BWMgmt- ABWMgmt-
+# lspci -s 03:00.1 -vv | grep LnkSta
+LnkSta: Speed 8GT/s, Width x8, TrErr- Train- SlotClk+ DLActive- BWMgmt- ABWMgmt-
 {% endhighlight %}
 
 Now that we know the NUMA node we can also check that if that is creating any impact in performance. In general a VM and its associated threads will run in a specific NUMA node and the memory pages and CPU in use should preferably be in the same NUMA node for highest performance. This is not always possible due to technical limitations. I.e. live-migration may have problems with CPU pinning/NUMA setups, which should be already fixed in the latest releases of Nova, however in some cases like NFV we would like to favor performance in detriment of the ability to livemigrate. CPU and NUMA pinning is a hard requirement in these scenarios. So the VNF (namely an instance) qemu-kvm threads will run in a pinned CPU, the memory pages should also match the NUMA node of the CPU and the NIC should also reside in it. Now there are multiple ways to consume this NIC from the guest, some workloads use DPDK or SR-IOV where one will dedicate specific sets of CPUs to the hypervisor and to the guests having as well as memory (normally hugepages) having in mind which NUMA node are they coming from, but I am not covering those here, and now a days there are even NUMA aware vSwitches, which will run an instnace and allocate a VIF to it in function of where the physical NIC that is in use by OpenvSwitch lives, thus avoiding cross-numa memory requests.
@@ -182,7 +190,7 @@ Total                 0   5324  5324
 
 Then again this is just for testing purposes and have a better grasp of what could improve the behavior observed.
 
-What regards to the NIC configuration, it is useful to observe the statistics of the NIC at the moment of the issue, what counters increase from one reproduction to the next and build from there. Are the right offloading that are needed supported by the NIC and enabled ? Are they working as expected ? For instance if using VxLAN/GENEVE or VLAN we want specific offloads to be enabled. Are we offloading flows ? Are there buffers like the RX ring properly sized ?
+What regards to the NIC configuration, it is useful to observe the statistics of the NIC at the moment of the issue, what counters increase from one reproduction to the next and build from there (we will cover this in step 4). Are the right offloadings that are needed supported by the NIC and enabled ? Are they working as expected ? For instance if using VxLAN/GENEVE tunneling or VLAN we want specific offloads to be enabled. Are we offloading flows ? Are there buffers like the RX ring properly sized ?
 
 
 ### 2. Reproduce it
@@ -237,31 +245,31 @@ For _RHEL_:
 
   * **Test latest downstream kernel.** You can check easily in CDN for the latest and update it if it is newer than the version in the system.
   
-  * **Test lastest upstream stable kernel.** The easiest here is to leverage **elrepo** repository which provides an RPM for Centos and RHEL distros built from the **mainline** stable branch of Linux Kernel Archive and thus named **kernel-ml** to avoid conflict with RHEL stock kernels. In the following example I am installing the RPM for major version 7 and setting grub to boot from it only once as we just want to test a reproducer and go back to the default kernel:
+  * **Test lastest upstream stable kernel.** The easiest here is to leverage **elrepo** repository which provides an RPM for Centos and RHEL distros built from the **mainline** stable branch of Linux Kernel Archive and thus named **kernel-ml** to avoid conflict with RHEL stock kernels. In the following example I am installing the RPM for major version 7 and setting grub to boot from it (grub menu entry number 0) only once as we just want to test a reproducer and go back to the default kernel:
   
   {% highlight shell %}
-    # rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
-    # yum install https://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
-    # yum --enablerepo=elrepo-kernel install kernel-ml
-    # grub2-reboot 0
+  # rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+  # yum install https://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
+  # yum --enablerepo=elrepo-kernel install kernel-ml
+  # grub2-reboot 0
   {% endhighlight %}
 
   * **Test linux-next kernel.** Similarly, when I expect some commit to solve my problem but it is not yet released upstream, I can test with the branches that are already accepted for the next stable release as follows. 
   
   
   {% highlight shell %}
-    $ git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-    $ cd linux
-    $ git remote add linux-next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
-    $ git fetch linux-next
-    $ git fetch --tags linux-next
+  $ git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+  $ cd linux
+  $ git remote add linux-next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+  $ git fetch linux-next
+  $ git fetch --tags linux-next
   {% endhighlight %}
 
   Now a specific **linux-next** tag can be checked out and built[^4]. Alternatively the **net-next** branch can also be used.
 
   {% highlight shell %}
-    $ git remote add net git://git.kernel.org/pub/scm/linux/kernel/git/davem/net.git
-    $ git fetch net
+  $ git remote add net git://git.kernel.org/pub/scm/linux/kernel/git/davem/net.git
+  $ git fetch net
   {% endhighlight %}
  
   And just like that one can retry and discard tons of already fixed bugs or include new features that could improve the situation.
@@ -286,7 +294,7 @@ There is some extra work to identify which commit or set of commits are needed t
   303d0403b8c2 udp: rehash on disconnect
   06f5201c6392 net/tls: Fix to avoid gettig invalid tls record
   33c4acbe2f4e bridge: br_stp: Use built-in RCU list checking
-...
+  ...
 {% endhighlight %}
 
 In case you missed it, git also provides __bisect__ subcommand which helps in pinpointing the culprit out of those commits by testing good and bad versions. Nevertheless the software and hardware vendors would normally take care of the search at this level. Once the commit or commits needed are known I can get in which branch was applied in the downstream tree:
@@ -299,16 +307,27 @@ In case you missed it, git also provides __bisect__ subcommand which helps in pi
 
 ### 4. Performance Metrics
 
-Dealing with a performance issue with a broad description, normally would involve also checking the output of performance and metrics monitoring tools, looking for stats like RX/TX packet counts and sizes in each interface involved, error counts and in general what counters are moving network wise to understand if they are or not part of the problem. 
+When dealing with a performance issue with a broad description of the problem, normally it is hard to know where to start digging. It always helps checking the output of performance and metrics monitoring tools, looking for stats like RX/TX packet counts and sizes in each interface involved, error counts in the NICs, and in general what counters overall are moving network wise or not.
+
+In the simplest stats check, I would like to see the difference between the output of **ethtool -S <NIC>** before and after facing the issue or running the reproducer.
+For instance, the following would tell that after the reproducer there was an increase of **no_buff_discards**, meaning that the NIC ran out of space in its RX ring buffer and had to discard the ingressing frames.
+
+{% highlight shell %}
+# ethtool -S p2p1  | egrep 'error|miss|drop|bad|crc|nop|discard' | egrep -v ': 0$'
+     no_buff_discards: 10736
+
+# ethtool -S p2p1  | egrep 'error|miss|drop|bad|crc|nop|discard' | egrep -v ': 0$'
+     no_buff_discards: 25264
+{% endhighlight %}
 
 There are hundreds of command line tools to chose here but for the sake of simplicity I will focus on the readings of __ethtool__ and __sar__ (the later because is the most widespread accross systems). It is normal to find environments with proper performance tooling, like stacks combining __collectd__, __prometheus__, __grafana__, __ganglia__, or any __rrdtool__ derivative. One interesting tool to consider is __pcp__ (performance co-pilot [^5]). It does not really matter which tool to use as long as one can get the metrics that is after (for a comprehensive list of Linux command line tools check out the mind blowing work of Brendan Gregg [^6][^7]).
 
 
 ### 5. Tracing
 
-Once we have identified that a bottleneck resides in certain userland or kernel thread, what happens next? Understanding what that task is doing is a fair next step which will reveal which part of the code is generating the noise. 
+There will be some situations where we _really_ want to know what is going on under the hood. For example, once we have identified that a bottleneck resides in certain userland or kernel thread, what happens next? Understanding what that task is doing is a fair next step which may reveal which part of the code is generating the problem. Another common example is that spurious drops are being observed but there is no clarity where or why are they being dropped.
 
-For that more tools come handy: **perf** is probably one I used the most in this cases. Also facilities like dynamic kernel tracing or **ftrace**, either through scripting directly or through **trace-cmd** command line tool.
+From the set of tools that will help in this endeavour **perf** is probably the most powerful one and the one I will resort to the most also. I will show other examples like dynamic kernel tracing, using **ftrace**, either through scripting directly or through **trace-cmd** command line tool, or **dropwatch**.
 
 Lets see some examples.
 Say we see **ksoftirqd/X** kernel thread consuming 100% CPU while the issue is reproducing (that means that there are either too many softirqs being processed by the same CPU or each softirq is taking too much to be serviced, and in turn there could be packet drops), and I want to find out what is happening within that thread. Note that we will need the kernel-debuginfo package in order for perf to display useful information, otherwise the hex addresses are not translated to function names. Also note that we usually have to enable the channel that contains the debug packages for that (i.e. for RHEL7 is **rhel-7-server-debug-rpms**)
@@ -318,13 +337,16 @@ $ yum install -y perf kernel-debuginfo kernel-debuginfo-common
 $ perf record --call-graph dwarf -p <PID> sleep 1
 {% endhighlight %}
 
-The previous command will create a perf.data file in the working directory.
-This file can be analyzed as follows.
+The previous command will create a perf.data file in the working directory showing what user or kernel functions have been invoked from that thread during the recorded period (1 second).
+
+This file can be visualized as follows.
 {% highlight shell %}
 $ perf report -i perf.data
 {% endhighlight %}
 
 The perf report can be navigated interactively in the command line (or it can also be non-interactive using --stdio flag), and it basically shows how much CPU is being consumed in each function in a break-down tree.
+
+Following is an example output I captured from an OpenvSwitch process that was consuming 100% CPU in an OpenStack networker node. 
 {% highlight shell %}
 -   96.77%     0.00%  ovs-vswitchd    [kernel.kallsyms]   [k] system_call_fastpath           
    - system_call_fastpath                
@@ -379,7 +401,33 @@ Issue Ctrl-C to stop monitoring
 ...
 {% endhighlight %}
 
-There is nothing fancy going on in the output above though.
+There is nothing fancy going on in the output above, though.
+
+In regard to dynamic debugging, I will bring up one example. One customer of mine once was reporting that while live migrating a bulk amount of instances (+50) from one compute to another (operation that creates multiple parallel connections among the computes and demands high troughput), after 30 minutes or so their bond interface was getting into CHURNED state. I am not getting into details what that is, but you can consider that the syncrhonization between the switch and the compute node was severed. This issue turned to be a bug in **qed/qede** drivers which was at some point in time dropping LACPDUs (control frames for 802.3ad LACP bonds). To get to the bottom of it I just enabled dynamic debbugging in the bonding module by adding in the kernel command line (/etc/default/grub) **bonding.dyndbg="+p"**, this would allow to get debug from this module in **dmesg** output including things like when the LACPDU was being received. At some point was clear that the LACP PDU was not longer observed (because the driver was dropping it).
+
+{% highlight shell %}
+[88233.914226] bond1: Received LACPDU on port 1 slave p2p1
+[88234.024144] bond1: Received LACPDU on port 2 slave p3p1
+[88234.662755] Sent LACPDU on port 1
+[88234.912929] bond1: Received LACPDU on port 1 slave p2p1
+[88234.963108] Sent LACPDU on port 2
+[88235.022547] bond1: Received LACPDU on port 2 slave p3p1
+[88235.860830] Sent LACPDU on port 1
+[88235.860838] Sent LACPDU on port 2
+[88235.911258] bond1: Received LACPDU on port 1 slave p2p1
+[88236.021118] bond1: Received LACPDU on port 2 slave p3p1
+[88236.759651] Sent LACPDU on port 1
+[88236.759658] Sent LACPDU on port 2
+[88236.909813] bond1: Received LACPDU on port 1 slave p2p1
+[88237.019850] bond1: Received LACPDU on port 2 slave p3p1                              <=== From this point on no more LACPDU observed
+[88237.657462] Sent LACPDU on port 1
+[88237.957743] Sent LACPDU on port 2
+[88238.858547] Sent LACPDU on port 1
+[88238.858555] Sent LACPDU on port 2
+[88239.759359] Sent LACPDU on port 1
+...
+{% endhighlight %}
+
 
 Lastly, I must mention **eBPF** (extended Barkley Packet Filter, originially named after BSD's BPF, however radically different) which is remarkably valuable and versatile kernel facility that was created for tracing purposes, but quickly became a swiss-army knife within the kernel that allows the user to create his own code and run it in a JIT compiler
 in kernel land. Scary? Of course.
