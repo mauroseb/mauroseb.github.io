@@ -337,7 +337,7 @@ $ yum install -y perf kernel-debuginfo kernel-debuginfo-common
 $ perf record --call-graph dwarf -p <PID> sleep 1
 {% endhighlight %}
 
-The previous command will create a perf.data file in the working directory showing what user or kernel functions have been invoked from that thread during the recorded period (1 second).
+The previous command will create a perf.data file, with debugging data in DWARF format, in the working directory showing what user or kernel functions have been invoked from that thread during the recorded period (1 second).
 
 This file can be visualized as follows.
 {% highlight shell %}
@@ -445,10 +445,6 @@ The best practices dictate to use at least 6 VLANs (+1 optional for management) 
 
 <img src="/images/6-vlan-arch.png" alt="Node connectivity" style="width:75%;"/>
 
-
-## Detecting Software Segmentation
-
-During the past years I stumbled a few times upon network driver bugs that prevent _GSO_ (generic segmentation offloading) to work properly each time on a different driver: __ixgbe__, __mlx5_core__ , __mlx4_core__ in combination with VxLAN encapsulation on top of a VLAN frame.
 
 
 ## References
