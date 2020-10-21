@@ -154,7 +154,7 @@ other_node                     0
 
 Here the numa_miss shows how many local misses occurred, and other_node count should show how many access from remote nodes have happened (each node has its own counter).
 
-If one wanted to test how the performance would improve matching the NUMA node, one could use the commands __taskset__ and __migratepages__ on the instance PID to achieve that.
+Small parenthesis here, if one wanted to test how the performance would improve matching the NUMA node, he/she could use the commands __taskset__ and __migratepages__ on the instance PID to achieve that.
 
  - Check the current CPU affinity mask af qemu-kvm PID and restrict it to run on a specific set of CPUs (second CPU in this example) that correspond to a given NUMA node
  
@@ -191,18 +191,16 @@ Total                 0   5324  5324
 
 Then again this is just for testing purposes and have a better grasp of what could improve the behavior observed.
 
-At this point you should have gotten a good depiction of what the hardware and logical layouts look like and can observe how the problem description fits into it.
+Overall, at this point you should have gotten a good depiction of what the hardware and logical layouts look like and can observe how the problem description fits into it.
 
 
-### 2. Reproduce it 
+### 2. Find a reproducer
 
-One of the first questions I normally ask is if there is a clear set of steps that can reproduce the problem. If so, it will simplify the formulation of an hypothesis considerably for you and any other involved party. I deem this little short cut is part of the initial observation phase. If there is one, then observe the system behaviour and statistics during the reproduction in contrast with the system under normal function and such would in many cases tell where to go next. Determine which recurrence, if it happens in only one system, in many, time patterns, every detail matters. Sometimes this is not possible as the problem only shows up sporadically and under unknown, apparently non-deterministic conditions. 
+One of the first questions I normally ask is if there is a clear set of steps that can reproduce the problem. If so, it will simplify the formulation of an hypothesis considerably for you and any other involved party. I deem this little short cut is part of the initial observation phase. If there is one, then observe the system behaviour and statistics during the reproduction in contrast with the system under normal function and such would in many cases tell where to go next. Determine which recurrence, if it happens in only one system, in many, time patterns, every detail matters. Sometimes this is not possible as the problem only shows up sporadically and under unknown, apparently non-deterministic conditions, but what can be done in that case is very limited.
 
-As example, under normal behaviour the system may not report any packets being dropped, but it does under heavy load, thus the problem will have to be observed during the reproduction to have better clarity of what is wrong.
+In addition, knowing the kind of traffic pattern/s that the application or system is supposed to generate will definitely help here. Examples for can range from a single continuous TCP stream, multiple parallel UDP request-response, mutlicast traffic with small packet sizes. Once known, it may be just enough to use **iperf**, **iperf3** , **netperf** or similar tools with the right options to instanciate the problem without needing to run the original application that had the issue. Also often times is difficult to locate resources to reproduce a _production-like_ environment as it may use expensive equipment, hence the use of virtual reproducers is quite common.
 
-Some times it is just enough to use **iperf3** , **netperf** or similar tools to display the problem. Also often times is difficult to locate resources to reproduce a _production-like_ environment as it may use expensive equipment. Hence the use of virtual reproducers is a common case, unless the involved pieces of hardware are also part of the problem.
-
-For example lets say we have two running instances inside two different compute nodes and we want to measure the throughput between them as we suspect there is an anomaly. They belong to the same tenant and virtual network. In the simplest test run a single TCP_STREAM test as follows to measure the baseline throughput between the compute nodes.
+Here goes an example, let's say we have two running instances inside two different compute nodes and in the same virtual network, where one acts as the client and the other as the server, and under heavy load the communication lags. We suspect there are some packet being dropped. If we wanted to reproduce the issue, the easiest would be to run a single TCP_STREAM test as shown below while observing the systems stat counters that will show when and where there are drops happening.
 
 On the _server_ instance:
 {% highlight shell %}
@@ -233,16 +231,19 @@ Connecting to host 172.16.0.2, port 5201
 iperf Done.
 {% endhighlight %}
  
-Here we can observe throughput, numer of retries, the TCP Congestion Windown (Cwnd) size along the test and averages. This test can be further extended by using _iperf3_ options like: multiple parallel streams (-P<#>), port (-p), UDP traffic (-u), bandwidth/bitrate (-b), buffer size (-w), time length (-t), intervals (-i), reverse direction (-R), binding address (-B), and so on so forth.
+ 
+Here we can observe throughput, numer of retries, the TCP Congestion Windown (Cwnd) size along the test and averages. This test can be further changed by using _iperf3_ options like: multiple parallel streams (-P<#>), port (-p), UDP traffic (-u), bandwidth/bitrate (-b), buffer size (-w), time length (-t), intervals (-i), reverse direction (-R), binding address (-B), and so on so forth. For multicast iperf previous version can be used.
 
-What regards to the NIC configuration, it is useful to observe the statistics of the NIC at the moment of the issue, what counters increase from one reproduction to the next and build from there (we will cover this in step 4). Are the right offloadings that are needed supported by the NIC and enabled ? Are they working as expected ? For instance if using VxLAN/GENEVE tunneling or VLAN we want specific offloads to be enabled. Are we offloading flows ? Are there buffers like the RX ring properly sized ?
+What statistics we will observe really depend on the description of the issue, but generally speaking if one understands basically how the receive stack works in the linux kernel, will do top-down analysis from the HW to the application level.
+
+What regards to the NIC configuration, it is useful to observe the statistics of the NIC at the moment of the issue, what counters increase from one reproduction to the next and build from there (we will cover this in step 4). Understanding if the right offloadings that are needed, are supported by the NIC and enabled ? Are they working as expected or could be a bug in the driver or firmware? For instance if using VxLAN/GENEVE tunneling or VLAN we want specific offloads to be enabled. Are we offloading flows ? If there are drops at the ring buffers, are there the RX/TX ring properly sized ?
 
 
 ### 3. Test initial conditions
 
 The reproduction of the problem can depend on multiple factors like hardware architecture, NIC vendor/model, firmware version, OS version, kernel version, NIC driver version, physical network devices (switches, load balancers and routers), virtual devices that have to be crossed. Many times permutation or removal of any of these components is helpful to narrow down the problem to a particular component before delving deeper into the analysis. 
 
-One of the first actions I normally try is to try to reproduce with the latest kernel available (downstream in case of _RHEL_), then the latest upstream kernel, also sometimes the latest kernel in __net-next__ tree of the linux kernel (which will become part of the next upstream linux kernel release) if there is any promising commit. 
+In order to narrow down the quest, one can try to reproduce with the latest kernel available (downstream in case of _RHEL_), then the latest upstream kernel, also sometimes the latest kernel in __linux-next__ or __net-next__ trees of the linux kernel (which will become part of the next upstream linux kernel release) if there is any promising commit. 
 
 For _RHEL_:
 
