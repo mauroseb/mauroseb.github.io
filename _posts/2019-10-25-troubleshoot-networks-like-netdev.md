@@ -13,13 +13,14 @@ author: mauroseb
 Firstly, I would like to mention that it gave me some hard time to find good comprehensive literature in regard to linux networking internals. In general for this specific topic one ends up crawling https://lkml.org/. Most common kernel related books like _"Understanding the Linux Kernel"_ or _"Linux Device Drivers"_ (which dedicates one chapter) do not cover this topic extensively. So I will start by noting the following book as the best source I found so far:
 
   - ["Linux Kernel Networking: Implementation and Theory" - Rami Rosen](https://www.amazon.nl/Linux-Kernel-Networking-Implementation-Theory/dp/143026196X/ref=sr_1_1?__mk_nl_NL=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=Linux+Kernel+Networking&qid=1596125842&sr=8-1)
-  
+
 Moreover, many times I had the chance to work next to some real experts in the matter at Red Hat who are and have been for ages active contributors to the kernel networking stack, and during the process could learn some interesting techniques when it comes to troubleshoot network issues in complex environments like OpenStack, where there are dozens or even hundreds of virtual devices, overlay networks involved, featured smart NICs, and more. Hopefully this article can help to give not just a boring collection of front line tales but also give shape to an approach that would help to sort out similar problems.
 
 It should be noted that even though most examples in the series involve OpenStack environments, the approaches and techniques discussed would hopefully help with networking issues in **any** linux based environment, with or without OpenvSwitch or OpenStack in the picture.
 
 Lastly this is the first article from hopefully many, therefore will end up in the first example after covering the basics. More to follow.
 <!-- more -->
+
 
 ## General Approach
 
@@ -30,9 +31,9 @@ The second point that has to be acknowledged is that no matter what technique it
 <img src="https://imgs.xkcd.com/comics/networking_problems.png" alt="plotnet sample PNG" style="width:50%;align:center;"/>
 
 
-The follwoing method is assuming a basic triage on the subject problem has taken place and it is worth a deeper analysis. I do not intend to cover basic troubleshooting of network connectivity issues (for what you can also find good resources[^2]), where one would normally start checking IP configuration, routing and so forth. Also it is assumed that there was a working environment in an earlier stage, and now an unsual and/or erratic behavior is manifestating. 
+The follwoing method is assuming a basic triage on the subject problem has taken place and it is worth a deeper analysis. I do not intend to cover basic troubleshooting of network connectivity issues (for what you can also find good resources[^2]), where one would normally start checking configuration, routing and so forth.
 
-As mentioned before, the level of knowledge of whom applies the method matters, picking a sensitive starting point, depth of the analysis in every step, so on so forth, depending on time/resource constraints and on the overall description of the issue can be valueable. Nonetheless it is also important not to be biased by past experiences and in general be skeptical that what is being witnesses now shares causality with previous events. This especially holds true for networking problems. 
+As mentioned before, the level of knowledge of whom applies the method matters, picking a sensitive starting point, depth of the analysis in every step, and so on, depending on time/resource constraints and on the overall description of the issue can be valueable. Nonetheless it is also important not to be biased by past experiences and in general be skeptical that what is being witnesses now shares causality with previous events. This especially holds true for networking problems. 
 
 Finally the following is definitely also flawed and incomplete (mea culpa) but may still come handy for my own forgetful mind and luckily some other reader.
 
@@ -190,18 +191,18 @@ Total                 0   5324  5324
 
 Then again this is just for testing purposes and have a better grasp of what could improve the behavior observed.
 
-What regards to the NIC configuration, it is useful to observe the statistics of the NIC at the moment of the issue, what counters increase from one reproduction to the next and build from there (we will cover this in step 4). Are the right offloadings that are needed supported by the NIC and enabled ? Are they working as expected ? For instance if using VxLAN/GENEVE tunneling or VLAN we want specific offloads to be enabled. Are we offloading flows ? Are there buffers like the RX ring properly sized ?
+At this point you should have gotten a good depiction of what the hardware and logical layouts look like and can observe how the problem description fits into it.
 
 
-### 2. Reproduce it
+### 2. Reproduce it 
 
-One of the first questions I normally ask is if there is a clear set of steps that can reproduce the problem. If so, it will simplify the formulation of an hypothesis considerably for you and any other involved party. This is a little short cut which is part of the initial observation phase. If there is one, great. 
+One of the first questions I normally ask is if there is a clear set of steps that can reproduce the problem. If so, it will simplify the formulation of an hypothesis considerably for you and any other involved party. I deem this little short cut is part of the initial observation phase. If there is one, then observe the system behaviour and statistics during the reproduction in contrast with the system under normal function and such would in many cases tell where to go next. Determine which recurrence, if it happens in only one system, in many, time patterns, every detail matters. Sometimes this is not possible as the problem only shows up sporadically and under unknown, apparently non-deterministic conditions. 
 
-Determine which recurrence, if it happens in only one system, in many, time patterns, etc. Sometimes this is not possible as the problem only shows up sporadically and under unknown, apparently non-deterministic conditions. 
+As example, under normal behaviour the system may not report any packets being dropped, but it does under heavy load, thus the problem will have to be observed during the reproduction to have better clarity of what is wrong.
 
 Some times it is just enough to use **iperf3** , **netperf** or similar tools to display the problem. Also often times is difficult to locate resources to reproduce a _production-like_ environment as it may use expensive equipment. Hence the use of virtual reproducers is a common case, unless the involved pieces of hardware are also part of the problem.
 
-For example lets say we have two running instances inside two different compute nodes and we want to measure the throughput between them as we suspect there is an anomaly. They belong to the same tenant and virtual network. In the simplest test I would run a single TCP_STREAM test as follows to measure the baseline throughput between the compute nodes.
+For example lets say we have two running instances inside two different compute nodes and we want to measure the throughput between them as we suspect there is an anomaly. They belong to the same tenant and virtual network. In the simplest test run a single TCP_STREAM test as follows to measure the baseline throughput between the compute nodes.
 
 On the _server_ instance:
 {% highlight shell %}
@@ -233,6 +234,8 @@ iperf Done.
 {% endhighlight %}
  
 Here we can observe throughput, numer of retries, the TCP Congestion Windown (Cwnd) size along the test and averages. This test can be further extended by using _iperf3_ options like: multiple parallel streams (-P<#>), port (-p), UDP traffic (-u), bandwidth/bitrate (-b), buffer size (-w), time length (-t), intervals (-i), reverse direction (-R), binding address (-B), and so on so forth.
+
+What regards to the NIC configuration, it is useful to observe the statistics of the NIC at the moment of the issue, what counters increase from one reproduction to the next and build from there (we will cover this in step 4). Are the right offloadings that are needed supported by the NIC and enabled ? Are they working as expected ? For instance if using VxLAN/GENEVE tunneling or VLAN we want specific offloads to be enabled. Are we offloading flows ? Are there buffers like the RX ring properly sized ?
 
 
 ### 3. Test initial conditions
