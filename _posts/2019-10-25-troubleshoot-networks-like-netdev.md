@@ -125,7 +125,7 @@ LnkSta: Speed 8GT/s, Width x8, TrErr- Train- SlotClk+ DLActive- BWMgmt- ABWMgmt-
 
 Now that we know the NUMA node we can also check that if that is creating any impact in performance. In general a VM and its associated threads will run in a specific NUMA node and the memory pages and CPU in use should preferably be in the same NUMA node for highest performance. This is not always possible due to technical limitations. I.e. live-migration may have problems with CPU pinning/NUMA setups, which should be already fixed in the latest releases of Nova, however in some cases like NFV we would like to favor performance in detriment of the ability to livemigrate. CPU and NUMA pinning is a hard requirement in these scenarios. So the VNF (namely an instance) qemu-kvm threads will run in a pinned CPU, the memory pages should also match the NUMA node of the CPU and the NIC should also reside in it. Now there are multiple ways to consume this NIC from the guest, some workloads use DPDK or SR-IOV where one will dedicate specific sets of CPUs to the hypervisor and to the guests having as well as memory (normally hugepages) having in mind which NUMA node are they coming from, but I am not covering those here, and now a days there are even NUMA aware vSwitches, which will run an instnace and allocate a VIF to it in function of where the physical NIC that is in use by OpenvSwitch lives, thus avoiding cross-numa memory requests.
 
- - Check numa architecture
+ - Check the NUMA architecture
 {% highlight shell %}
 #  numactl -H
 available: 1 nodes (0)
