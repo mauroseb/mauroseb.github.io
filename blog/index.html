@@ -6,7 +6,7 @@ title: BLOG
         <div>
 	  <ul class="posts">
 	    {% for post in site.posts %}
-	      <li class="posts"><span style="color: #00e500" > ‣ </span> <a style="color: #000000; width: 500px" href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a> - <span style="color: #696969; align: left">{{ post.date | date_to_string }}</span> </li>
+	      <li class="posts"><span style="color: #00e500" > ‣ </span> <a style="color: #000000; width: 500px; padding-left" href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a> - <span style="color: #696969; align: left">{{ post.date | date_to_string }}</span> </li>
 	    {% endfor %}
 	  </ul>
         </div>
