@@ -261,15 +261,21 @@ footer {
 }
 
 ul.posts { 
-    font-size: 20px;
+    font-size: 18px;
     font-family: 'Arial', 'Sans-Serif';
     width: 70%;
     margin: auto;
+    display: table;
+    table-layout: fixed;
 }
 
 li.posts {
     list-style: none;
-    width: 80%;
+    display: table-cell;
+}
+
+a.posts {
+   display: block;
 }
 
 table {
