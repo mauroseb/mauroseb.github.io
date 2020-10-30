@@ -274,6 +274,11 @@ li.posts {
     display: table-row;
 }
 
+li.date {
+    list-style: none;
+    display: table-cell;
+}
+
 a.posts {
    display: block;
 }
