@@ -271,6 +271,7 @@ ul.posts {
 
 li.posts {
     list-style: none;
+    display: table-row;
 }
 
 a.posts {
