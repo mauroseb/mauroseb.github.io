@@ -33,7 +33,7 @@ The second point that has to be acknowledged is that no matter what technique it
 
 The follwoing method is assuming a basic triage on the subject problem has taken place and it is worth a deeper analysis. I do not intend to cover basic troubleshooting of network connectivity issues (for what you can also find good resources[^2]), where one would normally start checking configuration, routing and so forth.
 
-As mentioned before, the level of knowledge of whom applies the method matters, picking a sensitive starting point, depth of the analysis in every step, and so on, depending on time/resource constraints and on the overall description of the issue can be valueable. Nonetheless it is also important not to be biased by past experiences and in general be skeptical that what is being witnesses now shares causality with previous events. This especially holds true for networking problems. 
+As mentioned before, the level of knowledge of whom applies the method matters, picking a sensitive starting point, depth of the analysis in every step, and so on, depending on time/resource constraints and on the overall description of the issue can be valueable. Nonetheless it is also important not to be biased by past experiences and in general be skeptical that what is being witnesses now shares causality with previous events. This especially stands true for networking problems. 
 
 Finally the following is definitely also flawed and incomplete (mea culpa) but may still come handy for my own forgetful mind and luckily some other reader.
 
@@ -61,15 +61,14 @@ To understand the problem we need to have a clear picture of the path the packet
 {% endhighlight %}
 
 
-
 In the diagram above the OvS circuitry is a bit more complex because it is performing VLAN tagging/untagging of the "tenant" network on **br-ex** (OvS bridge) internal port, which in turn carries VxLAN traffic, that is then forwarded internally to the **br-tun** where the VxLAN tunnel endpoint lives (for short VTEP - it holds the IP address of the previously mentioned internal port), and terminates each **VNI** corresponding to each tenant, then the traffic is forwarded via OvS internal patches to the **br-int** bridge that in turn forwards the traffic to the instance's qvo veth device.
 
 For the same purpose, there is an excellent tool from Jiri Benc: **plotnetcfg**[^3]. To run it needs either root privileges or **CAP_SYS_ADMIN** and **CAP_NET_ADMIN** capabilities. The tool will create an output file in dot format, that can then be converted for example to PNG format with the **dot** command.
 
 {% highlight shell %}
-   # dnf install -y plotnetcfg
-   # plotnetcfg > layout.out
-   # dot -Tpng layout.out > layout.png
+ # dnf install -y plotnetcfg
+ # plotnetcfg > layout.out
+ # dot -Tpng layout.out > layout.png
 {% endhighlight %}
 
 The former will create a picture like the following:
@@ -239,15 +238,15 @@ What statistics we will observe really depend on the description of the issue, b
 What regards to the NIC configuration, it is useful to observe the statistics of the NIC at the moment of the issue, what counters increase from one reproduction to the next and build from there (we will cover this in step 4). Understanding if the right offloadings that are needed, are supported by the NIC and enabled ? Are they working as expected or could be a bug in the driver or firmware? For instance if using VxLAN/GENEVE tunneling or VLAN we want specific offloads to be enabled. Are we offloading flows ? If there are drops at the ring buffers, are there the RX/TX ring properly sized ?
 
 
-### 3. Test initial conditions
+### 3. Simplify The Reproducer
 
-The reproduction of the problem can depend on multiple factors like hardware architecture, NIC vendor/model, firmware version, OS version, kernel version, NIC driver version, physical network devices (switches, load balancers and routers), virtual devices that have to be crossed. Many times permutation or removal of any of these components is helpful to narrow down the problem to a particular component before delving deeper into the analysis. 
+Now that there is a way to consistently reproduce the issue, the next step would be to simplify it as much as possible. The reproduction of the problem can depend on multiple factors like hardware architecture, NIC vendor/model, firmware version, OS version, kernel version, NIC driver version, physical network devices (switches, load balancers and routers), virtual devices that have to be crossed. Many times permutation or removal of any of these components is helpful to narrow down the problem to a particular component before delving deeper into the analysis. 
 
-In order to narrow down the quest, one can try to reproduce with the latest kernel available (downstream in case of _RHEL_), then the latest upstream kernel, also sometimes the latest kernel in __linux-next__ or __net-next__ trees of the linux kernel (which will become part of the next upstream linux kernel release) if there is any promising commit. 
+For that purpose, one could try for example to reproduce with the latest kernel available (downstream in case of _RHEL_), then the latest upstream kernel, also sometimes the latest kernel in __linux-next__ or __net-next__ trees of the linux kernel (which will become part of the next upstream linux kernel release) if there is any promising commit related to the apparent problem.
 
-For _RHEL_:
+Taking _RHEL_ as reference:
 
-  * **Test latest downstream kernel.** You can check easily in CDN for the latest and update it if it is newer than the version in the system.
+  * **Test latest downstream kernel.** You can check easily in Red Hat's CDN for the latest kernel and update it, if it is newer than the version installed in the system.
   
   * **Test lastest upstream stable kernel.** The easiest here is to leverage **elrepo** repository which provides an RPM for Centos and RHEL distros built from the **mainline** stable branch of Linux Kernel Archive and thus named **kernel-ml** to avoid conflict with RHEL stock kernels. In the following example I am installing the RPM for major version 7 and setting grub to boot from it (grub menu entry number 0) only once as we just want to test a reproducer and go back to the default kernel:
   
@@ -269,18 +268,18 @@ For _RHEL_:
   $ git fetch --tags linux-next
   {% endhighlight %}
 
-  Now a specific **linux-next** tag can be checked out and built[^4]. Alternatively the **net-next** branch can also be used.
+Now a specific **linux-next** tag can be checked out and built[^4]. Alternatively the **net-next** branch can also be used.
 
   {% highlight shell %}
   $ git remote add net git://git.kernel.org/pub/scm/linux/kernel/git/davem/net.git
   $ git fetch net
   {% endhighlight %}
  
-  And just like that one can retry and discard tons of already fixed bugs or include new features that could improve the situation.
+And just like that one can retry and discard tons of already fixed bugs or include new features that could improve the situation.
 
-Similar approach could be adopted for NIC firmware, drivers or even testing with a different NIC hardware if resources permit. 
+Similar approach could be adopted for NIC firmware, drivers, removing virtual devices from the way (like a bond interface), or even testing with a different NIC hardware if resources permit. 
 
-If the layout determined at step 2. is too complex. Cut down the devices involved and test if the issue can still be reproduced is also a good technique that will remove false suspects from the way. In example, if the issue happens with a bond device, does it still happen if we use directly one leg, or without bond at all ?  If the answer is yes, then we continue with the next piece to chop.
+If the layout determined at step 1. is too complex. Cut down the devices involved and test if the issue can still be reproduced is also a good technique that will remove false suspects from the way. In example, if the issue happens with a bond device, does it still happen if we use directly one leg, or without bond at all ?  If the answer is yes, then we continue with the next piece to chop.
 
 Actions like these have been the fastest way to identify existing bugs. Just by knowing it is not happening in a given kernel version, means that we only need to backport certain fix to a downstream kernel (in case of RHEL) or that the fix will be released soon upstream in case of using the **linux-next** kernel.
 
@@ -308,13 +307,15 @@ In case you missed it, git also provides __bisect__ subcommand which helps in pi
   * (HEAD detached at kernel-3.10.0-1122.el7)    
 {% endhighlight %}
 
+Now that we have a reproducer with the simplest scenario we came up with we can delve deeper into the analysis of the system while this happens.
 
-### 4. Performance Metrics
+### 4. Analyze Stats and Performance Metrics
 
-When dealing with a performance issue with a broad description of the problem, normally it is hard to know where to start digging. It always helps checking the output of performance and metrics monitoring tools, looking for stats like RX/TX packet counts and sizes in each interface involved, error counts in the NICs, and in general what counters overall are moving network wise or not.
+When dealing with a performance issue with a broad description, normally it is hard to know where to start digging. It always helps checking the output of performance and metrics monitoring tools, looking for stats like RX/TX packet counts and sizes in each interface involved, error counts in the NICs, and in general what counters overall are moving network wise or not.
 
-In the simplest stats check, I would like to see the difference between the output of **ethtool -S <NIC>** before and after facing the issue or running the reproducer.
-For instance, the following would tell that after the reproducer there was an increase of **no_buff_discards**, meaning that the NIC ran out of space in its RX ring buffer and had to discard the ingressing frames.
+In the simplest stats check, I would like to see the difference between the output of **ethtool -S <NIC>**, **ip -s a**, **ss -natuples**, **netstat -s**, **nstat**, system metrics, and a few other commands, before and after reproducing the issue, in order to observe errors and that the counters increasing are expected.
+  
+For instance, the following output would tell that after the reproducer there was an increase of **no_buff_discards**, meaning that the NIC ran out of space in its RX ring buffer and had to discard the ingressing frames.
 
 {% highlight shell %}
 # ethtool -S p2p1  | egrep 'error|miss|drop|bad|crc|nop|discard' | egrep -v ': 0$'
@@ -324,20 +325,27 @@ For instance, the following would tell that after the reproducer there was an in
      no_buff_discards: 25264
 {% endhighlight %}
 
-There are hundreds of command line tools to chose here but for the sake of simplicity I will focus on the readings of __ethtool__ and __sar__ (the later because is the most widespread accross systems). It is normal to find environments with proper performance tooling, like stacks combining __collectd__, __prometheus__, __grafana__, __ganglia__, or any __rrdtool__ derivative. One interesting tool to consider is __pcp__ (performance co-pilot [^5]). It does not really matter which tool to use as long as one can get the metrics that is after (for a comprehensive list of Linux command line tools check out the mind blowing work of Brendan Gregg [^6][^7]).
+There are hundreds of command line tools to chose here but for the sake of simplicity I will focus on the readings of __ethtool__ and also __sar__ (the later because is the most widespread accross systems). It is a common place that production environments have proper performance tooling, like stacks combining __collectd__, __prometheus__, __grafana__, or __ganglia__, or an __rrdtool__ derivative. One interesting tool to consider is __pcp__ (performance co-pilot [^5]). It does not really matter which tool to use as long as one can get the metrics that is after (for a comprehensive list of Linux command line tools check out the mind blowing work of Brendan Gregg [^6][^7]).
 
+In this point I would mention that the most trustworthy tool when it comes to the NIC counters is the NIC driver itself reported through __ethtool__.
+
+So now we have observed a specific effect of the reproducer that can shed some further light into the issue. In the case of no_buff_discards, it basically indicates that the NIC ran out of space in the RX ring buffers, which can be caused by multiple reasons, but mainly that the RX/TX ring buffer is not properly sized, that the kernel threads supposed to consume this buffer are not doing it fast enough or that flow control if configured, is not working as it should.
 
 ### 5. Tracing
 
-There will be some situations where we _really_ want to know what is going on under the hood. For example, once we have identified that a bottleneck resides in certain userland or kernel thread, what happens next? Understanding what that task is doing is a fair next step which may reveal which part of the code is generating the problem. Another common example is that spurious drops are being observed but there is no clarity where or why are they being dropped.
+Continuing with my previous example, while the issue reproduces, let's assume the system shows a __ksoftirqd__ kernel thread which is consuming 100% of one CPU which clearly looks like some sort of bottleneck. There will be situations like this one, where we _really_ want to know what is going on under the hood. Understanding what this task is doing on the CPU is a fair next step which may reveal which part of the code is generating the problem. 
 
-From the set of tools that will help in this endeavour **perf** is probably the most powerful one and the one I will resort to the most also. I will show other examples like dynamic kernel tracing, using **ftrace**, either through scripting directly or through **trace-cmd** command line tool, or **dropwatch**.
+From the set of tools that will help in this endeavour **perf** is probably the most powerful one and the one I will resort to the most also. I will show other examples like dynamic kernel tracing, using **ftrace**, either through scripting directly or through **trace-cmd** command line tool, or directly interacting with the **debugfs**. Another tools worth mentioning are **dropwatch** and **system-tap**.
 
-Lets see some examples.
-Say we see **ksoftirqd/X** kernel thread consuming 100% CPU while the issue is reproducing (that means that there are either too many softirqs being processed by the same CPU or each softirq is taking too much to be serviced, and in turn there could be packet drops), and I want to find out what is happening within that thread. Note that we will need the kernel-debuginfo package in order for perf to display useful information, otherwise the hex addresses are not translated to function names. Also note that we usually have to enable the channel that contains the debug packages for that (i.e. for RHEL7 is **rhel-7-server-debug-rpms**)
+Back to our example, we see **ksoftirqd/X** kernel thread consuming 100% CPU while the issue is reproducing. That means that there are either too many softirqs being processed by the same CPU or each softirq is taking too much to be serviced, and in turn that leads to packet drops. Note that we will need the kernel-debuginfo package in order for perf to display useful information, otherwise the hex addresses are not translated to function names. Also note that we usually have to enable the channel that contains the debug packages for that (i.e. for RHEL7 is **rhel-7-server-debug-rpms**)
 
 {% highlight shell %}
 $ yum install -y perf kernel-debuginfo kernel-debuginfo-common
+{% endhighlight %}
+  
+So after learning the PID of the process consuming 100% CPU:
+
+{% highlight shell %}
 $ perf record --call-graph dwarf -p <PID> sleep 1
 {% endhighlight %}
 
@@ -368,17 +376,18 @@ Following is an example output I captured from an OpenvSwitch process that was c
 ...
 {% endhighlight %}
 
-So in the previous example it can be observed that the process being checked is **ovs-vswitchd** and the funciton **security_netlink_send()** is consuming 95% of the CPU that the process is using. In this case it turned out to be a bug in openvswitch miscalculating the size of a netlink message.
+So in the previous example it can be observed that the process being checked is **ovs-vswitchd** and the funciton **security_netlink_send()** is consuming 95% of the CPU that the process is using. In this case it turned out to be a bug in openvswitch miscalculating the size of a netlink message. More on netlink in a future post.
 
-The tool is extremely powerful. One can also see what a given CPU or group of CPUs is doing at a given point in time with **-C** flag.
+One can also see what a given CPU or group of CPUs is doing at a given point in time with **-C** flag.
+
 {% highlight shell %}
-$ perf top -C 0-2,3 -g
+$ perf top -C 0-2,4 -g
 {% endhighlight %}
 
 A similar result can be achieved using the **ftrace** facility directly by configuring **/sys/kernel/debug**. I have created a small script called [ftrace-2.sh](https://gist.githubusercontent.com/mauroseb/29d2e8664899aa2e1206e3a55b334aba/raw/5b462e5028bc17ca31e29559cd35b7157dc9bbb9/ftrace-2.sh
-) to help me capture this data. This can come handy specially in **NFV** troubleshooting where a CPU has a single task of processing packets (running poll-mode driver thread) and any interruption or preemption from ot thread could bring packet drops. Hence if I see a packet drop, I want to know exactly what kernel or userspace threads are taking that CPU.
+) to help me capture this data. This can come handy specially in **NFV** troubleshooting where a CPU has a one and only task of processing packets of a given NIC/queue (running poll-mode driver thread), and any interruption or preemption from other thread could create packet drops. Hence if I see a packet drop, I want to know exactly what kernel or userspace threads are being run in that CPU to draw to conclusions.
 
-Another versatile tool to trace packets being dropped is **dropwatch**. This tool will basically report every time the **skb_free()** function is called and from which function. An **SKB** is the data structure that represents a packet in the kernel space, buffer which needs to be released after it is no longer useful when the packet dropped. There are many valid reasons why the **SKB** memory should be freed, however when there is an spurious drop it will also show up in the list.
+As mentioned before, nother versatile tool to trace packets being dropped is **dropwatch**. This tool will basically report every time the **skb_free()** function is called and from which function. An **SKB** is the data structure that represents a packet in the kernel space, buffer which needs to be released after it is no longer useful when the packet dropped. There are many valid reasons why the **SKB** memory should be freed, however when there are spurious drops, they will also show up in the list.
 
 {% highlight shell %}
 # yum install -y dropwatch dropwatch-debuginfo
