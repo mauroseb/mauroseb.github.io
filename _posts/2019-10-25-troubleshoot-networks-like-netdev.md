@@ -311,7 +311,7 @@ Now that we have a reproducer with the simplest scenario we came up with we can 
 
 ### 4. Analyze Stats and Performance Metrics
 
-When dealing with a performance issue with a broad description, normally it is hard to know where to start digging. It always helps checking the output of performance and metrics monitoring tools, looking for stats like RX/TX packet counts and sizes in each interface involved, error counts in the NICs, and in general what counters overall are moving network wise or not.
+When dealing with a performance issues, normally it is not easy to know where to start digging. It always helps checking out the output of performance and metrics collection tools, looking for system stats like RX/TX packet counts and sizes in each interface involved in the data path, error counts of the NICs, and in general what counters overall are moving network wise or not.
 
 In the simplest stats check, I would like to see the difference between the output of **ethtool -S <NIC>**, **ip -s a**, **ss -natuples**, **netstat -s**, **nstat**, system metrics, and a few other commands, before and after reproducing the issue, in order to observe errors and that the counters increasing are expected.
   
@@ -327,11 +327,12 @@ For instance, the following output would tell that after the reproducer there wa
 
 There are hundreds of command line tools to chose here but for the sake of simplicity I will focus on the readings of __ethtool__ and also __sar__ (the later because is the most widespread accross systems). It is a common place that production environments have proper performance tooling, like stacks combining __collectd__, __prometheus__, __grafana__, or __ganglia__, or an __rrdtool__ derivative. One interesting tool to consider is __pcp__ (performance co-pilot [^5]). It does not really matter which tool to use as long as one can get the metrics that is after (for a comprehensive list of Linux command line tools check out the mind blowing work of Brendan Gregg [^6][^7]).
 
-In this point I would mention that the most trustworthy tool when it comes to the NIC counters is the NIC driver itself reported through __ethtool__.
+Regarding this point I would mention that the most trustworthy tool when it comes to the NIC counters is the NIC driver itself reported through __ethtool__.
 
 So now we have observed a specific effect of the reproducer that can shed some further light into the issue. In the case of no_buff_discards, it basically indicates that the NIC ran out of space in the RX ring buffers, which can be caused by multiple reasons, but mainly that the RX/TX ring buffer is not properly sized, that the kernel threads supposed to consume this buffer are not doing it fast enough or that flow control if configured, is not working as it should.
 
-### 5. Tracing
+
+### 5. Tracing and Packet Captures
 
 Continuing with my previous example, while the issue reproduces, let's assume the system shows a __ksoftirqd__ kernel thread which is consuming 100% of one CPU which clearly looks like some sort of bottleneck. There will be situations like this one, where we _really_ want to know what is going on under the hood. Understanding what this task is doing on the CPU is a fair next step which may reveal which part of the code is generating the problem. 
 
