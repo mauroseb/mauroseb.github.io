@@ -10,11 +10,11 @@ author: mauroseb
 
 ## Introduction
 
-Firstly, I would like to mention that it gave me some hard time to find good comprehensive literature in regard to linux networking internals. In general for this specific topic one ends up crawling https://lkml.org/. Most common kernel related books like _"Understanding the Linux Kernel"_ or _"Linux Device Drivers"_ (which dedicates one chapter) do not cover this topic extensively. So I will start by noting the following book as the best source I found so far:
+Firstly, I would like to mention that it gave me some hard time to find good comprehensive literature in regard to linux networking internals. In general for this specific topic one ends up crawling [LKML](https://lkml.org/). Most common kernel related books like _"Understanding the Linux Kernel"_ or _"Linux Device Drivers"_ (which dedicates one chapter) do not cover the topic extensively. So I will start by noting the following book as the best source I found so far:
 
   - ["Linux Kernel Networking: Implementation and Theory" - Rami Rosen](https://www.amazon.nl/Linux-Kernel-Networking-Implementation-Theory/dp/143026196X/ref=sr_1_1?__mk_nl_NL=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=Linux+Kernel+Networking&qid=1596125842&sr=8-1)
 
-Moreover, many times I had the chance to work next to some real experts in the matter at Red Hat who are and have been for ages active contributors to the kernel networking stack, and during the process could learn some interesting techniques when it comes to troubleshoot network issues in complex environments like OpenStack, where there are dozens or even hundreds of virtual devices, overlay networks involved, featured smart NICs, and more. Hopefully this article can help to give not just a boring collection of front line tales but also give shape to an approach that would help to sort out similar problems.
+Many times I had the chance to work next to some real experts in the matter at Red Hat who are and have been for ages active contributors to the kernel networking stack, and during the process could learn some interesting techniques when it comes to troubleshoot network issues in complex environments like OpenStack, where there are dozens or even hundreds of virtual devices, overlay networks involved, featured smart NICs, and more. Hopefully this article can help to give not just a boring collection of front line tales but also give shape to an approach that would help to sort out similar problems.
 
 It should be noted that even though most examples in the series involve OpenStack environments, the approaches and techniques discussed would hopefully help with networking issues in **any** linux based environment, with or without OpenvSwitch or OpenStack in the picture.
 
@@ -41,7 +41,7 @@ Finally the following is definitely also flawed and incomplete (mea culpa) but m
 
 ### 1. Understand the virtual and physical layout
 
-To understand the problem we need to have a clear picture of the path the packets need to traverse. Without that, the search for a root cause will be partial and inaccurate. Taking note of **ALL** the network components, virtual or physical, is paramount. Following is a basic example of an instance running in an OpenStack compute node:
+To understand the problem not only we need to gather as much details as possible from the reporter, we also need to have a clear picture of the path that the packets need to traverse. Without it, the search for a root cause will be partial and inaccurate. Taking note of **ALL** the network components, virtual or physical, is paramount. Following is a basic example of an instance running in an OpenStack compute node and how it is plugged to the physical network.
 
 
 {% highlight shell %}
@@ -309,13 +309,17 @@ In case you missed it, git also provides __bisect__ subcommand which helps in pi
 
 Now that we have a reproducer with the simplest scenario we came up with we can delve deeper into the analysis of the system while this happens.
 
-### 4. Analyze Stats and Performance Metrics
+### 4. Observability of Stats and Performance Metrics
 
 When dealing with a performance issues, normally it is not easy to know where to start digging. It always helps checking out the output of performance and metrics collection tools, looking for system stats like RX/TX packet counts and sizes in each interface involved in the data path, error counts of the NICs, and in general what counters overall are moving network wise or not.
 
-In the simplest stats check, I would like to see the difference between the output of **ethtool -S <NIC>**, **ip -s a**, **ss -natuples**, **netstat -s**, **nstat**, system metrics, and a few other commands, before and after reproducing the issue, in order to observe errors and that the counters increasing are expected.
+It is very common that production environments have proper performance tooling in place, like software stacks like the __prometheus__ stack, a __TICK__ stack (InfluxDB based), __ganglia__, an __rrdtool__ derivatives, or similar. Hence one could rely directly on them for many kinds of reading. However I am assuming that we can only check the server with standard command line tools.
+
+There are hundreds of command line tools for performance to choose here but for the sake of simplicity I will focus on the readings of __ethtool__ and also __sar__ (the later because is the most widespread accross systems). . One interesting tool to take a look at is __pcp__ (performance co-pilot [^5]). In the end, it does not really matter which tool to use as long as it does the job. For a comprehensive list of Linux command line tools check out the mind blowing work of Brendan Gregg [^6][^7].
+
+In the simplest stats check, I would like to see the difference between the output of some standard commands: **ethtool -S <NIC>**, **ip -s a**, **ss -natuples**, **netstat -s**, **nstat**, system metrics (and if we work with OvS there is also a set of specific commands), etc., before and after reproducing the issue, in order to observe errors and that the counters increasing are expected.
   
-For instance, the following output would tell that after the reproducer there was an increase of **no_buff_discards**, meaning that the NIC ran out of space in its RX ring buffer and had to discard the ingressing frames.
+For instance, the following output would tell that after the reproducer there was an increased number of **no_buff_discards**, meaning that the NIC ran out of space in its RX ring buffer and had to discard the ingressing frames.
 
 {% highlight shell %}
 # ethtool -S p2p1  | egrep 'error|miss|drop|bad|crc|nop|discard' | egrep -v ': 0$'
@@ -325,18 +329,19 @@ For instance, the following output would tell that after the reproducer there wa
      no_buff_discards: 25264
 {% endhighlight %}
 
-There are hundreds of command line tools to chose here but for the sake of simplicity I will focus on the readings of __ethtool__ and also __sar__ (the later because is the most widespread accross systems). It is a common place that production environments have proper performance tooling, like stacks combining __collectd__, __prometheus__, __grafana__, or __ganglia__, or an __rrdtool__ derivative. One interesting tool to consider is __pcp__ (performance co-pilot [^5]). It does not really matter which tool to use as long as one can get the metrics that is after (for a comprehensive list of Linux command line tools check out the mind blowing work of Brendan Gregg [^6][^7]).
 
-Regarding this point I would mention that the most trustworthy tool when it comes to the NIC counters is the NIC driver itself reported through __ethtool__.
+Regarding this point I would mention that __ethtool__ is the most trustworthy tool when it comes to the NIC counters.
 
 So now we have observed a specific effect of the reproducer that can shed some further light into the issue. In the case of no_buff_discards, it basically indicates that the NIC ran out of space in the RX ring buffers, which can be caused by multiple reasons, but mainly that the RX/TX ring buffer is not properly sized, that the kernel threads supposed to consume this buffer are not doing it fast enough or that flow control if configured, is not working as it should.
 
 
 ### 5. Tracing and Packet Captures
 
-Continuing with my previous example, while the issue reproduces, let's assume the system shows a __ksoftirqd__ kernel thread which is consuming 100% of one CPU which clearly looks like some sort of bottleneck. There will be situations like this one, where we _really_ want to know what is going on under the hood. Understanding what this task is doing on the CPU is a fair next step which may reveal which part of the code is generating the problem. 
+If we got to the point where the stats and performance metrics still are not pointing to a clear culprit for the reported behavior, we may need to delve even deeper into the issue through the use of packet captures or through the tracing of the processes involved.
 
-From the set of tools that will help in this endeavour **perf** is probably the most powerful one and the one I will resort to the most also. I will show other examples like dynamic kernel tracing, using **ftrace**, either through scripting directly or through **trace-cmd** command line tool, or directly interacting with the **debugfs**. Another tools worth mentioning are **dropwatch** and **system-tap**.
+Continuing with my previous example, while the issue reproduces, let's assume the system shows a __ksoftirqd__ kernel thread which is consuming 100% of one CPU which clearly looks like some sort of bottleneck. There will be situations like this one, where we really want to know what is going on under the hood. Understanding what this task is doing on the CPU is a fair next step which may reveal a lot, like which part of the code is generating the problem or involved in the problem. 
+
+From the set of tools that will help in this endeavour **perf** is probably the most powerful one and the one I will resort to the most also. I will show other examples like dynamic kernel tracing, using **ftrace**, either through scripting directly or through **trace-cmd** command line tool, or directly interacting with the **debugfs**. Other tools worth mentioning in this step are **dropwatch** and **systemtap**.
 
 Back to our example, we see **ksoftirqd/X** kernel thread consuming 100% CPU while the issue is reproducing. That means that there are either too many softirqs being processed by the same CPU or each softirq is taking too much to be serviced, and in turn that leads to packet drops. Note that we will need the kernel-debuginfo package in order for perf to display useful information, otherwise the hex addresses are not translated to function names. Also note that we usually have to enable the channel that contains the debug packages for that (i.e. for RHEL7 is **rhel-7-server-debug-rpms**)
 
