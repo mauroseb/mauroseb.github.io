@@ -317,7 +317,7 @@ It is very common that production environments have proper performance tooling i
 
 There are hundreds of command line tools for performance to choose here but for the sake of simplicity I will focus on the readings of __ethtool__ and also __sar__ (the later because is the most widespread accross systems). . One interesting tool to take a look at is __pcp__ (performance co-pilot [^5]). In the end, it does not really matter which tool to use as long as it does the job. For a comprehensive list of Linux command line tools check out the mind blowing work of Brendan Gregg [^6][^7].
 
-In the simplest stats check, I would like to see the difference between the output of some standard commands: **ethtool -S <NIC>**, **ip -s a**, **ss -natuples**, **netstat -s**, **nstat**, system metrics (and if we work with OvS there is also a set of specific commands), etc., before and after reproducing the issue, in order to observe errors and that the counters increasing are expected.
+In the simplest stats check, I would like to see the difference between the output of some standard commands: **ethtool -S <NIC>**, **ip -s -s a**, **ss -natuples**, **netstat -s**, **nstat**, system metrics (and if we work with OvS there is also a set of specific commands), etc., before and after reproducing the issue, in order to observe errors and that the counters increasing are expected (for which is good to create a script).
   
 For instance, the following output would tell that after the reproducer there was an increased number of **no_buff_discards**, meaning that the NIC ran out of space in its RX ring buffer and had to discard the ingressing frames.
 
@@ -446,7 +446,6 @@ In regard to dynamic debugging, I will bring up one example. One customer of min
 [88239.759359] Sent LACPDU on port 1
 ...
 {% endhighlight %}
-
 
 Lastly, I must mention **eBPF** (extended Barkley Packet Filter, originially named after BSD's BPF, however radically different) which is remarkably valuable and versatile kernel facility that was created for tracing purposes, but quickly became a swiss-army knife within the kernel that allows the user to create his own code and run it in a JIT compiler
 in kernel land. Scary? Of course.
