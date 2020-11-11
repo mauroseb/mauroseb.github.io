@@ -10,7 +10,7 @@ author: mauroseb
 
 ## Introduction
 
-Firstly, I would like to mention that it gave me some hard time to find good comprehensive literature in regard to linux networking internals. In general for this specific topic one ends up crawling [LKML](https://lkml.org/). Most common kernel related books like _"Understanding the Linux Kernel"_ or _"Linux Device Drivers"_ (which dedicates one chapter) do not cover the topic extensively. So I will start by noting the following book as the best source I found so far:
+Firstly, I would like to mention that it gave me some hard time to find good comprehensive literature in regard to linux networking internals. In general for this specific topic one ends up crawling [LKML](https://lkml.org/). The well-known kernel related books like _"Understanding the Linux Kernel"_ or _"Linux Device Drivers"_ (which dedicates one chapter) do not cover the topic extensively, so I will start by noting the following book that has been the most comprehensive source for the topic I could find so far:
 
   - ["Linux Kernel Networking: Implementation and Theory" - Rami Rosen](https://www.amazon.nl/Linux-Kernel-Networking-Implementation-Theory/dp/143026196X/ref=sr_1_1?__mk_nl_NL=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=Linux+Kernel+Networking&qid=1596125842&sr=8-1)
 
@@ -307,7 +307,7 @@ In case you missed it, git also provides __bisect__ subcommand which helps in pi
   * (HEAD detached at kernel-3.10.0-1122.el7)    
 {% endhighlight %}
 
-Now that we have a reproducer with the simplest scenario we came up with we can delve deeper into the analysis of the system while this happens.
+Now that we have a reproducer with the simplest scenario we came up with we can dive into the analysis of the systems involved while this happens.
 
 ### 4. Observability of Stats and Performance Metrics
 
@@ -382,7 +382,7 @@ Following is an example output I captured from an OpenvSwitch process that was c
 ...
 {% endhighlight %}
 
-So in the previous example it can be observed that the process being checked is **ovs-vswitchd** and the funciton **security_netlink_send()** is consuming 95% of the CPU that the process is using. In this case it turned out to be a bug in openvswitch miscalculating the size of a netlink message. More on netlink in a future post.
+So in the previous example it can be observed that the process being checked is **ovs-vswitchd** and the funciton **security_netlink_send()** is consuming 95% of the CPU that the process is using. In this case it turned out to be a bug in openvswitch miscalculating the size of a netlink message. In case you are wondering, a netlink socket (AF_NETLINK) is basically a communication channel between userland and kernel land, and OpenvSwitch uses it extensively to send configuration messages between the openvswitch kernel module messages to the user land processes.
 
 One can also see what a given CPU or group of CPUs is doing at a given point in time with **-C** flag.
 
