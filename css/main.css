@@ -221,6 +221,14 @@ h4 {
     color: #000000;
 }
 
+h5 {
+    font-size: 12px;
+    font-family:'Arial', 'Sans-Serif';
+    font-weight: 300;
+    text-transform: uppercase;
+    color: #000000;
+}
+
 img {
     margin-left: 20px;
 }
