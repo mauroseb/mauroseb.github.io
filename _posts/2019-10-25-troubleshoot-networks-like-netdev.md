@@ -127,17 +127,21 @@ Now that we know the NUMA node we can also check that if that is creating any im
 
  - Check the NUMA architecture
 {% highlight console %}
-#  numactl -H
-available: 1 nodes (0)
-node 0 cpus: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
-node 0 size: 386761 MB
-node 0 free: 91864 MB
+# numactl -H
+available: 2 nodes (0-1)
+node 0 cpus: 0 1 2 3 4 5
+node 0 size: 32742 MB
+node 0 free: 20409 MB
+node 1 cpus: 6 7 8 9 10 11
+node 1 size: 0 MB
+node 1 free: 0 MB
 node distances:
-node   0 
-  0:  10 
+node   0   1
+  0:  10  11
+  1:  11  10
 {% endhighlight %}
 
-I only have here a single node, but the output will be similar with mulitple nodes. Important is to spot where the CPUs live, how much memory is in each node, the cross node distance (last table of the output) as in large architectures the distances varies from node to node and that is also a factor for the design.
+Important point here is to spot where the CPUs live, how much memory each node has, the cross node distance (last table of the output) as in large architectures the distances varies from node to node and that is also a factor for the design.
 
  - Another valid way to check CPU belonging to each NUMA node
  
