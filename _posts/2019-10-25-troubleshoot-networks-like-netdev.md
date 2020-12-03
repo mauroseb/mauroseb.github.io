@@ -65,7 +65,7 @@ In the diagram above the OvS circuitry is a bit more complex because it is perfo
 
 For the same purpose, there is an excellent tool from Jiri Benc: **plotnetcfg**[^3]. To run it needs either root privileges or **CAP_SYS_ADMIN** and **CAP_NET_ADMIN** capabilities. The tool will create an output file in dot format, that can then be converted for example to PNG format with the **dot** command.
 
-{% highlight shell %}
+{% highlight console %}
  # dnf install -y plotnetcfg
  # plotnetcfg > layout.out
  # dot -Tpng layout.out > layout.png
@@ -85,7 +85,7 @@ So to start with, lets see if the PCI port is proper for the NIC or NICs.
 
  - Get NIC PCI port information
 
-{% highlight shell %}
+{% highlight console %}
     # lshw -c network -businfo
     Bus info          Device      Class          Description
     ========================================================
@@ -95,7 +95,7 @@ So to start with, lets see if the PCI port is proper for the NIC or NICs.
 {% endhighlight %}
 
  - Check the NIC driver and Firmware
-{% highlight shell %}
+{% highlight console %}
 # ethtool -i p2p1 
 driver: qede
 version: 8.10.10.21
@@ -110,7 +110,7 @@ supports-priv-flags: yes
 {% endhighlight %}
 
  - Check the NIC NUMA node
-{% highlight shell %}
+{% highlight console %}
 # lspci -s 03:00.1 -vv | grep NUMA
 NUMA node: 1
 # cat /sys/bus/pci/devices/0000\:03\:00.1/numa_node
@@ -118,15 +118,15 @@ NUMA node: 1
 {% endhighlight %}
 
  - Now I can check the PCI Bus speed. For more than one 10Gbps NIC in the same bus (like dual-por NICs) at least PCI __Gen3__ (Width x8/x16) is recommended.
-{% highlight shell %}
+{% highlight console %}
 # lspci -s 03:00.1 -vv | grep LnkSta
 LnkSta: Speed 8GT/s, Width x8, TrErr- Train- SlotClk+ DLActive- BWMgmt- ABWMgmt-
 {% endhighlight %}
 
-Now that we know the NUMA node we can also check that if that is creating any impact in performance. In general a VM and its associated threads will run in a specific NUMA node and the memory pages and CPU in use should preferably be in the same NUMA node for highest performance. This is not always possible due to technical limitations. I.e. live-migration may have problems with CPU pinning/NUMA setups, which should be already fixed in the latest releases of Nova, however in some cases like NFV we would like to favor performance in detriment of the ability to livemigrate. CPU and NUMA pinning is a hard requirement in these scenarios. So the VNF (namely an instance) qemu-kvm threads will run in a pinned CPU, the memory pages should also match the NUMA node of the CPU and the NIC should also reside in it. Now there are multiple ways to consume this NIC from the guest, some workloads use DPDK or SR-IOV where one will dedicate specific sets of CPUs to the hypervisor and to the guests having as well as memory (normally hugepages) having in mind which NUMA node are they coming from, but I am not covering those here, and now a days there are even NUMA aware vSwitches, which will run an instnace and allocate a VIF to it in function of where the physical NIC that is in use by OpenvSwitch lives, thus avoiding cross-numa memory requests.
+Now that we know the NUMA node we can also check that if that is creating any impact in performance. In general a VM and its associated threads will run in a specific NUMA node and the memory pages and CPU in use should preferably be in the same NUMA node for highest performance. This is not always possible due to technical limitations. I.e. live-migration may have problems with CPU pinning/NUMA setups, which should be already fixed in the latest releases of Nova, however in some cases like NFV we would like to favor performance in detriment of the ability to livemigrate. CPU isolation (to dedicate some to a specific purpose) and CPU and NUMA pinning is a hard requirement in these scenarios. So the VNF (namely an instance) qemu-kvm threads will run pinned to a CPU that is only dedicated for that, the memory pages should also match the NUMA node of the CPU and the NIC should also reside in it. Now, there are multiple ways to consume this NIC from the guest. Some workloads use DPDK or SR-IOV where one will dedicate specific sets of CPUs to the hypervisor and to the guests having as well as memory (normally hugepages) having in mind which NUMA node are they coming from, but I am not covering those cases in this article. Nowadays there are even NUMA aware vSwitches, which will run an instnace and allocate a virtual interface (VIF) plug to it in function of which NUMA node where the physical NIC that is in use by OpenvSwitch lives, thus avoiding cross-numa memory requests. In other words there is matching between instance, OvS threads and NIC.
 
  - Check the NUMA architecture
-{% highlight shell %}
+{% highlight console %}
 #  numactl -H
 available: 1 nodes (0)
 node 0 cpus: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
@@ -139,8 +139,19 @@ node   0
 
 I only have here a single node, but the output will be similar with mulitple nodes. Important is to spot where the CPUs live, how much memory is in each node, the cross node distance (last table of the output) as in large architectures the distances varies from node to node and that is also a factor for the design.
 
+ - Another valid way to check CPU belonging to each NUMA node
+ 
+{% highlight console %}
+# lscpu | grep NUMA
+NUMA node(s):          4
+NUMA node0 CPU(s):     0,4,8,12,16,20,24,28
+NUMA node2 CPU(s):     1,5,9,13,17,21,25,29
+NUMA node4 CPU(s):     2,6,10,14,18,22,26,30
+NUMA node7 CPU(s):     3,7,11,15,19,23,27,31
+{% endhighlight %}
+
  - Also the statistics can give an idea on how efficient is the usage at the moment
-{% highlight shell %}
+{% highlight console %}
 # numastat
                            node0
 numa_hit              2176524897
@@ -153,11 +164,14 @@ other_node                     0
 
 Here the numa_miss shows how many local misses occurred, and other_node count should show how many access from remote nodes have happened (each node has its own counter).
 
-Small parenthesis here, if one wanted to test how the performance would improve matching the NUMA node, he/she could use the commands __taskset__ and __migratepages__ on the instance PID to achieve that.
+
+##### CPU Isolation and NUMA/CPU pinning
+
+Small parenthesis here to disgress on how CPU isolation and NUMA and CPU pinning is important for some virtual workloads which is closer to qemu/KVM. If one wanted to test how the performance would improve matching the NUMA node, he/she could use the commands __taskset__ and __migratepages__ on the instance PID to achieve that.
 
  - Check the current CPU affinity mask af qemu-kvm PID and restrict it to run on a specific set of CPUs (second CPU in this example) that correspond to a given NUMA node
  
-{% highlight shell %}
+{% highlight console %}
 # taskset -p 520733
 pid 520733's current affinity mask: ffffff
 # taskset -p  000002 520733
@@ -166,7 +180,7 @@ pid 520733's new affinity mask: 2
 {% endhighlight %}
 
  - Similarly __migratepages__ command will move the memory pages from a set of source NUMA nodes to a given destination node
-{% highlight shell %}
+{% highlight console %}
 # numastat -c qemu-kvm
 Per-node process memory usage (in MBs)
 PID              Node 0 Node 1 Total
@@ -190,7 +204,33 @@ Total                 0   5324  5324
 
 Then again this is just for testing purposes and have a better grasp of what could improve the behavior observed.
 
-Overall, at this point you should have gotten a good depiction of what the hardware and logical layouts look like and can observe how the problem description fits into it.
+For CPU isolation an important point is that we can use a **tuned** profile associated with the compute node exactly for that. For example NFV workloads will tend to use **cpu-partitioning** whereby the CPUs will be isolated per function, and that can be adjusted to fit our needs.
+
+{% highlight shell %}
+# grep -v ^# /etc/tuned/cpu-partitioning-variables.conf
+isolated_cores=16-31
+
+# tuned-adm profile cpu-partitioning
+
+# tuned-adm active
+Current active profile: cpu-partitioning
+{% endhighlight %}
+
+The previous lines tell to leave 16-31 cores free for other uses.
+While the following would tell the system to use 0-15 cores:
+
+{% highlight shell %}
+# grep CPUAffinity /etc/systemd/system.conf
+CPUAffinity=0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+{% endhighlight %}
+
+Last but not least all the previous configuration is normally coupled along with Huge Pages which have to be set in grub.
+
+{% highlight shell %}
+default_hugepagesz=1GB hugepagesz=1G hugepages=236 
+{% endhighlight %}
+
+Overall, at this point you should have gotten a good depiction of what the hardware and logical layouts look like, if configuration related to it is in place or not and can observe how the problem description fits into it.
 
 
 ### 2. Find a reproducer
@@ -364,7 +404,15 @@ $ perf report -i perf.data
 
 The perf report can be navigated interactively in the command line (or it can also be non-interactive using --stdio flag), and it basically shows how much CPU is being consumed in each function in a break-down tree.
 
-Following is an example output I captured from an OpenvSwitch process that was consuming 100% CPU in an OpenStack networker node. 
+Following is an example output I captured from an OpenvSwitch process that was consuming 100% CPU in an OpenStack networker node. ps command was showing the following output.
+
+{% highlight shell %}
+ PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+1512 root      10 -10 4352840 793864  12008 R  1101  0.3  15810:26 ovs-vswitchd
+{% endhighlight %}
+
+And the perf report follows.
+
 {% highlight shell %}
 -   96.77%     0.00%  ovs-vswitchd    [kernel.kallsyms]   [k] system_call_fastpath           
    - system_call_fastpath                
@@ -382,7 +430,7 @@ Following is an example output I captured from an OpenvSwitch process that was c
 ...
 {% endhighlight %}
 
-So in the previous example it can be observed that the process being checked is **ovs-vswitchd** and the funciton **security_netlink_send()** is consuming 95% of the CPU that the process is using. In this case it turned out to be a bug in openvswitch miscalculating the size of a netlink message. In case you are wondering, a netlink socket (AF_NETLINK) is basically a communication channel between userland and kernel land, and OpenvSwitch uses it extensively to send configuration messages between the openvswitch kernel module messages to the user land processes.
+So in the previous example it can be observed that the process being checked is **ovs-vswitchd** and the funciton **security_netlink_send()** is consuming 95% of the CPU that the process is using. In this case it turned out to be a bug in OvS miscalculating the size of a netlink message. In case you are wondering, a netlink socket (AF_NETLINK) is basically a communication channel between user land and kernel land, and OpenvSwitch uses it extensively to send configuration messages between the openvswitch kernel module messages to the user land processes.
 
 One can also see what a given CPU or group of CPUs is doing at a given point in time with **-C** flag.
 
