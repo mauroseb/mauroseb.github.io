@@ -169,11 +169,11 @@ other_node                     0
 Here the numa_miss shows how many local misses occurred, and other_node count should show how many access from remote nodes have happened (each node has its own counter).
 
 
-##### CPU Isolation and NUMA/CPU pinning
+##### CPU Isolation and NUMA/CPU pinning 
 
-Small parenthesis here to disgress on how CPU isolation and NUMA and CPU pinning is important for some virtual workloads which is closer to qemu/KVM. If one wanted to test how the performance would improve matching the NUMA node, he/she could use the commands __taskset__ and __migratepages__ on the instance PID to achieve that.
+Small parenthesis here to disgress deeper into CPU isolation and NUMA/CPU pinning which is important for some virtual workloads and closer to qemu/KVM rather than networking. If one wanted to test how the performance would improve matching the NUMA node, he/she could use the commands __taskset__ and __migratepages__ on the instance PID to achieve that.
 
- - Check the current CPU affinity mask af qemu-kvm PID and restrict it to run on a specific set of CPUs (second CPU in this example) that correspond to a given NUMA node
+ - Check the current CPU affinity mask of qemu-kvm PID and restrict it to run on a specific set of CPUs (second CPU in this example) that correspond to a given NUMA node
  
 {% highlight console %}
 # taskset -p 520733
@@ -210,12 +210,10 @@ Then again this is just for testing purposes and have a better grasp of what cou
 
 For CPU isolation an important point is that we can use a **tuned** profile associated with the compute node exactly for that. For example NFV workloads will tend to use **cpu-partitioning** whereby the CPUs will be isolated per function, and that can be adjusted to fit our needs.
 
-{% highlight shell %}
+{% highlight console %}
 # grep -v ^# /etc/tuned/cpu-partitioning-variables.conf
 isolated_cores=16-31
-
 # tuned-adm profile cpu-partitioning
-
 # tuned-adm active
 Current active profile: cpu-partitioning
 {% endhighlight %}
@@ -223,15 +221,15 @@ Current active profile: cpu-partitioning
 The previous lines tell to leave 16-31 cores free for other uses.
 While the following would tell the system to use 0-15 cores:
 
-{% highlight shell %}
+{% highlight console %}
 # grep CPUAffinity /etc/systemd/system.conf
 CPUAffinity=0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
 {% endhighlight %}
 
-Last but not least all the previous configuration is normally coupled along with Huge Pages which have to be set in grub.
+Last but not least all the previous configuration is normally coupled along with Huge Pages and other config (disabling C-states, soft lockups,set IOMMU, etc.) which have to be set in the grub kernel line.
 
-{% highlight shell %}
-default_hugepagesz=1GB hugepagesz=1G hugepages=236 
+{% highlight console %}
+ iommu=pt intel_iommu=on nohz=on intel_pstate=disable nosoftlockup default_hugepagesz=1GB hugepagesz=1G hugepages=236 
 {% endhighlight %}
 
 Overall, at this point you should have gotten a good depiction of what the hardware and logical layouts look like, if configuration related to it is in place or not and can observe how the problem description fits into it.
@@ -246,12 +244,12 @@ In addition, knowing the kind of traffic patterns that the application or system
 Here goes an example, let's say we have two running instances inside two different compute nodes and in the same virtual network, where one acts as the client and the other as the server, and under heavy load the communication lags. We suspect there are some packet being dropped. If we wanted to reproduce the issue, the easiest would be to run a single TCP_STREAM test as shown below while observing the systems stat counters that will show when and where there are drops happening.
 
 On the _server_ instance:
-{% highlight shell %}
+{% highlight console %}
 [root@hostb~]# iperf3 -s
 {% endhighlight %}
   
 On the _client_ instance:
-{% highlight shell %}
+{% highlight console %}
 [root@hosta~]# iperf3 -c 172.16.0.2
 Connecting to host 172.16.0.2, port 5201
 [  4] local 172.16.0.1 port 43488 connected to 172.16.0.2 port 5201
@@ -286,7 +284,7 @@ What regards to the NIC configuration, it is useful to observe the statistics of
 
 Now that there is a way to consistently reproduce the issue, the next step would be to simplify it as much as possible. The reproduction of the problem can depend on multiple factors like hardware architecture, NIC vendor/model, firmware version, OS version, kernel version, NIC driver version, physical network devices (switches, load balancers and routers), virtual devices that have to be crossed. Many times permutation or removal of any of these components is helpful to narrow down the problem to a particular component before delving deeper into the analysis. 
 
-For that purpose, one could try for example to reproduce with the latest kernel available (downstream in case of _RHEL_), then the latest upstream kernel, also sometimes the latest kernel in __linux-next__ or __net-next__ trees of the linux kernel (which will become part of the next upstream linux kernel release) if there is any promising commit related to the apparent problem.
+For that purpose, one could try for example to reproduce with a different kernel. Starting with the latest kernel available (downstream in case of _RHEL_), the latest upstream kernel, also sometimes, if there is any promising commit related to the apparent problem, the latest kernel in __linux-next__ or __net-next__ trees of the linux kernel (which will become part of the next upstream linux kernel release).
 
 Taking _RHEL_ as reference:
 
@@ -294,7 +292,7 @@ Taking _RHEL_ as reference:
   
   * **Test lastest upstream stable kernel.** The easiest here is to leverage **elrepo** repository which provides an RPM for Centos and RHEL distros built from the **mainline** stable branch of Linux Kernel Archive and thus named **kernel-ml** to avoid conflict with RHEL stock kernels. In the following example I am installing the RPM for major version 7 and setting grub to boot from it (grub menu entry number 0) only once as we just want to test a reproducer and go back to the default kernel:
   
-  {% highlight shell %}
+  {% highlight console %}
   # rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
   # yum install https://www.elrepo.org/elrepo-release-7.0-4.el7.elrepo.noarch.rpm
   # yum --enablerepo=elrepo-kernel install kernel-ml
@@ -304,7 +302,7 @@ Taking _RHEL_ as reference:
   * **Test linux-next kernel.** Similarly, when I expect some commit to solve my problem but it is not yet released upstream, I can test with the branches that are already accepted for the next stable release as follows. 
   
   
-  {% highlight shell %}
+  {% highlight console %}
   $ git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
   $ cd linux
   $ git remote add linux-next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
@@ -314,7 +312,7 @@ Taking _RHEL_ as reference:
 
 Now a specific **linux-next** tag can be checked out and built[^4]. Alternatively the **net-next** branch can also be used.
 
-  {% highlight shell %}
+  {% highlight console %}
   $ git remote add net git://git.kernel.org/pub/scm/linux/kernel/git/davem/net.git
   $ git fetch net
   {% endhighlight %}
@@ -329,7 +327,7 @@ Actions like these have been the fastest way to identify existing bugs. Just by 
 
 There is some extra work to identify which commit or set of commits are needed to solve the problem. To start with, one could list the commits between the problematic and the fixed kernel:
 
-{% highlight shell %}
+{% highlight console %}
   $ git log --oneline v5.6-rc2..v5.6-rc3 net/ include/net/
   3dc55dba6723 Merge git://git.kernel.org/pub/scm/linux/kernel/git/netdev/net
   3a20773beeee net: netlink: cap max groups which will be considered in netlink_bind()
@@ -346,7 +344,7 @@ There is some extra work to identify which commit or set of commits are needed t
 
 In case you missed it, git also provides __bisect__ subcommand which helps in pinpointing the culprit out of those commits by testing good and bad versions. Nevertheless the software and hardware vendors would normally take care of the search at this level. Once the commit or commits needed are known I can get in which branch was applied in the downstream tree:
 
-{% highlight shell %}
+{% highlight console %}
   $ git branch --contains cc2af34db9a5b5222eefdc25fd1265e305df9f2e
   * (HEAD detached at kernel-3.10.0-1122.el7)    
 {% endhighlight %}
@@ -365,7 +363,7 @@ In the simplest stats check, I would like to see the difference between the outp
   
 For instance, the following output would tell that after the reproducer there was an increased number of **no_buff_discards**, meaning that the NIC ran out of space in its RX ring buffer and had to discard the ingressing frames.
 
-{% highlight shell %}
+{% highlight console %}
 # ethtool -S p2p1  | egrep 'error|miss|drop|bad|crc|nop|discard' | egrep -v ': 0$'
      no_buff_discards: 10736
 
@@ -389,20 +387,20 @@ From the set of tools that will help in this endeavour **perf** is probably the 
 
 Back to our example, we see **ksoftirqd/X** kernel thread consuming 100% CPU while the issue is reproducing. That means that there are either too many softirqs being processed by the same CPU or each softirq is taking too much to be serviced, and in turn that leads to packet drops. Note that we will need the kernel-debuginfo package in order for perf to display useful information, otherwise the hex addresses are not translated to function names. Also note that we usually have to enable the channel that contains the debug packages for that (i.e. for RHEL7 is **rhel-7-server-debug-rpms**)
 
-{% highlight shell %}
+{% highlight console %}
 $ yum install -y perf kernel-debuginfo kernel-debuginfo-common
 {% endhighlight %}
   
 So after learning the PID of the process consuming 100% CPU:
 
-{% highlight shell %}
+{% highlight console %}
 $ perf record --call-graph dwarf -p <PID> sleep 1
 {% endhighlight %}
 
 The previous command will create a perf.data file, with debugging data in DWARF format, in the working directory showing what user or kernel functions have been invoked from that thread during the recorded period (1 second).
 
 This file can be visualized as follows.
-{% highlight shell %}
+{% highlight console %}
 $ perf report -i perf.data
 {% endhighlight %}
 
@@ -410,14 +408,14 @@ The perf report can be navigated interactively in the command line (or it can al
 
 Following is an example output I captured from an OpenvSwitch process that was consuming 100% CPU in an OpenStack networker node. ps command was showing the following output.
 
-{% highlight shell %}
+{% highlight console %}
  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
 1512 root      10 -10 4352840 793864  12008 R  1101  0.3  15810:26 ovs-vswitchd
 {% endhighlight %}
 
 And the perf report follows.
 
-{% highlight shell %}
+{% highlight console %}
 -   96.77%     0.00%  ovs-vswitchd    [kernel.kallsyms]   [k] system_call_fastpath           
    - system_call_fastpath                
       - 96.49% sys_sendmsg             
@@ -438,7 +436,7 @@ So in the previous example it can be observed that the process being checked is 
 
 One can also see what a given CPU or group of CPUs is doing at a given point in time with **-C** flag.
 
-{% highlight shell %}
+{% highlight console %}
 $ perf top -C 0-2,4 -g
 {% endhighlight %}
 
@@ -447,7 +445,7 @@ A similar result can be achieved using the **ftrace** facility directly by confi
 
 As mentioned before, nother versatile tool to trace packets being dropped is **dropwatch**. This tool will basically report every time the **skb_free()** function is called and from which function. An **SKB** is the data structure that represents a packet in the kernel space, buffer which needs to be released after it is no longer useful when the packet dropped. There are many valid reasons why the **SKB** memory should be freed, however when there are spurious drops, they will also show up in the list.
 
-{% highlight shell %}
+{% highlight console %}
 # yum install -y dropwatch dropwatch-debuginfo
 # dropwatch -l kas
 Initalizing kallsyms db
@@ -476,7 +474,7 @@ There is nothing fancy going on in the output above, though.
 
 In regard to dynamic debugging, I will bring up one example. One customer of mine once was reporting that while live migrating a bulk amount of instances (+50) from one compute to another (operation that creates multiple parallel connections among the computes and demands high troughput), after 30 minutes or so their bond interface was getting into CHURNED state. I am not getting into details what that is, but you can consider that the syncrhonization between the switch and the compute node was severed. This issue turned to be a bug in **qed/qede** drivers which was at some point in time dropping LACPDUs (control frames for 802.3ad LACP bonds). To get to the bottom of it I just enabled dynamic debbugging in the bonding module by adding in the kernel command line (/etc/default/grub) **bonding.dyndbg="+p"**, this would allow to get debug from this module in **dmesg** output including things like when the LACPDU was being received. At some point was clear that the LACP PDU was not longer observed (because the driver was dropping it).
 
-{% highlight shell %}
+{% highlight console %}
 [88233.914226] bond1: Received LACPDU on port 1 slave p2p1
 [88234.024144] bond1: Received LACPDU on port 2 slave p3p1
 [88234.662755] Sent LACPDU on port 1
