@@ -351,17 +351,17 @@ In case you missed it, git also provides __bisect__ subcommand which helps in pi
 
 Now that we have a reproducer with the simplest scenario we came up with we can dive into the analysis of the systems involved while this happens.
 
-### 4. Observability of Stats and Performance Metrics
+### 4. Analysis of Stats and Performance Metrics
 
-When dealing with a performance issues, normally it is not easy to know where to start digging. It always helps checking out the output of performance and metrics collection tools, looking for system stats like RX/TX packet counts and sizes in each interface involved in the data path, error counts of the NICs, and in general what counters overall are moving network wise or not.
+When dealing with a performance issues, normally it is not easy to know where to start digging. Unvariably, it always helps checking out the output of performance and metrics collection tools, looking for system stats like RX/TX packet counts and sizes in each interface involved in the data path, error counts of the NICs, and in general what counters overall are moving network wise or not.
 
-It is very common that production environments have proper performance tooling in place, like software stacks like the __prometheus__ stack, a __TICK__ stack (InfluxDB based), __ganglia__, an __rrdtool__ derivatives, or similar. Hence one could rely directly on them for many kinds of reading. However I am assuming that we can only check the server with standard command line tools.
+It is very common that production environments have proper performance tooling in place, like software stacks like the __prometheus__ stack, a __TICK__ stack (InfluxDB based), __ganglia__, an __rrdtool__ derivatives, or similar. Hence one could directly rely on them for many kinds of readings. However I will assume that we can only use the server's standard command line tools.
 
 There are hundreds of command line tools for performance to choose here but for the sake of simplicity I will focus on the readings of __ethtool__ and also __sar__ (the later because is the most widespread accross systems). . One interesting tool to take a look at is __pcp__ (performance co-pilot [^5]). In the end, it does not really matter which tool to use as long as it does the job. For a comprehensive list of Linux command line tools check out the mind blowing work of Brendan Gregg [^6][^7].
 
 In the simplest stats check, I would like to see the difference between the output of some standard commands: **ethtool -S <NIC>**, **ip -s -s a**, **ss -natuples**, **netstat -s**, **nstat**, system metrics (and if we work with OvS there is also a set of specific commands), etc., before and after reproducing the issue, in order to observe errors and that the counters increasing are expected (for which is good to create a script).
   
-For instance, the following output would tell that after the reproducer there was an increased number of **no_buff_discards**, meaning that the NIC ran out of space in its RX ring buffer and had to discard the ingressing frames.
+For instance, the following output would tell that after the reproducer (second run) there was an increased number of **no_buff_discards**, meaning that the NIC ran out of space in its RX ring buffer and had to discard the ingressing frames.
 
 {% highlight console %}
 # ethtool -S p2p1  | egrep 'error|miss|drop|bad|crc|nop|discard' | egrep -v ': 0$'
@@ -377,7 +377,7 @@ Regarding this point I would mention that __ethtool__ is the most trustworthy to
 So now we have observed a specific effect of the reproducer that can shed some further light into the issue. In the case of no_buff_discards, it basically indicates that the NIC ran out of space in the RX ring buffers, which can be caused by multiple reasons, but mainly that the RX/TX ring buffer is not properly sized, that the kernel threads supposed to consume this buffer are not doing it fast enough or that flow control if configured, is not working as it should.
 
 
-### 5. Tracing and Packet Captures
+### 5. Analysis by Process Tracing and Packet Captures
 
 If we got to the point where the stats and performance metrics still are not pointing to a clear culprit for the reported behavior, we may need to delve even deeper into the issue through the use of packet captures or through the tracing of the processes involved.
 
@@ -517,24 +517,24 @@ The best practices dictate to use at least 6 VLANs (+1 optional for management) 
 
 ## References
 
-[^1]: https://landing.google.com/sre/sre-book/chapters/effective-troubleshooting/
+[^1]: <https://landing.google.com/sre/sre-book/chapters/effective-troubleshooting>
 
-[^2]: https://www.redhat.com/sysadmin/beginners-guide-network-troubleshooting-linux
+[^2]: <https://www.redhat.com/sysadmin/beginners-guide-network-troubleshooting-linux>
 
-[^3]: https://github.com/jbenc/plotnetcfg
+[^3]: <https://github.com/jbenc/plotnetcfg>
 
-[^4]: https://kernelnewbies.org/KernelBuild
+[^4]: <https://kernelnewbies.org/KernelBuild>
 
-[^5]: https://pcp.io/docs/guide.html
+[^5]: <https://pcp.io/docs/guide.html>
 
-[^6]: http://www.brendangregg.com/
+[^6]: <http://www.brendangregg.com>
 
-[^7]: http://www.brendangregg.com/blog/2014-11-22/linux-perf-tools-2014.html
+[^7]: <http://www.brendangregg.com/blog/2014-11-22/linux-perf-tools-2014.html>
 
-[^8]: https://www.rdoproject.org/networking/networking-in-too-much-detail/
+[^8]: <https://www.rdoproject.org/networking/networking-in-too-much-detail>
 
-[^9]: https://docs.openstack.org/neutron/latest/
+[^9]: <https://docs.openstack.org/neutron/latest>
 
-[^10]: https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html-single/networking_guide/index
+[^10]: <https://access.redhat.com/documentation/en-us/red_hat_openstack_platform/13/html-single/networking_guide/index>
 
-[^11]: https://www.slideshare.net/nyechiel/neutron-networking-with-red-hat-enterprise-linux-openstack-platform
+[^11]: <https://www.slideshare.net/nyechiel/neutron-networking-with-red-hat-enterprise-linux-openstack-platform>
