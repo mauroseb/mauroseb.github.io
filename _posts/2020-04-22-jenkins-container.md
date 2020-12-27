@@ -17,7 +17,7 @@ Plenty of sources to achieve the same, but main is the official one[^1].
 1. Pull the latest official image for Jenkins
 <!-- more -->
 
-{% highlight shell %}
+{% highlight console %}
 
         # podman pull jenkins/jenkins
         Trying to pull jenkins/jenkins...
@@ -61,7 +61,7 @@ Plenty of sources to achieve the same, but main is the official one[^1].
 
 3. Test run
 
-{% highlight shell %}
+{% highlight console %}
        # podman run --name jenkins-master --rm -d -p 8080:8080 -p 50000:50000 -v /home/jenkins:/var/jenkins_home:z jenkins/jenkins
        3f4a74966f26e4d98ac7daacf7f39f1a43f80388ce40adc7dfd067d0beb01f30
 
