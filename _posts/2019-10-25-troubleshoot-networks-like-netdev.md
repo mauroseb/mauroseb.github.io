@@ -10,9 +10,9 @@ author: mauroseb
 
 ## Introduction
 
-I am not a kernel developer myself but while working at Red Hat, many times I had the chance to work next to some real experts in the matter who are and have been for ages active contributors to the kernel networking stack, and during the process could learn some interesting techniques when it comes to troubleshoot network issues in complex environments like OpenStack, where there are dozens or even hundreds of virtual devices, overlay networks involved, featured smart NICs, and more. Hopefully this article can help to give not just a boring collection of front line tales but also give shape to an approach that would help to sort out similar problems.
+I am not a kernel developer myself, however while at Red Hat, many times had the chance to work next to some real experts in the matter, who are and have been for ages active contributors to the kernel networking stack. During the process I could learn some interesting techniques when it comes to troubleshoot network issues in complex environments like OpenStack or OpenShift, where there are dozens or even hundreds of virtual devices, overlay networks, featured smart NICs, and more. Hopefully this article can help to give not just a boring collection of front line tales but also shape an approach that would help you to address similar problems.
 
-It should be noted that even though most examples in the series involve OpenStack environments, the approaches and techniques discussed would hopefully help with networking issues in **any** linux based environment, with or without OpenvSwitch or OpenStack in the picture.
+It should be noted that even though most examples in the series will involve OpenStack or OpenShift environments, the approaches and techniques discussed would hopefully help with networking issues in **any** linux based environment, with or without OpenvSwitch or OpenStack in the picture.
 
 Lastly this is the first article from hopefully many, therefore will end up in the first example after covering the basics. More to follow.
 <!-- more -->
@@ -20,33 +20,31 @@ Lastly this is the first article from hopefully many, therefore will end up in t
 
 ## Know Your Enemy
 
-Albeit it is not mandatory, getting familiar as much as possible with the GNU/Linux kernel receive and sending data paths can be extremely helpful to know where you are standing at the time of troubleshooting issues and identifying a root cause. Same goes for OpenvSwitch, DPDK and other components that you often run into in OpenStack land.
+Albeit it is not mandatory, getting familiar as much as possible with the GNU/Linux kernel receive and sending data paths can be extremely helpful to know where you are standing at the time of troubleshooting issues and identifying a root cause. Same goes for OpenvSwitch, OpenVirtual Networking, DPDK and other components that one often run into in these lands.
 
-I would like to recognize that it gave me some hard time to find good comprehensive literature in regard to linux networking internals. In general for this specific topic one ends up crawling [LKML](https://lkml.org/), blog posts and presentations. For example some well-known kernel related books like _"Understanding the Linux Kernel"_ or _"Linux Device Drivers"_ (which dedicates mainly one chapter, and one for DMA) do not cover the topic extensively, so I will start by noting the following book that has been the most comprehensive source for the topic I could find so far:
+I have to recognize that it gave me some hard time to find good comprehensive and structured literature in regard to linux networking internals. In general for this specific topic one ends up crawling [LKML](https://lkml.org/), blog posts and presentations. For example some well-known kernel related books like _"Understanding the Linux Kernel"_ or _"Linux Device Drivers"_ (latter dedicates mainly one chapter for networking, and one for DMA) do not cover the topic extensively, so I will start by noting the following book which has been the best source for the topic I could find so far:
 
   - ["Linux Kernel Networking: Implementation and Theory" - Rami Rosen](https://www.amazon.nl/Linux-Kernel-Networking-Implementation-Theory/dp/143026196X/ref=sr_1_1?__mk_nl_NL=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=Linux+Kernel+Networking&qid=1596125842&sr=8-1)
   
-Before starting with a top-down approach, let's take a look at what "down" means in the following (quite intimidating) image form Linux Foundation wiki depicts the data flows for TCP over IPv4 and some other.
+Before starting with a top-down approach, let's take a look at what "down" means in the following (quite intimidating) image form Linux Foundation wiki, depicting the data flows for TCP over IPv4 and some other.
 
 <img src="/images/Network_data_flow_through_kernel.png" alt="Kernel network data flow PNG" style="width:75%;"/>
 
 
-Since my focus is in troubleshooting I am not going to cover most of that in this post but a quick overview of the receive stack should be handy to understand better some of the examples in the following sections.
+Since my focus is in troubleshooting, I am not going to cover most of it in this post. As a quick overview of (specially) the receive stack will be handy to understand better some of the examples in the following sections, next is an overly simplified glimpse of the flow may be as follows:
 
-An overly simplified glimpse of the flow may be as follows:
-
- 1. It all starts with the NIC receiving a packet from the network.
+ 1. It all starts with the NIC receiving a packet from the network. The packet may belong to an existing connection or not.
  2. The packet is DMA-copied into the RX ring buffer for the NIC in RAM.
  3. An IRQ is raised.
- 4. To handle the IRQ, a CPU will run the Interrupt Service Routine that corresponds to the IRQ number in question. This routine, commonly denominated "top-half", is the very critical path that has to be done to not loose any data, and has to be kept as small as possible. At the end of the routine a call napi_schedule() is made to wake up the NAPI poll_loop (I will go back to what NAPI/New API is in a minute). The last point is done for two reasons: A. the NIC NAPI struct is added to the current's CPU softnet_data structure poll_list, and B. Call _raise_softirq_irqoff(NET_RX_SOFTIRQ) to raise NET_RX_SOFTIRQ soft IRQ in order to signal the system to finish the processing of the packet reception ("bottom-half"). 
+ 4. To handle the IRQ, a CPU will run the Interrupt Service Routine that corresponds to the IRQ number in question. This routine, commonly denominated "top-half", is the very critical mandatory path that has to be performed to not loose any data, and has to be kept as small as possible. At the end of the routine, a call napi_schedule() is made to wake up the NAPI poll_loop (I will go back to what NAPI/New API is in a minute). The last point is done for two reasons: A. the NIC NAPI struct is added to the current's CPU softnet_data structure poll_list, and B. Call _raise_softirq_irqoff(NET_RX_SOFTIRQ) to raise NET_RX_SOFTIRQ soft IRQ in order to signal the system to finish the processing of the packet reception ("bottom-half"). 
  5. The IRQ is cleared.
  6. Since the NET_RX_SOFTIRQ was raised, a kernel thread (ksoftirqd/CPUID) will process it by executing net_rx_action() routine.
- 7. The IRQ is  poll_list entry is received.
- 8. If the netdev_budget or time window is not exceeded the network card driver's poll function will be invoked to fetch more packets from its RX ring buffer. If theere are no more packets NAPI poll_loop will exit and re-enable the IRQ.
- 9. After that napi_gro_receive() is called, to check if the packets can be coaleased into a bigger packet (through Generic Receive Offloading).
+ 7. The IRQ's poll_list entry is received.
+ 8. The netdev_budget and time window are reset and the packet is processed. Following, the routine will check if the budget or the time are not exceeded, and then the network card driver's poll function will be invoked to fetch more packets from its RX ring buffer. If theere are no more packets (or budget / time is exceeded) NAPI poll_loop will exit and re-enable the IRQ.
+ 9. After that napi_gro_receive() is called, to check if the packets can be coaleased into a bigger packet (through Generic Receive Offloading) before passing it along.
  10. The GRO'ed (or not) packet is passed to net_receive_skb() to be sent up to the protocol stacks.
 
-NAPI was devised to increase the efficiency of packet processing by reducing the overhead of running the whole IRQ cycle for every packet received. As shown above, the basic idea is after processing the first packet, to actively poll the network card RX ring buffer for new packets without waiting for a new interrupt to arrive.
+NAPI was devised to increase the efficiency of packet processing (which would otherwise quickly hit some theoretical CPU limits for 1Gbit and higher networks), by reducing the overhead of running the whole IRQ cycle for every packet received. As shown above, the basic idea is after processing the first packet, to disable subsequent interrupts and instead actively poll the network card RX ring buffer for new packets.
 
 
 ## General Approach
