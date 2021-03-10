@@ -34,15 +34,18 @@ Before starting with a top-down approach, let's take a look at what "down" means
 Since my focus is in troubleshooting, I am not going to cover most of it in this post. As a quick overview of (specially) the receive stack will be handy to understand better some of the examples in the following sections, next is an overly simplified glimpse of the flow may be as follows:
 
  1. It all starts with the NIC receiving a packet from the network. The packet may belong to an existing connection or not.
- 2. The packet is DMA-copied into the RX ring buffer for the NIC in RAM.
+ 2. The packet is DMA-copied into a pre allocated RX ring buffer for the NIC in RAM. The ring is acts like a FIFO queue with sk_buff structures representing each packet (SKBs).
  3. An IRQ is raised.
- 4. To handle the IRQ, a CPU will run the Interrupt Service Routine that corresponds to the IRQ number in question. This routine, commonly denominated "top-half", is the very critical mandatory path that has to be performed to not loose any data, and has to be kept as small as possible. At the end of the routine, a call napi_schedule() is made to wake up the NAPI poll_loop (I will go back to what NAPI/New API is in a minute). The last point is done for two reasons: A. the NIC NAPI struct is added to the current's CPU softnet_data structure poll_list, and B. Call _raise_softirq_irqoff(NET_RX_SOFTIRQ) to raise NET_RX_SOFTIRQ soft IRQ in order to signal the system to finish the processing of the packet reception ("bottom-half"). 
+ 4. To handle the IRQ, a CPU will run the Interrupt Service Routine that corresponds to the IRQ number in question. This routine, commonly denominated "top-half", is the very critical mandatory path that has to be performed to not loose any data, and has to be kept as small as possible. At the end of the routine, a call napi_schedule() is made to wake up the NAPI poll_loop (I will go back to what NAPI/New API is in a minute). The last point is done for two reasons: A. the NIC NAPI struct is added to the current's CPU softnet_data structure's poll_list, and B. Call _raise_softirq_irqoff(NET_RX_SOFTIRQ) to raise NET_RX_SOFTIRQ soft IRQ in order to signal the system to finish the processing of the packet reception ("bottom-half"). 
  5. The IRQ is cleared.
  6. Since the NET_RX_SOFTIRQ was raised, a kernel thread (ksoftirqd/CPUID) will process it by executing net_rx_action() routine.
  7. The IRQ's poll_list entry is received.
  8. The netdev_budget and time window are reset and the packet is processed. Following, the routine will check if the budget or the time are not exceeded, and then the network card driver's poll function will be invoked to fetch more packets from its RX ring buffer. If theere are no more packets (or budget / time is exceeded) NAPI poll_loop will exit and re-enable the IRQ.
  9. After that napi_gro_receive() is called, to check if the packets can be coaleased into a bigger packet (through Generic Receive Offloading) before passing it along.
- 10. The GRO'ed (or not) packet is passed to net_receive_skb() to be sent up to the protocol stacks.
+ 10. The GRO'ed (or not) packet is passed to net_receive_skb() which will determine how to send it up to the protocol layers.
+ 11. The protocol specific functions of the next layer (L3) like arp_rcv() or ip_rcv() will take care of the corresponding packet. Here some checks on the packet are done based on the L3 headers (checksum, length, valid destination, if forwarding is needed, etc.) and finally based on the IP protocol field will select the transport protocol handler.
+ 12. The hnadler for TCP (tcp_rcv()) and UDP (udp_rcv()) are the most common cases. Similarly to the previous step, some L4 header processing is done and it is passed to the next layer.
+ 13. Finally the process waiting for the data through the invokation of read(), recvfrom() or recvmsg() is woken up, and will copy the data from the connection's queue.
 
 NAPI was devised to increase the efficiency of packet processing (which would otherwise quickly hit some theoretical CPU limits for 1Gbit and higher networks), by reducing the overhead of running the whole IRQ cycle for every packet received. As shown above, the basic idea is after processing the first packet, to disable subsequent interrupts and instead actively poll the network card RX ring buffer for new packets.
 
