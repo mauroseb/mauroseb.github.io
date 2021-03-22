@@ -36,7 +36,7 @@ Now lets get to work.
 
  1. Assume you have a working OCP4 cluster and you are cluster admin.
 
-{% highlight bash %}
+{% highlight console %}
 $ oc whoami
 system:admin
 
@@ -96,7 +96,7 @@ The standard way to install Service Mesh is through its operator. But first one 
 
 2. Check that the installation is successful:
 
-{% highlight bash %}
+{% highlight console %}
 $ oc get csv
 NAME                                         DISPLAY                  VERSION               REPLACES   PHASE
 elasticsearch-operator.4.1.41-202004130646   Elasticsearch Operator   4.1.41-202004130646              Succeeded
@@ -112,7 +112,7 @@ elasticsearch-operator-57cbcc6565-n9ts5   1/1     Running   0          4m59s
 
 2. Check that the installation is successful:
 
-{% highlight bash %}
+{% highlight console %}
 $ oc get csv
 NAME                                         DISPLAY                    VERSION               REPLACES   PHASE
 elasticsearch-operator.4.1.41-202004130646   Elasticsearch Operator     4.1.41-202004130646              Succeeded
@@ -130,7 +130,7 @@ jaeger-operator-ff8cccbd8-j67jc           1/1     Running   0          2m42s
 
 2. Check that the installation is successful:
 
-{% highlight bash %}
+{% highlight console %}
 $ oc get csv
 NAME                                         DISPLAY                    VERSION               REPLACES                  PHASE
 elasticsearch-operator.4.1.41-202004130646   Elasticsearch Operator     4.1.41-202004130646                             Succeeded
@@ -146,7 +146,7 @@ kiali-operator-69bffd8cd4-nsmcj           2/2     Running   0          59s
 
 At this moment is time to proceed with the Service Mesh Operator itself.
 
-{% highlight bash %}
+{% highlight console %}
 $ oc adm new-project istio-operator --display-name="Service Mesh Operator"
 Created project istio-operator
 
@@ -174,7 +174,7 @@ istio-operator-568849cc4f-zw4nh   1/1     Running   0          2m4s   10.130.0.1
 
 1. Create SM control plane project
 
-{% highlight bash %}
+{% highlight console %}
 $ oc adm new-project istio-system --display-name="Service Mesh System"
 Created project istio-system
 {% endhighlight %}
@@ -182,7 +182,7 @@ Created project istio-system
 {:start="2"}
 2. Create a CRD definition like the follwoing:
 
-{% highlight bash %}
+{% highlight console %}
 apiVersion: maistra.io/v1
 kind: ServiceMeshControlPlane
 metadata:
@@ -242,7 +242,7 @@ servicemeshcontrolplane.maistra.io/service-mesh-installation created
 
 Wait for containers to come up from 5 to 10 minutes.
 
-{% highlight bash %}
+{% highlight console %}
 $  oc get po -o wide -n istio-system
 NAME                                      READY   STATUS    RESTARTS   AGE     IP            NODE                                         NOMINATED NODE   READINESS GATES
 grafana-798f5c4695-7rcf2                  2/2     Running   0          6m33s   10.130.0.23   ip-10-0-143-141.eu-west-1.compute.internal   <none>           <none>
@@ -262,7 +262,7 @@ prometheus-7ddcc755fb-q9n6l               2/2     Running   0          10m     1
 {:start="3"}
 3. Create ServiceMeshMemberRoll with the projects which need to take part of the service mesh
 
-{% highlight bash %}
+{% highlight console %}
 $ echo "apiVersion: maistra.io/v1
 kind: ServiceMeshMemberRoll
 metadata:
@@ -293,7 +293,7 @@ The service mesh component Pilot will create graph modeling the discovered micro
 
 From previous section I have included **coolapp** namespace in the service mesh member roll definition:
 
-{% highlight bash %}
+{% highlight console %}
 $ oc get servicemeshmemberrolls.maistra.io
 NAME      MEMBERS
 default   [coolapp]
@@ -335,7 +335,7 @@ metadata:
 
  - Create the coolapp namespace to deploy the microservices
 
-{% highlight bash %}
+{% highlight console %}
 $ oc new-project coolapp
 Now using project "coolapp" on server "https://api.cluster-f2a8.f2a8.sandbox663.opentlc.com:6443".
 
@@ -351,7 +351,7 @@ to build a new example application in Python. Or use kubectl to deploy a simple 
 
  - Create the catalog microservice
 
-{% highlight bash %}
+{% highlight console %}
 $ oc create -f lab/ocp-service-mesh-foundations/catalog/kubernetes/catalog-service-template.yml -n coolapp
 deployment.extensions/catalog-v1 created
 
@@ -377,7 +377,7 @@ catalog-v1-6d6b478456-9vsm2   2/2     Running   0          2m5s
 
  - Note that we have two containers for the catalog pod
 
-{% highlight bash %}
+{% highlight console %}
 $ oc get pod/catalog-v1-6d6b478456-9vsm2  -o yaml
 apiVersion: v1
 kind: Pod
@@ -748,7 +748,7 @@ replicaset.apps/partner-v1-77bd558948   1         1         1       2m49s
 
 Now I will create the Istio ingress gateway for the mesh.
 
-{% highlight bash %}
+{% highlight console %}
 $ cat service-mesh-gw.yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
@@ -792,7 +792,7 @@ virtualservice.networking.istio.io/ingress-gateway created
 
  - Identifying the URL of the ingress gateway
 
-{% highlight bash %}
+{% highlight console %}
 $ oc -n istio-system get route istio-ingressgateway -o jsonpath='{.spec.host}{"\n"}'
 istio-ingressgateway-istio-system.apps.cluster-f2a8.f2a8.sandbox663.opentlc.com
 
@@ -806,7 +806,7 @@ istio-ingressgateway-istio-system.apps.cluster-f2a8.f2a8.sandbox663.opentlc.com
 
  - Now lets create some requets
 
-{% highlight bash %}
+{% highlight console %}
 $ curl $GATEWAY_URL
 gateway => partner => catalog v1 from '6d6b478456-9vsm2': 1
 $ curl $GATEWAY_URL
@@ -822,14 +822,14 @@ gateway => partner => catalog v1 from '6d6b478456-9vsm2': 3
 
 The next test is to create a new version of catalog microservice and let the service mesh to route to it.
 
-{% highlight bash %}
+{% highlight console %}
 $ oc create -f lab/ocp-service-mesh-foundations/catalog-v2/kubernetes/catalog-service-template.yml -n coolapp
 deployment.extensions/catalog-v2 created
 {% endhighlight %}
 
 Now we have two catalog versions running
 
-{% highlight bash %}
+{% highlight console %}
 $ oc get pods -o wide --show-labels
 NAME                          READY   STATUS    RESTARTS   AGE     IP            NODE                                         NOMINATED NODE   READINESS GATES   LABELS
 catalog-v1-6d6b478456-9vsm2   2/2     Running   0          2d15h   10.130.0.32   ip-10-0-143-141.eu-west-1.compute.internal   <none>           <none>            app=catalog,application=catalog,deployment=catalog,failure-domain.beta.kubernetes.io/region=eu-west-1,failure-domain.beta.kubernetes.io/zone=eu-west-1a,pod-template-hash=6d6b478456,version=v1
@@ -841,7 +841,7 @@ partner-v1-77bd558948-zskt5   2/2     Running   0          2d14h   10.130.0.33  
 
 The service that I created originally for catalog v1 now has two endpoints, one for each version because both versions share the label __application=catalog__ .
 
-{% highlight bash %}
+{% highlight console %}
 $ oc describe service catalog
 Name:              catalog
 Namespace:         coolapp
@@ -860,7 +860,7 @@ Events:            <none>
 
 By default OpenShift is loadbalancing in a round-robin fashion between the two now.
 
-{% highlight bash %}
+{% highlight console %}
 $ curl $GATEWAY_URL
 gateway => partner => catalog v2 from '58b586459d-wvmk8': 1
 $ curl $GATEWAY_URL
@@ -877,7 +877,7 @@ Service Mesh supports 5 types of rules. The VirtualService object represents the
 In this case I am requesting to route 100% of the traffic to the subset of backend hosts named __version-v2__.
 
 
-{% highlight bash %}
+{% highlight console %}
 $ cat lab/ocp-service-mesh-foundations/istiofiles/virtual-service-catalog-v2.yml
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -899,7 +899,7 @@ virtualservice.networking.istio.io/catalog created
 
 However since there is no such subset yet created the curl to the external endpoint fails with 503.
 
-{% highlight bash %}
+{% highlight console %}
 $ curl -v $GATEWAY_URL
 * About to connect() to istio-ingressgateway-istio-system.apps.cluster-f2a8.f2a8.sandbox663.opentlc.com port 80 (#0)
 *   Trying 3.248.149.209...
@@ -925,7 +925,7 @@ gateway => 503 partner => 503
 
 Next step is to create this subsets now (one for each version) then. The subsets are created based on the node label __version__.
 
-{% highlight bash %}
+{% highlight console %}
 $ cat  ~/lab/ocp-service-mesh-foundations/istiofiles/destination-rule-catalog-v1-v2.yml 
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
@@ -950,7 +950,7 @@ destinationrule.networking.istio.io/catalog created
 
 Retrying that request now redirects all traffic to v2.
 
-{% highlight bash %}
+{% highlight console %}
 $ curl $GATEWAY_URL
 gateway => partner => catalog v2 from '58b586459d-wvmk8': 3
 $ curl $GATEWAY_URL
@@ -961,7 +961,7 @@ gateway => partner => catalog v2 from '58b586459d-wvmk8': 4
 Effectively catalog v2 is now responding.
 Finally I am going to redirect 100% of the traffic to __version-v1__ subset.
 
-{% highlight bash %}
+{% highlight console %}
 $ cat  ~/lab/ocp-service-mesh-foundations/istiofiles/virtual-service-catalog-v1.yml 
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -988,7 +988,7 @@ __NOTE:__ since the rule already existed I need to use replace and not create.
 
 Verify that the traffic is effectively reaching v1 catalog microservice:
 
-{% highlight bash %}
+{% highlight console %}
 $ curl $GATEWAY_URL
 gateway => partner => catalog v1 from '6d6b478456-9vsm2': 15
 $ curl $GATEWAY_URL
@@ -999,7 +999,7 @@ gateway => partner => catalog v1 from '6d6b478456-9vsm2': 16
 
 Lastly, I can split traffic 70% to catalog v1 and 30% to catalog v2.
 
-{% highlight bash %}
+{% highlight console %}
 $ cat ~/lab/ocp-service-mesh-foundations/istiofiles/virtual-service-catalog-v1_and_v2_70_30.yml 
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
