@@ -23,6 +23,6 @@ plugins:
 - 'jekyll-paginate'
 - 'jekyll-seo-tag'
 - 'jekyll-feed'
-exclude: ['README.md', 'Gemfile', 'Gemfile.lock', 'screenshot.png', 'create_post.py', 'templates', 'vendor']
+exclude: ['README.md', 'Gemfile', 'Gemfile.lock', 'screenshot.png', 'templates', 'vendor']
 
-theme: jekyll-theme-hacker
+#theme: jekyll-theme-hacker
