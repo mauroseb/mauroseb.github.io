@@ -31,10 +31,11 @@ Before starting with a top-down approach, let's take a look at what "down" means
 <img src="/images/Network_data_flow_through_kernel.png" alt="Kernel network data flow PNG" style="width:75%;"/>
 
 
-Since my focus is in troubleshooting, I am not going to cover most of it in this post. As a quick overview of (specially) the receive stack will be handy to understand better some of the examples in the following sections, next is an overly simplified glimpse of the flow may be as follows:
+Since my focus is in troubleshooting, I am not going to cover most of it in this post. However a quick overview of the receive stack will be handy to understand better some of the examples in the following sections. 
+Next is an overly simplified glimpse of the receive flow:
 
  1. It all starts with the NIC receiving a packet from the network. The packet may belong to an existing connection or not.
- 2. The packet is DMA-copied into a pre allocated RX ring buffer for the NIC in RAM. The ring is acts like a FIFO queue with sk_buff structures representing each packet (SKBs).
+ 2. The packet is DMA-copied into a pre allocated RX ring buffer for the NIC in RAM. The ring is acts like a FIFO queue with __sk_buff__ structures representing each packet (or SKBs).
  3. An IRQ is raised.
  4. To handle the IRQ, a CPU will run the Interrupt Service Routine that corresponds to the IRQ number in question. This routine, commonly denominated "top-half", is the very critical mandatory path that has to be performed to not loose any data, and has to be kept as small as possible. At the end of the routine, a call napi_schedule() is made to wake up the NAPI poll_loop (I will go back to what NAPI/New API is in a minute). The last point is done for two reasons: A. the NIC NAPI struct is added to the current's CPU softnet_data structure's poll_list, and B. Call _raise_softirq_irqoff(NET_RX_SOFTIRQ) to raise NET_RX_SOFTIRQ soft IRQ in order to signal the system to finish the processing of the packet reception ("bottom-half"). 
  5. The IRQ is cleared.
@@ -47,12 +48,14 @@ Since my focus is in troubleshooting, I am not going to cover most of it in this
  12. The hnadler for TCP (tcp_rcv()) and UDP (udp_rcv()) are the most common cases. Similarly to the previous step, some L4 header processing is done and it is passed to the next layer.
  13. Finally the process waiting for the data through the invokation of read(), recvfrom() or recvmsg() is woken up, and will copy the data from the connection's queue.
 
-NAPI was devised to increase the efficiency of packet processing (which would otherwise quickly hit some theoretical CPU limits for 1Gbit and higher networks), by reducing the overhead of running the whole IRQ cycle for every packet received. As shown above, the basic idea is after processing the first packet, to disable subsequent interrupts and instead actively poll the network card RX ring buffer for new packets.
+NAPI was devised to increase the efficiency of packet processing (which would otherwise quickly hit some theoretical CPU limits for 1Gbit and higher networks), by reducing the overhead of running the whole IRQ routines for every packet received. As shown above, the basic idea is after processing the first packet, to disable subsequent interrupts and instead actively poll the network card RX ring buffer for new packets.
 
 
-## General Approach
+## General Approach to Network Troubleshooting
 
-A ton has been written on the matter and arguably many methods and techniques may compete to be proven effective under specific circumstances. But firstly it has to be acknowledged that even if one strives to abide to a method as much as possible, the complexity of modern software systems makes the process not precisely deterministic, and that at the time there is critical impact the expert may choose the tools that her/his experience is dicating in order to address the problem first in the fastest manner, and then chase the root cause. With that said, I personally find Google SRE Guide Troubleshooting section quite comprehensive[^1] and references the hypothetico-deductive model as proposed method, which is basically, observing, creating an hypothesis, creating predictions on that hypothesis and put it to test. While from a logical standpoint this is obviously flawed with positive confirmation/reinforcement of the hypothesis, in the empirical world is the way to go. But hey, there are many other sources for methodologies too. There are techniques exclusive to root cause analysis like the simple _5 whys_, _RPR_, and other covered by _Problem Management_ domain in _ITILv3_ literature.
+A ton has been written on the matter and arguably many methods and techniques may compete to be proven effective under specific circumstances. Firstly it has to be acknowledged that even if one strives to abide to any given method as much as possible, the complexity of modern software systems makes the process not precisely deterministic, and that at the time there is critical impact the expert may choose the tools that her/his experience is dicating in order to address the problem first in the fastest manner, and then chase the root cause. 
+
+With that said, I personally find Google SRE Guide Troubleshooting section quite comprehensive[^1] and references the hypothetico-deductive model (which is no less than the scientific method) as proposed path. In essence, observing, creating an hypothesis, creating predictions based on that hypothesis, and put them to test. While from a logical standpoint this is obviously flawed with positive confirmation/reinforcement of the hypothesis, in the empirical world is one way to go. There are many other sources for methodologies too. There are techniques exclusive to root cause analysis like the simple _5 whys_, _RPR_, and other covered by _Problem Management_ domain in _ITILv3_ literature.
 
 The second point that has to be acknowledged is that no matter what technique it is, there is a common ground for all. Most agree that a thorough observation and data gathering has to take place first. Which is what I am going to focus on in the following section.
 
@@ -388,7 +391,7 @@ It is very common that production environments have proper performance tooling i
 
 There are hundreds of command line tools for performance to choose here but for the sake of simplicity I will focus on the readings of __ethtool__ and also __sar__ (the later because is the most widespread accross systems). . One interesting tool to take a look at is __pcp__ (performance co-pilot [^5]). In the end, it does not really matter which tool to use as long as it does the job. For a comprehensive list of Linux command line tools check out the mind blowing work of Brendan Gregg [^6][^7].
 
-In the simplest stats check, I would like to see the difference between the output of some standard commands: **ethtool -S <NIC>**, **ip -s -s a**, **ss -natuples**, **netstat -s**, **nstat**, system metrics (and if we work with OvS there is also a set of specific commands), etc., before and after reproducing the issue, in order to observe errors and that the counters increasing are expected (for which is good to create a script).
+In the simplest stats check, I would like to see the difference between the output of some standard commands: **ethtool -S _NIC_**, **ip -s -s a**, **ss -natuples**, **netstat -s**, **nstat**, system metrics (and if we work with OvS there is also a set of specific commands), etc., before and after reproducing the issue, in order to observe errors and that the counters increasing are expected (for which is good to create a script).
   
 For instance, the following output would tell that after the reproducer (second run) there was an increased number of **no_buff_discards**, meaning that the NIC ran out of space in its RX ring buffer and had to discard the ingressing frames.
 
@@ -410,7 +413,7 @@ So now we have observed a specific effect of the reproducer that can shed some f
 
 If we got to the point where the stats and performance metrics still are not pointing to a clear culprit for the reported behavior, we may need to delve even deeper into the issue through the use of packet captures or through the tracing of the processes involved.
 
-Continuing with my previous example, while the issue reproduces, let's assume the system shows a __ksoftirqd__ kernel thread which is consuming 100% of one CPU which clearly looks like some sort of bottleneck. There will be situations like this one, where we really want to know what is going on under the hood. Understanding what this task is doing on the CPU is a fair next step which may reveal a lot, like which part of the code is generating the problem or involved in the problem. 
+Continuing with my previous example, while the issue reproduces, let's assume the system shows a __ksoftirqd__ kernel thread which is consuming 100% of one CPU which clearly looks like some sort of bottleneck. There will be situations like this one, where we really want to know what is going on under the hood. Understanding what this task is doing on the CPU is a fair next step which may reveal a lot, like which part of the code is generating the problem or at least involved in it. 
 
 From the set of tools that will help in this endeavour **perf** is probably the most powerful one and the one I will resort to the most also. I will show other examples like dynamic kernel tracing, using **ftrace**, either through scripting directly or through **trace-cmd** command line tool, or directly interacting with the **debugfs**. Other tools worth mentioning in this step are **dropwatch** and **systemtap**.
 
