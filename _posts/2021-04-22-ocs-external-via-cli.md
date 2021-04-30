@@ -448,5 +448,6 @@ Moreover in case we add, replace or remove a MON, the operator will take care of
 ### References
 
  [^1]: [Install OCS without the OpenShift Web UI](https://github.com/red-hat-storage/ocs-training/blob/master/training/modules/ocs4/pages/ocs4-install-no-ui.adoc)
+ 
  [^2]: [OpenShift Container Storage in External Mode](https://access.redhat.com/documentation/en-us/red_hat_openshift_container_storage/4.6/html-single/deploying_openshift_container_storage_in_external_mode/index)
 
