@@ -12,9 +12,9 @@ excerpt_separator: "<!-- more -->"
 One of my customers requested me a way to deploy OpenShift Container Storage 4.6 (soon to be renamed to OpenShift Data Foundation) in external mode via CLI.
 What is external mode you may ask ? OCS can provision storage to OpenShift by deploying its own in-cluster Ceph installation (internal mode) using in the background the Rook operator, or it can connect to an already existing Ceph cluster (external mode) where OCS mainly acts as Ceph client.
 
-Despite there is no documented way to achieve this yet, we have some upstrem reference to deploying internal mode via CLI[^1], so we just need to add a little twist to make this work for external mode also.
+Despite there is no documented way to achieve this yet, we have some upstrem reference to deploying internal mode via CLI [^1], so we just need to add a little twist to make this work for external mode also.
 
-To be noted, even though it is not straight away supported installation method it is technically the same result as the UI documented installation[^2].
+To be noted, even though it is not straight away supported installation method it is technically the same result as the UI documented installation [^2].
 
 In the following sections you can find the procedure I came up with.
 
