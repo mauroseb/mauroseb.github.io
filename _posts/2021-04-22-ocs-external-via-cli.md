@@ -431,7 +431,7 @@ rook-ceph-operator-6d454c4c58-7f7bw   1/1     Running   0          11d
  - The OCS storage classes are now avaialble
 
 {% highlight bash %}
-oc get sc
+$ oc get sc
 NAME                                   PROVISIONER                             RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
 ocs-external-storagecluster-ceph-rbd   openshift-storage.rbd.csi.ceph.com      Delete          Immediate           true                   13d
 ocs-external-storagecluster-ceph-rgw   openshift-storage.ceph.rook.io/bucket   Delete          Immediate           false                  13d
@@ -441,9 +441,25 @@ openshift-storage.noobaa.io            openshift-storage.noobaa.io/obc         D
 
 ### Final Thoughts
 
-When I create the JSON file a single MON/MGR IP is passed to the python script however the operator will take care from there to inspect the external Cluster and populate the 3 MONs and thus getting rid of the potential SPOC between OCP and Ceph.
+When I create the JSON file a single MON/MGR IP is passed to the python script however the operator will take care from there to inspect the external Cluster and populate the 3 MONs and thus getting rid of the potential SPOC between OCP and Ceph as we can see below.
 
-Moreover in case we add, replace or remove a MON, the operator will take care of updating the internal information automatically.
+{% highlight bash %}
+$ oc get cm rook-ceph-mon-endpoints -o yaml
+apiVersion: v1
+data:
+  csi-cluster-config-json: '[{"clusterID":"openshift-storage","monitors":["192.168.122.11:6789","192.168.122.12:6789","192.168.122.13:6789"]}]'
+  data: ice-extceph-01=192.168.122.11:6789,ice-extceph-02=192.168.122.12:6789,ice-extceph-03=192.168.122.13:6789
+  mapping: '{"node":{}}'
+  maxMonId: "-1"
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2021-03-05T02:28:48Z"
+  managedFields:
+  - apiVersion: v1
+...
+{% endhighlight %}
+
+Moreover in case we add, replace or remove a MON, the operator will take care of updating the internal resources automatically.
 
 ### References
 
