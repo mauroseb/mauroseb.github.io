@@ -461,9 +461,13 @@ metadata:
 
 Moreover in case we add, replace or remove a MON, the operator will take care of updating the internal resources automatically.
 
+Finally, there is an on going bug[^3] about OCS not detecting correct;y a MGR's failing over (which runs a prometheus exporter) and the effect is that the OCS dashboard will not repotr any data from it. Thus if you loose the MGR configured on deployment you have to either bring it back up or edit manually the ook-ceph-external-cluster-details to reflect the current monitoring endpoint.
+
+
 ### References
 
  [^1]: [Install OCS without the OpenShift Web UI](https://github.com/red-hat-storage/ocs-training/blob/master/training/modules/ocs4/pages/ocs4-install-no-ui.adoc)
  
  [^2]: [OpenShift Container Storage in External Mode](https://access.redhat.com/documentation/en-us/red_hat_openshift_container_storage/4.6/html-single/deploying_openshift_container_storage_in_external_mode/index)
 
+ [^3]: https://bugzilla.redhat.com/show_bug.cgi?id=1925217
