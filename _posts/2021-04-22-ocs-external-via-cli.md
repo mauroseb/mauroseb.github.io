@@ -470,4 +470,4 @@ Finally, there is an on going bug[^3] about OCS not detecting correct;y a MGR's 
  
  [^2]: [OpenShift Container Storage in External Mode](https://access.redhat.com/documentation/en-us/red_hat_openshift_container_storage/4.6/html-single/deploying_openshift_container_storage_in_external_mode/index)
 
- [^3]: https://bugzilla.redhat.com/show_bug.cgi?id=1925217
+ [^3]: <https://bugzilla.redhat.com/show_bug.cgi?id=1925217>
