@@ -1,8 +1,0 @@
-additionalNetworks:
-- name: extnet1
-  namespace: multus-test
-  simpleMacvlanConfig:
-    ipamConfig:
-      type: dhcp
-    master: enp7s0
-  type: SimpleMacvlan
