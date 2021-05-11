@@ -1,0 +1,6 @@
+additionalNetworks:
+  - name: extnet1
+    namespace: multus-test
+    rawCNIConfig: '{ "cniVersion": "0.3.1", "name": "extnet1", "type": "macvlan",
+      "master": "enp7s0", "ipam": { "type": "dhcp" } }'
+    type: Raw
