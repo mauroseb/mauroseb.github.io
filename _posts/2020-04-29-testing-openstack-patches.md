@@ -15,7 +15,7 @@ When you start the journey of collaborating in OpenStack upstream projects one o
 
 This activity is not only paramount for the community but also will position you better when you start to submit patches. The more reviews you have, the more trustworthy you become.
 
-OpenStack projects use **gerrit** for this purpose (in essence similar to gitlab or reviewboard). This is an excellent tool that integrates into git and allows to submit commits for review, scoring and many other features. You can find all documentation you need in the _OpenStack Contributor Guide_ and if time permits I will add some post on that too.[^1] [^2] [^3]
+OpenStack projects use **gerrit** for this purpose (in essence similar to gitlab, bitbucket or reviewboard). This is an excellent tool that integrates into git and allows to submit commits for review, scoring and many other features. You can find all documentation you need in the _OpenStack Contributor Guide_ and if time permits I will add some post on that too[^1] [^2] [^3]. Also check this [link](https://julien.danjou.info/rant-about-github-pull-request-workflow-implementation/) for a good reference that shows why many developers consider gerrit superior to the PR workflow of Github or Gitlab that most are used to. I guess for me, I started with gerrit first and it feels a lot more natural way to work.
 
 But that is not what I am going to write about today. I just want to showcase how can you quickly test a patch in your own environment that has not been merged into the master branch yet, with an example.
 
