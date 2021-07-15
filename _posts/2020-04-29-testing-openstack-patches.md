@@ -46,7 +46,7 @@ You can notice very useful information in the gerrit dashboard like: the descrip
 
 I log in into my undercloud server, change to the directory where the code for the project in question ```tripleo-common``` sits. Then download the patch. Notice the URL is slightly different than before so I can get the mime-encoded version of it. And apply it.
 
-{% highlight command %}
+{% highlight console %}
 
 [root@undercloud-osp16 ]# cd /usr/lib/python3.6/site-packages/
 [root@undercloud-osp16 site-packages]# curl -4sSL https://review.opendev.org/changes/713923/revisions/current/patch?download | base64 -d | patch -p1
@@ -64,7 +64,7 @@ In this case it complains that a hunk failed. A hunk is a segment of code in the
 
 I check this part of code is exception handling and it is already halfly managed by the next code block so I consider can live without it:
 
-{% highlight command %}
+{% highlight console %}
 
  [root@undercloud-osp16 site-packages]# cat tripleo_common/image/image_export.py.rej
 --- tripleo_common/image/image_export.py
@@ -92,7 +92,7 @@ I could add my ```+1``` (good review) in gerrit and leave a comment of my test i
 
 Lastly since this is python the OpenStack community uses **tox** [^4] as standard way to test the code. You can run this tests in your local branch if you like.
 
-{% highlight shell %}
+{% highlight console %}
 $ tox -e py36
 $ tox -e pep8
 $ tox -e functional
