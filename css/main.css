@@ -63,10 +63,10 @@ nav ul li {
 }
 
 nav ul li a {
-    padding: 14px 16px;
+    padding: 20px 16px;
     display: block;
     text-align: center;
-    text-decoration: bold;
+    font-weight: bold;
     font-size: 20px;
     color: #808080;
 }
