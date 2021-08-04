@@ -112,11 +112,11 @@ div.content {
 }
 
 div.navi {
-    position: absolute;
-    top: 20px;
-    right: 300px;
-    background-color: rgba(0, 0, 0, 0.50) 
+    float: right;
+    color: #000000;
+    background-color: rgba(0, 0, 0, 0.5);
     border-radius: 8px;
+    font-size: 24px;
 }
 
 div.nav {
