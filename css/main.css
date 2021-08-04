@@ -147,10 +147,11 @@ p.post {
 
 p.navi {
     font-family: 'Arial', 'Sans-Serif';
-    font-size: 16px;
+    font-size: 24px;
     color: #ffffff;
     vertical-align: middle;
     align: center;
+    padding: 20px 16px;
 }
 
 p.gen {
