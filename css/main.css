@@ -187,7 +187,7 @@ h1.navi {
     font-weight: 300;
     line-height: 24px;
     text-transform: uppercase;
-    color:  #ffffff;
+    color:  #000000;
     align: center;
     vertical-align: middle;
 }
@@ -205,7 +205,7 @@ h2.navi {
     font-family:'Arial', 'Sans-Serif';
     weight: 300;
     text-transform: uppercase;
-    color: #ffffff;
+    color: #000000;
     align: center;
     vertical-align: middle;
 }
