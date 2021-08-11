@@ -2,7 +2,7 @@ name: oddi.info
 title: MAURO'S
 
 description: OpenStack | Ceph | Kubernetes | Linux | Code | Random 
-url: 'http://mauroseb.github.io'
+url: 'http://oddi.info'
 baseurl: '/'
 
 author: Mauro Oddi
