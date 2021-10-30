@@ -1,6 +1,6 @@
 ---
 layout: posts
-title: "Troubleshoot OpenStack Networking Like a Netdev Kernel Developer - Part 1"
+title: "Troubleshoot OpenStack Networking Like a Netdev Kernel Developer"
 date: 2019-10-25
 categories: [blog]
 tags: [ neutron, openstack, networking, kernel ]
@@ -10,11 +10,9 @@ author: mauroseb
 
 ## Introduction
 
-I am not a kernel developer myself, however while at Red Hat, many times had the chance to work next to some real experts in the matter, who are and have been for ages active contributors to the kernel networking stack. During the process I could learn some interesting techniques when it comes to troubleshoot network issues in complex environments like OpenStack or OpenShift, where there are dozens or even hundreds of virtual devices, overlay networks, featured smart NICs, and more. Hopefully this article can help to give not just a boring collection of front line tales but also shape an approach that would help you to address similar problems.
+I am not a kernel developer myself, however while at Red Hat, many times had the chance to work next to some real experts in the matter, who are and have been for ages active contributors to the kernel networking stack. During the process I could learn some interesting techniques when it comes to troubleshoot network issues in complex environments like OpenStack or OpenShift, where there are dozens or even hundreds of virtual devices, overlay networks, featured smart NICs, and more. Hopefully this article can help you to address problems in similar scenarios.
 
 It should be noted that even though most examples in the series will involve OpenStack or OpenShift environments, the approaches and techniques discussed would hopefully help with networking issues in **any** linux based environment, with or without OpenvSwitch or OpenStack in the picture.
-
-Lastly this is the first article from hopefully many, therefore will end up in the first example after covering the basics. More to follow.
 <!-- more -->
 
 
@@ -53,7 +51,7 @@ NAPI was devised to increase the efficiency of packet processing (which would ot
 
 ## General Approach to Network Troubleshooting
 
-A ton has been written on the matter and arguably many methods and techniques may compete to be proven effective under specific circumstances. Firstly it has to be acknowledged that even if one strives to abide to any given method as much as possible, the complexity of modern software systems makes the process not precisely deterministic, and that at the time there is critical impact the expert may choose the tools that her/his experience is dicating in order to address the problem first in the fastest manner, and then chase the root cause. 
+Many methods and techniques may compete to be proven effective under specific circumstances. Firstly it has to be acknowledged that even if one strives to abide to any given method as much as possible, the complexity of modern software systems makes the process not precisely deterministic, and that at the time there is critical impact the expert may choose the tools that her/his experience is dicating in order to address the problem first in the fastest manner, and then chase the root cause. 
 
 With that said, I personally find Google SRE Guide Troubleshooting section quite comprehensive[^1] and references the hypothetico-deductive model (which is no less than the scientific method) as proposed path. In essence, observing, creating an hypothesis, creating predictions based on that hypothesis, and put them to test. While from a logical standpoint this is obviously flawed with positive confirmation/reinforcement of the hypothesis, in the empirical world is one way to go. There are many other sources for methodologies too. There are even techniques exclusive to root cause analysis like the simple _5 whys_, _RPR_, and other covered by _Problem Management_ domain in _ITILv3_ literature.
 
@@ -155,8 +153,6 @@ NUMA node: 1
 LnkSta: Speed 8GT/s, Width x8, TrErr- Train- SlotClk+ DLActive- BWMgmt- ABWMgmt-
 {% endhighlight %}
 
-Now that we know the NUMA node we can also check that if that is creating any impact in performance. In general a VM and its associated threads will run in a specific NUMA node and the memory pages and CPU in use should preferably be in the same NUMA node for highest performance. This is not always possible due to technical limitations. I.e. live-migration may have problems with CPU pinning/NUMA setups, which should be already fixed in the latest releases of Nova, however in some cases like NFV we would like to favor performance in detriment of the ability to livemigrate. CPU isolation (to dedicate some to a specific purpose) and CPU and NUMA pinning is a hard requirement in these scenarios. So the VNF (namely an instance) qemu-kvm threads will run pinned to a CPU that is only dedicated for that, the memory pages should also match the NUMA node of the CPU and the NIC should also reside in it. Now, there are multiple ways to consume this NIC from the guest. Some workloads use DPDK or SR-IOV where one will dedicate specific sets of CPUs to the hypervisor and to the guests having as well as memory (normally hugepages) having in mind which NUMA node are they coming from, but I am not covering those cases in this article. Nowadays there are even NUMA aware vSwitches, which will run an instnace and allocate a virtual interface (VIF) plug to it in function of which NUMA node where the physical NIC that is in use by OpenvSwitch lives, thus avoiding cross-numa memory requests. In other words there is matching between instance, OvS threads and NIC.
-
  - Check the NUMA architecture
 {% highlight console %}
 # numactl -H
@@ -200,10 +196,13 @@ other_node                     0
 
 Here the numa_miss shows how many local misses occurred, and other_node count should show how many access from remote nodes have happened (each node has its own counter).
 
-
 ##### CPU Isolation and NUMA/CPU pinning 
 
-Small parenthesis here to disgress deeper into CPU isolation and NUMA/CPU pinning which is important for some virtual workloads and closer to qemu/KVM rather than networking. If one wanted to test how the performance would improve matching the NUMA node, he/she could use the commands __taskset__ and __migratepages__ on the instance PID to achieve that.
+Small parenthesis here to disgress deeper into CPU isolation and NUMA/CPU pinning which is important for some virtual workloads and closer to qemu/KVM rather than networking.
+
+Now that we know the NUMA architecture and where the node where the NIC lives, we can also check if that is creating any impact in performance. In general a VM and its associated threads will run in a specific NUMA node, the memory pages and vCPU associated should preferably pinned to a pCPU/memory in the same NUMA node than the NIC for highest performance. Here is where CPU isolation comes to help by reserving CPU and NUMA for the host and for the rest of the workloads (VMs), and within the second subset. This is a hard requirement in NFV (Network Function Virtualization) scenarios. So the VNF (namely an instance) qemu-kvm threads will preferably run pinned to a pCPU/s that is only dedicated for that VM, the memory pages should also match the NUMA node of the CPU and the NIC should also reside in it. Now, there are multiple ways to consume this NIC from the guest, some NFV workloads use for example DPDK (Data Plane Development Kit) which demands specific pinning for cores in the hypervisor for tasks like running a poll mode driver (PMD) thread, or OvS host process (lcore) thread.
+
+In regular kernel data path scenarios, if one wanted to test how the network performance of the VM would vary running on a given NUMA node, he/she could use the commands __taskset__ and __migratepages__ on the instance PID to achieve that.
 
  - Check the current CPU affinity mask of qemu-kvm PID and restrict it to run on a specific set of CPUs (second CPU in this example) that correspond to a given NUMA node
  
@@ -258,10 +257,30 @@ While the following would tell the system to use 0-15 cores:
 CPUAffinity=0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
 {% endhighlight %}
 
-Last but not least all the previous configuration is normally coupled along with Huge Pages and other config (disabling C-states, soft lockups,set IOMMU, etc.) which have to be set in the grub kernel line.
+In Red Hat's OpenStack flavor these variables can be set through TripleO configuration variables (IsolCpusList,NovaComputeCpuDedicatedSet, NovaComputeCpuSharedSet).
+
+##### Interrupts
+
+Knowing the H/W layout, trying to undertsand the interrupts distribution can be an eye opener when investigating a network performance issue. NICs can have tens of queues, and each queue can be served by any CPU by default. Moreover in RHEL irqbalance service normally takes care of setting up this relationship, by measuring the CPU IRQ handling activity and reconfiguring the IRQ distribution based on that. However the output produced is not always ideal for a high troughput service, and may need tuning (masking CPUs, etc). Fixing a CPU to a NIC queue can also be set manullay and improve performance considerably. 
+Taking a look at __/proc/interrupts__ can tell if we need to tune the IRQ mapping. You can see the following output of an Emulex NIC with 8 queues where the interrupt number of each queue is handled only by one CPU (one column). 
+{% highlight console %}
+$ cat /proc/interrupts | grep eth0
+  88:          0          0          0          0          0          0          0          0          0          0          0          0        215          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0 2720115936          0          0          0          0          0          0  IR-PCI-MSI-edge      eth0_2-q0
+  89:          0          0          0          0          0          0          0          0          0          0          0          0         48          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0 2477914282          0          0          0          0          0  IR-PCI-MSI-edge      eth0_2-q1
+  90:          0          0          0          0          0          0          0          0          0          0          0          0         44          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0 1810393192          0          0          0          0  IR-PCI-MSI-edge      eth0_2-q2
+  91:          0          0          0          0          0          0          0          0          0          0          0          0         20          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0 2226253959          0          0          0  IR-PCI-MSI-edge      eth0_2-q3
+  92:          0          0          0          0          0          0          0          0          0          0          0          0         71          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0 2406447678          0          0  IR-PCI-MSI-edge      eth0_2-q4
+  93:          0          0          0          0          0          0          0          0          0          0          0          0         81          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0 2293619600          0  IR-PCI-MSI-edge      eth0_2-q5
+  94:          0          0          0          0          0          0          0          0          0          0          0          0         18          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0 2120494896  IR-PCI-MSI-edge      eth0_2-q6
+  95:          0          0          0          0          0          0          0          0          0          0          0          0 2008593614          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0  IR-PCI-MSI-edge      eth0_2-q7
+{% endhighlight %}
+
+If another CPU picks the packet it may cause re-ordering and retransmits in the flow and will slow down throughput.
+
+Last but not least all the previous configuration is normally coupled along with other config (use of Huge Pages, disabling C-states, soft lockups,set IOMMU, etc.) which have to be set in the grub kernel line (KernelArgs variable in TripleO).
 
 {% highlight console %}
- iommu=pt intel_iommu=on nohz=on intel_pstate=disable nosoftlockup default_hugepagesz=1GB hugepagesz=1G hugepages=236 
+iommu=pt intel_iommu=on nohz=on intel_pstate=disable nosoftlockup default_hugepagesz=1GB hugepagesz=1G hugepages=236
 {% endhighlight %}
 
 Overall, at this point you should have gotten a good depiction of what the hardware and logical layouts look like, if configuration related to it is in place or not and can observe how the problem description fits into it.
