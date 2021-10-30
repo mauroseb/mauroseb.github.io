@@ -276,8 +276,9 @@ $ cat /proc/interrupts | grep eth0
 {% endhighlight %}
 
 If another CPU picks the packet it may cause re-ordering and retransmits in the flow and will slow down throughput.
+A thumb rule here is, get the NUMA node of the NIC and set the number of queues of the NIC to the amount of CPUs of that NUMA (or as much as the NIC permits) with __ethtool -L__, and then check that the IRQ/CPU distribution is even.
 
-It is also good to check that the overall IRQ load of the CPUs is evenly distribbuted. The following output shows that CPU 38 and 4 are heavily loaded in contrast with the rest and that may give some space of improvement if those CPUs are choking.
+The following output shows that CPU 38 and 4 are heavily loaded in contrast with the rest and that may give some space of improvement if those CPUs are choking.
 
 {% highlight console %}
 $ cat proc/interrupts |awk '/eth1/ { for (i=1; i<=NF; i++) { cpu[i]=cpu[i]+$i } } END{ for(i=1;i<=56;i++) { print "CPU "i-1": "cpu[i] }}' | sort -rn -k 3
@@ -296,6 +297,12 @@ CPU 32: 1161018810
 CPU 33: 1140303753
 ...
 {% endhighlight %}
+
+In addition to the previous Intel also distributes a script called: set_irq_affinity.sh with some drivers (ixgbe, e1000...) that can be useful to save some manual work.
+
+Summarizing, if irqbalance tuning is not enough, we can fall back to manual configuration, but regardless of the method ensuring the IRQs are properly distributed among multiple CPUs is going to improve performance overall.
+
+
 
 Last but not least all the previous configuration is normally coupled along with other config (use of Huge Pages, disabling C-states, soft lockups,set IOMMU, etc.) which have to be set in the grub kernel line (KernelArgs variable in TripleO).
 
