@@ -262,7 +262,7 @@ In Red Hat's OpenStack flavor these variables can be set through TripleO configu
 ##### Interrupts
 
 Knowing the H/W layout, trying to undertsand the interrupts distribution can be an eye opener when investigating a network performance issue. NICs can have tens of queues, and each queue can be served by any CPU by default. Moreover in RHEL irqbalance service normally takes care of setting up this relationship, by measuring the CPU IRQ handling activity and reconfiguring the IRQ distribution based on that. However the output produced is not always ideal for a high troughput service, and may need tuning (masking CPUs, etc). Fixing a CPU to a NIC queue can also be set manullay and improve performance considerably. 
-Taking a look at __/proc/interrupts__ can tell if we need to tune the IRQ mapping. You can see the following output of an Emulex NIC with 8 queues where the interrupt number of each queue is handled only by one CPU (one column). 
+Taking a look at __/proc/interrupts__ can tell if we need to tune the IRQ mapping. You can see the following output of an Emulex NIC with 8 queues where the interrupt number of each queue (processing one or more flows) is handled only by one CPU (one column). This way we ensure that any given flow is always tied to the same CPU.
 {% highlight console %}
 $ cat /proc/interrupts | grep eth0
   88:          0          0          0          0          0          0          0          0          0          0          0          0        215          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0 2720115936          0          0          0          0          0          0  IR-PCI-MSI-edge      eth0_2-q0
@@ -276,6 +276,26 @@ $ cat /proc/interrupts | grep eth0
 {% endhighlight %}
 
 If another CPU picks the packet it may cause re-ordering and retransmits in the flow and will slow down throughput.
+
+It is also good to check that the overall IRQ load of the CPUs is evenly distribbuted. The following output shows that CPU 38 and 4 are heavily loaded in contrast with the rest and that may give some space of improvement if those CPUs are choking.
+
+{% highlight console %}
+$ cat proc/interrupts |awk '/eth1/ { for (i=1; i<=NF; i++) { cpu[i]=cpu[i]+$i } } END{ for(i=1;i<=56;i++) { print "CPU "i-1": "cpu[i] }}' | sort -rn -k 3
+CPU 38: 2341969254
+CPU 4: 2300807287
+CPU 11: 1491887099
+CPU 42: 1384661084
+CPU 37: 1364268691
+CPU 40: 1297693620
+CPU 34: 1244174244
+CPU 39: 1221850946
+CPU 35: 1212980000
+CPU 36: 1194057497
+CPU 1: 1165872038
+CPU 32: 1161018810
+CPU 33: 1140303753
+...
+{% endhighlight %}
 
 Last but not least all the previous configuration is normally coupled along with other config (use of Huge Pages, disabling C-states, soft lockups,set IOMMU, etc.) which have to be set in the grub kernel line (KernelArgs variable in TripleO).
 
