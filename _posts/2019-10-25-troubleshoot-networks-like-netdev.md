@@ -53,18 +53,16 @@ NAPI was devised to increase the efficiency of packet processing (which would ot
 
 Many methods and techniques may compete to be proven effective under specific circumstances. Firstly it has to be acknowledged that even if one strives to abide to any given method as much as possible, the complexity of modern software systems makes the process not precisely deterministic, and that at the time there is critical impact the expert may choose the tools that her/his experience is dicating in order to address the problem first in the fastest manner, and then chase the root cause. 
 
-With that said, I personally find Google SRE Guide Troubleshooting section quite comprehensive[^1] and references the hypothetico-deductive model (which is no less than the scientific method) as proposed path. In essence, observing, creating an hypothesis, creating predictions based on that hypothesis, and put them to test. While from a logical standpoint this is obviously flawed with positive confirmation/reinforcement of the hypothesis, in the empirical world is one way to go. There are many other sources for methodologies too. There are even techniques exclusive to root cause analysis like the simple _5 whys_, _RPR_, and other covered by _Problem Management_ domain in _ITILv3_ literature.
+With that said, I personally find Google SRE Guide Troubleshooting section quite comprehensive[^1] and references the hypothetico-deductive model (which is no less than the scientific method) as proposed path. In essence, observing, creating an hypothesis, creating predictions based on that hypothesis, and put them to test. While it suffers from positive confirmation/reinforcement of the hypothesis, it is the best we can attain. There are many other sources for methodologies too. There are even techniques exclusive to root cause analysis like the simple _5 whys_, _RPR_, and other covered by _Problem Management_ domain in _ITILv3_ literature.
 
-The second point that has to be acknowledged is that no matter what technique it is, there is a common ground for all. Most agree that a thorough observation and data gathering has to take place first. Which is what I am going to focus on in the following section.
+Most agree that a thorough observation and data gathering has to take place first. Which is what I am going to focus on in the following section.
 
 <img src="https://imgs.xkcd.com/comics/networking_problems.png" alt="plotnet sample PNG" style="width:50%;align:center;"/>
 
 
-The follwoing method is assuming a basic triage on the subject problem has taken place and it is worth a deeper analysis. I do not intend to cover basic troubleshooting of network connectivity issues (for what you can also find good resources[^2]), where one would normally start checking configuration, routing and so forth.
+I do not intend to cover basic troubleshooting of network connectivity issues (for what you can also find good resources[^2]), where one would normally start checking configuration, routing and so forth, but rather network performance intermittent issues.
 
-As mentioned before, the level of knowledge of whom applies the method matters, picking a sensitive starting point, depth of the analysis in every step, and so on, depending on time/resource constraints and on the overall description of the issue can be valueable. Nonetheless it is also important not to be biased by past experiences and in general be skeptical that what is being witnesses now shares causality with previous events. This especially stands true for networking problems. 
-
-Finally the following is definitely also flawed and incomplete (mea culpa) but may still come handy for my own forgetful mind and luckily some other reader.
+It is also important to remark not to be biased by past experiences and in general be skeptical that what is being witnesses now shares causality with previous events. This especially stands true for networking problems. 
 
 
 ## Observation Phase
@@ -200,7 +198,9 @@ Here the numa_miss shows how many local misses occurred, and other_node count sh
 
 Small parenthesis here to disgress deeper into CPU isolation and NUMA/CPU pinning which is important for some virtual workloads and closer to qemu/KVM rather than networking.
 
-Now that we know the NUMA architecture and where the node where the NIC lives, we can also check if that is creating any impact in performance. In general a VM and its associated threads will run in a specific NUMA node, the memory pages and vCPU associated should preferably pinned to a pCPU/memory in the same NUMA node than the NIC for highest performance. Here is where CPU isolation comes to help by reserving CPU and NUMA for the host and for the rest of the workloads (VMs), and within the second subset. This is a hard requirement in NFV (Network Function Virtualization) scenarios. So the VNF (namely an instance) qemu-kvm threads will preferably run pinned to a pCPU/s that is only dedicated for that VM, the memory pages should also match the NUMA node of the CPU and the NIC should also reside in it. Now, there are multiple ways to consume this NIC from the guest, some NFV workloads use for example DPDK (Data Plane Development Kit) which demands specific pinning for cores in the hypervisor for tasks like running a poll mode driver (PMD) thread, or OvS host process (lcore) thread.
+Now that we know the NUMA architecture and where the node where the NIC lives, we can also check if that is creating any impact in performance. In general a VM and its associated threads will run in a specific NUMA node, the memory pages and vCPU associated should preferably pinned to a pCPU/memory in the same NUMA node than the NIC for highest performance. Here is where CPU isolation comes to help by reserving CPU and NUMA for the host and for the rest of the workloads (VMs). This is a hard requirement in NFV (Network Function Virtualization) scenarios. So the VNF (namely an instance) qemu-kvm threads will preferably run pinned to a pCPU/s that is only dedicated for that VM, the memory pages should also match the NUMA node of the CPU and the NIC should also reside in it. 
+
+Now, there are multiple ways to consume this NIC from the guest, some NFV workloads use for example DPDK (Data Plane Development Kit) which demands specific pinning for cores in the hypervisor for tasks like running a poll mode driver (PMD) thread, or OvS host process (lcore) thread.
 
 In regular kernel data path scenarios, if one wanted to test how the network performance of the VM would vary running on a given NUMA node, he/she could use the commands __taskset__ and __migratepages__ on the instance PID to achieve that.
 
@@ -259,7 +259,7 @@ CPUAffinity=0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
 
 In Red Hat's OpenStack flavor these variables can be set through TripleO configuration variables (IsolCpusList,NovaComputeCpuDedicatedSet, NovaComputeCpuSharedSet).
 
-##### Interrupts
+##### Hardware Interrupts
 
 Knowing the H/W layout, trying to undertsand the interrupts distribution can be an eye opener when investigating a network performance issue. NICs can have tens of queues, and each queue can be served by any CPU by default. Moreover in RHEL irqbalance service normally takes care of setting up this relationship, by measuring the CPU IRQ handling activity and reconfiguring the IRQ distribution based on that. However the output produced is not always ideal for a high troughput service, and may need tuning (masking CPUs, etc). Fixing a CPU to a NIC queue can also be set manullay and improve performance considerably. 
 Taking a look at __/proc/interrupts__ can tell if we need to tune the IRQ mapping. You can see the following output of an Emulex NIC with 8 queues where the interrupt number of each queue (processing one or more flows) is handled only by one CPU (one column). This way we ensure that any given flow is always tied to the same CPU.
@@ -302,7 +302,59 @@ In addition to the previous Intel also distributes a script called: set_irq_affi
 
 Summarizing, if irqbalance tuning is not enough, we can fall back to manual configuration, but regardless of the method ensuring the IRQs are properly distributed among multiple CPUs is going to improve performance overall.
 
+##### Software Interrupts
 
+So H/W looks good, and H/W Interrupts are also properly setup. The next link in the chain are software interrupts, which can tell us for example if there are excesive Soft IRQs created for each packet ingressing the physical NICs (which is expected up to some point when you have multiple stacked devices as shown above) which could hint something is not working as expected (GRO, GSO, some offloading not working, software segmentation, etc.), if there is a CPU running out of budget to process its backlog and there may be some extra tuning needed.
+
+As I mentioned in "Know your Enemy" section when a packet arrives to the NIC it will process the top half, and raise a NET_RX_SOFTIRQ to signal the CPU in charge of the queue to process there is at least on packet in the backlog. The kernel thread ksoftirqd/<CPUID> will execute the net_rx_action() function to process the backlog. If the backlog is too long that the CPU cannot complete the processing before its budget runs out, it may end up losing packets. 
+  
+On top of that, if the packet has to cross other virtual devices like a bond or a veth device for instance, it will also create further soft IRQs for each. Thus if the packets cannot be coaleased (via NIC coaleasing, or GRO, where multiple MTU sized packets can be aggregated in a bigger packet), the amount of soft IRQs generated internally will be multiplied by the crossing of all these stacked devices.
+
+Another example is software segmentation, where for instance an egressing packet of bigger size has to be split in smaller packets within the system consuming CPU and multiplying again the amount of Soft IRQs down the line, because one stacked device does not inherit GSO features from the NIC for example (normally a bug in the driver code).
+  
+- To see current distribution of soft IRQs across multiple CPUs (we are interested in NET_TX and NET_RX):
+
+{% highlight console %}
+$ cat /proc/softirqs 
+                    CPU0       CPU1       CPU2       CPU3       CPU4       CPU5       CPU6       CPU7       
+          HI:  411788319  316836063 2829187730  323250335  314060771  311999515  438725074  310760833
+       TIMER:  195063275  173129389  514805673  179025655  171511058  170458341  193059324  170766566
+      NET_TX:         83         69         67         78         79         80         65        111
+      NET_RX:    4397463    1412271    1331222    1300212    1257464    1323611    1291692  271832800
+       BLOCK:     232126     889492    1255754     508076     395894     318856     282648     252398
+    IRQ_POLL:          2          0          0          0          0          4          0          1
+     TASKLET:     371719       4221   15785565       4170       4318    2922089      95663    1699731
+       SCHED: 1465867016 1415170513 1426921081 1378823241 1345735961 1326671710 1283713408 1297345456
+     HRTIMER:        941        249        151        268         78        108        123      35283
+         RCU:  557548929  563034208  556023122  559006799  556569988  558104864  555181507  556608635
+{% endhighlight %}
+  
+ - Every time a CPU runs out of budget the third column of __/proc/net/softnet_stat__ which is a counter will increment
+
+{% highlight console %}
+$ cat /proc/net/softnet_stat 
+004d9e01 00000000 0000002c 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
+00380302 00000000 00000001 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000001
+00339949 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000002
+0030eb51 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000003
+002c24a9 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000004
+002baf3c 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000005
+002ad85b 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000006
+0a943e9b 00000000 000003b5 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000007
+{% endhighlight %}
+
+Note that each row of the output above corresponds to a CPU, and each column to a different event. So the first line is CPU0 has run out of budget 2c times (44 in decimal).
+
+The other columns may help in some cases too:
+  
+ 1. packet_process: Packet processed by each CPU.
+ 2. packet_drop: Packets dropped.
+ 3. time_squeeze: net_rx_action.
+ 4. cpu_collision: collision occur while obtaining device lock while transmitting.
+ 5. received_rps: number of times cpu woken up received_rps.
+ 6. flow_limit_count: number of times reached flow limit count.
+  
+##### Extra config
 
 Last but not least all the previous configuration is normally coupled along with other config (use of Huge Pages, disabling C-states, soft lockups,set IOMMU, etc.) which have to be set in the grub kernel line (KernelArgs variable in TripleO).
 
@@ -315,7 +367,7 @@ Overall, at this point you should have gotten a good depiction of what the hardw
 
 ### 2. Find a reproducer
 
-One of the first questions I normally ask is if there is a clear set of steps that can reproduce the problem. If so, it will simplify the formulation of an hypothesis considerably for you and any other involved party. I deem this little short cut as part of the initial observation phase. If there is a reproducer, then observe the system behaviour and statistics during the reproduction in contrast with the system under normal function and such would in many cases tell where to go next. Determine which recurrence, if it happens in only one system, in many, time patterns, every detail matters. Sometimes this is not possible as the problem only shows up sporadically and under unknown, apparently non-deterministic conditions, but what can be done in that case is very limited.
+One of the first questions I normally ask is if there is a clear set of steps that can reproduce the problem. If so, it will simplify the formulation of an hypothesis considerably. I look at this as a little short cut, part of the initial observation phase. If there is a reproducer, then observe the system behaviour and statistics during the reproduction in contrast with the system under normal function and such would in many cases tells where to go next. Determine which recurrence, if it happens in only one system, in many, time patterns, every detail matters. Sometimes this is not possible as the problem only shows up sporadically and under unknown, apparently non-deterministic conditions, but what can be done in that case is very limited.
 
 In addition, knowing the kind of traffic patterns that the application or system is supposed to generate will definitely help here. Examples for can range from a single continuous TCP stream, multiple parallel UDP request-response, mutlicast traffic with small packet sizes. Once known, it may be just enough to use **iperf**, **iperf3** , **netperf** or similar tools with the right options to instanciate the problem without needing to run the original application that had the issue. Also often times is difficult to locate resources to reproduce a _production-like_ environment as it may use expensive equipment, hence the use of virtual reproducers is quite common.
 
