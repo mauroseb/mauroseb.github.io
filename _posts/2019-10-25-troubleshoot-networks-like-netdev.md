@@ -194,7 +194,7 @@ other_node                     0
 
 Here the numa_miss shows how many local misses occurred, and other_node count should show how many access from remote nodes have happened (each node has its own counter).
 
-##### CPU Isolation and NUMA/CPU pinning 
+#### CPU Isolation and NUMA/CPU pinning 
 
 Small parenthesis here to disgress deeper into CPU isolation and NUMA/CPU pinning which is important for some virtual workloads and closer to qemu/KVM rather than networking.
 
@@ -259,7 +259,7 @@ CPUAffinity=0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
 
 In Red Hat's OpenStack flavor these variables can be set through TripleO configuration variables (IsolCpusList,NovaComputeCpuDedicatedSet, NovaComputeCpuSharedSet).
 
-##### Hardware Interrupts
+#### Hardware Interrupts
 
 Knowing the H/W layout, trying to undertsand the interrupts distribution can be an eye opener when investigating a network performance issue. NICs can have tens of queues, and each queue can be served by any CPU by default. Moreover in RHEL irqbalance service normally takes care of setting up this relationship, by measuring the CPU IRQ handling activity and reconfiguring the IRQ distribution based on that. However the output produced is not always ideal for a high troughput service, and may need tuning (masking CPUs, etc). Fixing a CPU to a NIC queue can also be set manullay and improve performance considerably. 
 Taking a look at __/proc/interrupts__ can tell if we need to tune the IRQ mapping. You can see the following output of an Emulex NIC with 8 queues where the interrupt number of each queue (processing one or more flows) is handled only by one CPU (one column). This way we ensure that any given flow is always tied to the same CPU.
@@ -302,7 +302,7 @@ In addition to the previous Intel also distributes a script called: set_irq_affi
 
 Summarizing, if irqbalance tuning is not enough, we can fall back to manual configuration, but regardless of the method ensuring the IRQs are properly distributed among multiple CPUs is going to improve performance overall.
 
-##### Software Interrupts
+#### Software Interrupts
 
 So H/W looks good, and H/W Interrupts are also properly setup. The next link in the chain are software interrupts, which can tell us for example if there are excesive Soft IRQs created for each packet ingressing the physical NICs (which is expected up to some point when you have multiple stacked devices as shown above) which could hint something is not working as expected (GRO, GSO, some offloading not working, software segmentation, etc.), if there is a CPU running out of budget to process its backlog and there may be some extra tuning needed.
 
@@ -354,9 +354,9 @@ The other columns may help in some cases too:
  5. received_rps: number of times cpu woken up received_rps.
  6. flow_limit_count: number of times reached flow limit count.
   
-##### Extra config
+#### Extra config
 
-Last but not least all the previous configuration is normally coupled along with other config (use of Huge Pages, disabling C-states, soft lockups,set IOMMU, etc.) which have to be set in the grub kernel line (KernelArgs variable in TripleO).
+Last but not least all the previous configuration is normally coupled along with other config which may come in part from the tuned profile like enabling Huge Pages which is mandatory for some workloads like OvS DPDK, disabling C-states, disabling soft lockups on isolated cores, disable timer activity on isolated cores, setting IOMMU, removing RCU callbacks on isolated cores, etc. In the case of OpenStack could also be set in the grub kernel line via KernelArgs variable in TripleO. For example:
 
 {% highlight console %}
 iommu=pt intel_iommu=on nohz=on intel_pstate=disable nosoftlockup default_hugepagesz=1GB hugepagesz=1G hugepages=236
@@ -412,7 +412,7 @@ What regards to the NIC configuration, it is useful to observe the statistics of
 
 ### 3. Simplify The Reproducer
 
-Now that there is a way to consistently reproduce the issue, the next step would be to simplify it as much as possible. The reproduction of the problem can depend on multiple factors like hardware architecture, NIC vendor/model, firmware version, OS version, kernel version, NIC driver version, physical network devices (switches, load balancers and routers), virtual devices that have to be crossed. Many times permutation or removal of any of these components is helpful to narrow down the problem to a particular component before delving deeper into the analysis. 
+Now that there is a way to consistently reproduce the issue, the next step would be to simplify it as much as possible in order to isolate the cause. The reproduction of the problem can depend on multiple factors like hardware architecture, NIC vendor/model, firmware version, OS version, kernel version, NIC driver version, physical network devices (switches, load balancers and routers), virtual devices that have to be crossed. Many times permutation or removal of any of these components is helpful to narrow down the problem to a particular component before delving deeper into the analysis. 
 
 For that purpose, one could try for example to reproduce with a different kernel. Starting with the latest kernel available (downstream in case of _RHEL_), the latest upstream kernel, also sometimes, if there is any promising commit related to the apparent problem, the latest kernel in __linux-next__ or __net-next__ trees of the linux kernel (which will become part of the next upstream linux kernel release).
 
@@ -627,8 +627,7 @@ In regard to dynamic debugging, I will bring up one example. One customer of min
 ...
 {% endhighlight %}
 
-Lastly, I must mention **eBPF** (extended Barkley Packet Filter, originially named after BSD's BPF, however radically different) which is remarkably valuable and versatile kernel facility that was created for tracing purposes, but quickly became a swiss-army knife within the kernel that allows the user to create his own code and run it in a JIT compiler
-in kernel land. Scary? Of course.
+Lastly, I must mention **eBPF** (extended Barkley Packet Filter, originially named after BSD's BPF, however radically different) which is remarkably valuable and versatile kernel facility that was created for tracing purposes, but quickly became a swiss-army knife within the kernel that allows the user to create his own code and run it in a JIT compiler in kernel land. Scary? Of course.
 
 
 ## OpenStack Network Architecture
