@@ -261,7 +261,7 @@ In Red Hat's OpenStack flavor these variables can be set through TripleO configu
 
 #### Hardware Interrupts
 
-Knowing the H/W layout, trying to undertsand the interrupts distribution can be an eye opener when investigating a network performance issue. NICs can have tens of queues, and each queue can be served by any CPU by default. Moreover in RHEL irqbalance service normally takes care of setting up this relationship, by measuring the CPU IRQ handling activity and reconfiguring the IRQ distribution based on that. However the output produced is not always ideal for a high troughput service, and may need tuning (masking CPUs, etc). Fixing a CPU to a NIC queue can also be set manullay and improve performance considerably. 
+Knowing the H/W layout, trying to undertsand the interrupts distribution can be an eye opener when investigating a network performance issue. NICs can have tens of queues, and each queue can be served by any CPU by default. Moreover in RHEL irqbalance service normally takes care of setting up this relationship, by measuring the CPU IRQ handling activity and reconfiguring the IRQ distribution based on that. However the output produced is not always ideal for a high troughput service, and it may need tuning (masking CPUs, etc). Fixing a CPU to a NIC queue can also be set manullay and improve performance considerably. 
 Taking a look at __/proc/interrupts__ can tell if we need to tune the IRQ mapping. You can see the following output of an Emulex NIC with 8 queues where the interrupt number of each queue (processing one or more flows) is handled only by one CPU (one column). This way we ensure that any given flow is always tied to the same CPU.
 {% highlight console %}
 $ cat /proc/interrupts | grep eth0
@@ -298,7 +298,81 @@ CPU 33: 1140303753
 ...
 {% endhighlight %}
 
-In addition to the previous Intel also distributes a script called: set_irq_affinity.sh with some drivers (ixgbe, e1000...) that can be useful to save some manual work.
+Another great tool to check the CPU affinity of the IRQs (and many other cool things) is  __tuna__. In the example below the third column is the CPU mask. If it is set to the hexadecimal number of _0xfff_ , it means all CPUs can process that IRQ number. Conversely, the IRQs assocuated to a NIC queue are using a single CPU. 
+
+{% highlight console %}
+# tuna --show_irqs
+   # users            affinity
+   0 timer               0xfff
+   1 i8042               0xfff
+   8 rtc0                0xfff
+   9 acpi                0xfff
+  12 i8042               0xfff
+  18 i801_smbus          0xfff
+  19 hpilo               0xfff
+  25 PME                 0xfff
+  26 PME                 0xfff
+  28 PME                 0xfff
+  29 PME                 0xfff
+  30 PME                 0xfff
+  31 PME                 0xfff
+  33 PME                 0xfff
+  34 PME                 0xfff
+  35 PME                 0xfff
+  36 PME                 0xfff
+  37 PME                 0xfff
+  38 PME                 0xfff
+  39 PME                 0xfff
+  40 PME                 0xfff
+  41 PME                 0xfff
+  42 hpsa0-msix0             0
+  43 hpsa0-msix1             1
+  44 hpsa0-msix2             2
+  45 hpsa0-msix3             3
+  46 hpsa0-msix4             4
+  47 hpsa0-msix5             5
+  48 dmar0               0xfff
+  49 hpsa0-msix6             6
+  50 hpsa0-msix7             7
+  51 hpsa0-msix8             8
+  52 hpsa0-msix9             9
+  53 hpsa0-msix10           10
+  54 hpsa0-msix11           11
+  55 qla2xxx1_default    0xfff
+  56 qla2xxx1_rsp_q      0xfff
+  57 qla2xxx2_default    0xfff
+  58 qla2xxx2_rsp_q      0xfff
+  60 ioat-msix           0xfff
+  62 ioat-msix           0xfff
+  63 ioat-msix           0xfff
+  64 ioat-msix           0xfff
+  65 ioat-msix           0xfff
+  66 ioat-msix           0xfff
+  67 ioat-msix           0xfff
+  68 ioat-msix           0xfff
+  69 eno1-tx-0               9  tg3
+  70 eno1-rx-1               6  tg3
+  71 eno1-rx-2               7  tg3
+  72 eno1-rx-3               8  tg3
+  73 eno1-rx-4               5  tg3
+  74 eno2-tx-0              10  tg3
+  75 eno2-rx-1              11  tg3
+  76 eno2-rx-2               0  tg3
+  77 eno2-rx-3               1  tg3
+  78 eno2-rx-4               2  tg3
+  79 eno3-tx-0               3  tg3
+  80 eno3-rx-1               4  tg3
+  81 eno3-rx-2               5  tg3
+  82 eno3-rx-3               6  tg3
+  83 eno3-rx-4               7  tg3
+  84 eno4-tx-0               8  tg3
+  85 eno4-rx-1               9  tg3
+  86 eno4-rx-2              10  tg3
+  87 eno4-rx-3              11  tg3
+  88 eno4-rx-4               0  tg3
+{% endhighlight %}
+
+In addition, Intel also distributes a script called: set_irq_affinity.sh with some drivers (ixgbe, e1000...) that can be useful to save some manual work to mask the CPUs manually.
 
 Summarizing, if irqbalance tuning is not enough, we can fall back to manual configuration, but regardless of the method ensuring the IRQs are properly distributed among multiple CPUs is going to improve performance overall.
 
