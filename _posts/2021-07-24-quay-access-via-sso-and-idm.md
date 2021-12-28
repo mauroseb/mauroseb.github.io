@@ -14,22 +14,22 @@ In this post I will cover the configuration overview of Red Hat Single Sign On (
 
 ### Environment
 
- 1. **Red Hat IdM 4.6.8.** IdM is setup with default configuration. Some groups and users were created for this test: like the **mauro** or **jdoe** which to the **devops** group which will be the test subject.
+ 1. **Red Hat IdM 4.6.8.** IdM is setup with default configuration. Some groups and users were created for this test: like the **mauro** or **jdoe** which to the **devops** group which will be the test subject. <br/>
 
-  <img src="/images/quay-sso-idm_users.png" alt="IdM users PNG" style="width:50%;"/>
+  <img src="/images/quay-sso-idm_users.png" alt="IdM users PNG" style="width:30%;"/>
 
- 2. **Red Hat SSO 7.3.8.** SSO has been installed and configured with a realm called LAB
+ 2. **Red Hat SSO 7.3.8.** SSO has been installed and configured with a realm called LAB <br/>
 
-  <img src="/images/quay-sso-sso_realm.png" alt="IdM users PNG" style="width:75%;"/>
+  <img src="/images/quay-sso-sso_realm.png" alt="SSO realm PNG" style="width:60%;"/>
 
-    - In addition the following configuration has been set to source federated users from IdM. The account **uid=rhsso,cn=sysaccounts,cn=etc,dc=lab,dc=local** is used as BindDN.
-  <img src="/images/quay-sso-sso_federation.png" alt="IdM users PNG" style="width:75%;"/>
+   - In addition the following configuration has been set to source federated users from IdM. The account **uid=rhsso,cn=sysaccounts,cn=etc,dc=lab,dc=local** is used as BindDN. <br/>
+  <img src="/images/quay-sso-sso_federation.png" alt="SSO federation PNG" style="width:60%;"/>
 
-    - The provider settings are displayed in the next image
-  <img src="/images/quay-sso-sso_federation_provider.png" alt="IdM users PNG" style="width:75%;"/>
+   - The provider settings are displayed in the next image <br/>
+  <img src="/images/quay-sso-sso_federation_provider.png" alt="SSO federation provider PNG" style="width:60%;"/>
 
-    - I have created an LDAP mapper configuration to map groups in iDM to groups in SSO.
-  <img src="/images/quay-sso-sso_ldapmapper.png" alt="IdM users PNG" style="width:75%;"/>
+   - I have created an LDAP mapper configuration to map groups in iDM to groups in SSO. <br/>
+  <img src="/images/quay-sso-sso_ldapmapper.png" alt="SSO LDAP mapper PNG" style="width:60%;"/>
 
 
  3. **Quay 3.3.5.** Is already installed using the _Basic_ method[^1] (as this is a LAB) which is just using plain containers. There are other alternatives like using an HA deployment, or on OpenShift 4 using the Quay Operator directly if you have OpenShift 4 running. Then I configured it to use the certificates signed by IdM CA to serve user traffic. Quay setup steps may slightly differ from one install method to other but in the end in all cases it will wind up to setup the Quay config.yaml file.
@@ -44,17 +44,19 @@ OpenIDC 1.0 is an authentication protocol that is built upon OAuth 2.0 protocol 
 
  1. Log in to SSO with LAB realm admin privileges
 
- 2. Create a new OpenID Connect client for Quay. Make sure we are in the right realm LAB, and then in the Clients menu and click Create.
-  <img src="/images/quay-sso-sso_quayclient-1.png" alt="IdM users PNG" style="width:75%;"/>
+ 2. Create a new OpenID Connect client for Quay. Make sure we are in the right realm LAB, and then in the Clients menu and click Create. <br/>
 
- 3. Once in the Add Client menu, add quay-enterprise as the Client ID and openid-connect as Client Protocol. Then click Save.
-  <img src="/images/quay-sso-sso_quayclient-2.png" alt="IdM users PNG" style="width:75%;"/>
+<img src="/images/quay-sso-sso_quayclient-1.png" alt="SSO quay client 1 PNG" style="width:75%;"/>
 
- 4. That will open the Settings tab. Fill in the fields as follows:
-    a. It is mandatory to set Access Type as confidential. Confidential access type is for server-side clients that need to perform a browser login and require a client secret when they turn an access code into an access token.
-    b. It is also mandatory to set _Valid Redirect URL_ as the Quay’s SSO callback webhook which in my case will be: **https://ice-quay-01.lab.local/oauth2/redhatsso/callback**. Then click Save.
+ 3. Once in the Add Client menu, add quay-enterprise as the Client ID and openid-connect as Client Protocol. Then click Save. <br/>
 
-  <img src="/images/quay-sso-sso_quayclient-3.png" alt="IdM users PNG" style="width:75%;"/>
+<img src="/images/quay-sso-sso_quayclient-2.png" alt="SSO quay client 2 PNG" style="width:75%;"/>
+
+ 4. That will open the Settings tab. Fill in the fields as follows: <br/>
+   a. It is mandatory to set Access Type as confidential. Confidential access type is for server-side clients that need to perform a browser login and require a client secret when they turn an access code into an access token. <br/>
+   b. It is also mandatory to set _Valid Redirect URL_ as the Quay’s SSO callback webhook which in my case will be: **https://ice-quay-01.lab.local/oauth2/redhatsso/callback**. Then click Save. <br/>
+
+<img src="/images/quay-sso-sso_quayclient-3.png" alt="SSO quay client 3 PNG" style="width:75%;"/>
 
 
 #### Red Hat Quay Setup
@@ -63,35 +65,35 @@ Now we need to setup Quay to use Red Hat SSO as external authentication.
 
  1. Start Quay in config mode and log in. For that I am going to start the Quay container in config mode and access the portal at **https://ice-quay-01.lab.local:8443/**. The user as usual is _quayuser_ and the password the one passed to the quay container.
 
- 2. Click on _Modify existing configuration_
-  <img src="/images/quay-sso-quay_oidc-1.png" alt="IdM users PNG" style="width:75%;"/>
+ 2. Click on _Modify existing configuration_ <br/>
+  <img src="/images/quay-sso-quay_oidc-1.png" alt="SSO quay OIDC 1 PNG" style="width:50%;"/>
 
  3. Upload the current config tarball to open the _Config_ menu
 
- 4. In _External Configuration_ section hit _Add OIDC Provider_ button.
-  <img src="/images/quay-sso-quay_oidc-2.png" alt="IdM users PNG" style="width:75%;"/>
+ 4. In _External Configuration_ section hit _Add OIDC Provider_ button. <br/>
+  <img src="/images/quay-sso-quay_oidc-2.png" alt="SSO quay OIDC 2 PNG" style="width:50%;"/>
 
- 5. Enter **redhatsso** as the provider name and hit _OK_.
-  <img src="/images/quay-sso-quay_oidc-3.png" alt="IdM users PNG" style="width:75%;"/>
+ 5. Enter **redhatsso** as the provider name and hit _OK_. <br/>
+  <img src="/images/quay-sso-quay_oidc-3.png" alt="SSO quay OIDC 3 PNG" style="width:50%;"/>
 
- 6. Fill in the configuration for the SSO client Quay we created in the previous section.
-   a. _OIDC Server_ will be the SSO FQDN + '/auth/realms/<REALM NAME>' (where <REALM NAME> is LAB).
-   b. _Client ID_ should be the name we created in SSO: **quay-enterprise**
-   c. The _Client Secret_ should be copied from SSO. Within the **quay-enterprise** client menu, _Credentials_ tab, check the _Secret_ field.
-      <img src="/images/quay-sso-quay_oidc-4.png" alt="IdM users PNG" style="width:75%;"/>
-   d. Fill in _Service Name_.
-   e. For _Login Scopes_ type **openid** and then hit _Add_.
-   f. Check the _Callback URLs_ are as expected by SSO.
-   g. In the section _Access Settings_ toggle _Enable Open User Creation_ to allow federated users creation.
-   h. Leave _Internal Authentication_ with the default _Local Database_, which will ask the users to create a local password for pushing/pulling content after the first login.
-   i. Finally hit _Save Configuration Changes_.
-      <img src="/images/quay-sso-quay_oidc-5.png" alt="IdM users PNG" style="width:75%;"/>
+ 6. Fill in the configuration for the SSO client Quay we created in the previous section. <br/>
+   a. _OIDC Server_ will be the SSO FQDN + '/auth/realms/<REALM NAME>' (where <REALM NAME> is LAB). <br/>
+   b. _Client ID_ should be the name we created in SSO: **quay-enterprise** <br/>
+   c. The _Client Secret_ should be copied from SSO. Within the **quay-enterprise** client menu, _Credentials_ tab, check the _Secret_ field. <br/>
+      <img src="/images/quay-sso-quay_oidc-4.png" alt="SSO quay OIDC 4 PNG" style="width:50%;"/> <br/>
+   d. Fill in _Service Name_. <br/>
+   e. For _Login Scopes_ type **openid** and then hit _Add_. <br/>
+   f. Check the _Callback URLs_ are as expected by SSO. <br/>
+   g. In the section _Access Settings_ toggle _Enable Open User Creation_ to allow federated users creation. <br/>
+   h. Leave _Internal Authentication_ with the default _Local Database_, which will ask the users to create a local password for pushing/pulling content after the first login. <br/>
+   i. Finally hit _Save Configuration Changes_. <br/>
+      <img src="/images/quay-sso-quay_oidc-5.png" alt="SSO quay OIDC 5 PNG" style="width:50%;"/>
 
-  **NOTE:** At this point I received a TLS error due to Red Hat SSO using self-signed certs.
-      <img src="/images/quay-sso-quay_oidc-6.png" alt="IdM users PNG" style="width:75%;"/>
+  **NOTE:** At this point I received a TLS error due to Red Hat SSO using self-signed certs. <br/>
+      <img src="/images/quay-sso-quay_oidc-6.png" alt="SSO quay OIDC 6 PNG" style="width:50%;"/>
 
-            See Appendix 1 to see how to setup Red Hat SSO with custom certificates issued and signed by Red Hat IdM so Quay can trust them. After this fix we can observe that if we try to save Quay configuration again it now succeeds.
-      <img src="/images/quay-sso-quay_oidc-7.png" alt="IdM users PNG" style="width:75%;"/>
+            See Appendix 1 to see how to setup Red Hat SSO with custom certificates issued and signed by Red Hat IdM so Quay can trust them. After this fix we can observe that if we try to save Quay configuration again it now succeeds. <br/>
+      <img src="/images/quay-sso-quay_oidc-7.png" alt="SSO quay OIDC 7 PNG" style="width:50%;"/>
 
  7. Download the new configuration as **quay-config.tar.gz**, stop the quay container in config mode, and upload the tarball to Quay’s config volume [2]. Finally start the container in normal mode.
 
@@ -117,17 +119,17 @@ extra_ca_certs/ipa-ca.crt
 3c0ce6b6beb3c2ef92cc4e35cba2f2e6e0454fcea3c9e82b8b013b50bfb46926
 {% endhighlight %}
 
- 8. Now at the Quay login page observe the LAB SSO backend being displayed.
-  <img src="/images/quay-sso-quay_oidc-8.png" alt="IdM users PNG" style="width:75%;"/>
+ 8. Now at the Quay login page observe the LAB SSO backend being displayed.<br/>
+  <img src="/images/quay-sso-quay_oidc-8.png" alt="SSO quay OIDC 8 PNG" style="width:50%;"/>
 
- 9. Once we click on it we are immediately redirected to our Red Hat SSO instance to login.
-  <img src="/images/quay-sso-quay_oidc-9.png" alt="IdM users PNG" style="width:75%;"/>
+ 9. Once we click on it we are immediately redirected to our Red Hat SSO instance to login.<br/>
+  <img src="/images/quay-sso-quay_oidc-9.png" alt="SSO quay OIDC 9 PNG" style="width:50%;"/>
 
- 10. After authentication succeeds, the callback to Quay is correctly invoked and upon first login the new user creation needs to be confirmed within Quay.
-  <img src="/images/quay-sso-quay_oidc-10.png" alt="IdM users PNG" style="width:75%;"/>
+ 10. After authentication succeeds, the callback to Quay is correctly invoked and upon first login the new user creation needs to be confirmed within Quay.<br/>
+  <img src="/images/quay-sso-quay_oidc-10.png" alt="SSO quay OIDC 10 PNG" style="width:50%;"/>
 
- 11. When user is confirmed the user is finally in.
-  <img src="/images/quay-sso-quay_oidc-11.png" alt="IdM users PNG" style="width:75%;"/>
+ 11. When user is confirmed the user is finally in.<br/>
+  <img src="/images/quay-sso-quay_oidc-11.png" alt="SSO quay OIDC 11 PNG" style="width:50%;"/>
 
 
 ### Appendix 1 - Setup custom certificates for Red Hat SSO
@@ -308,7 +310,7 @@ ice-sso-01.jks                standalone-ha.xml
 
 {% endhighlight %}
 
- 5. Now we can see the connection to the SSO server is secured by a trusted CA.
+ 5. Now we can see the connection to the SSO server is secured by a trusted CA.<br/>
   <img src="/images/quay-sso-sso_trusted.png" alt="IdM users PNG" style="width:75%;"/>
 
 ### Appendix 2 - Quay config.yaml
