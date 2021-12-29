@@ -92,9 +92,10 @@ Now we need to setup Quay to use Red Hat SSO as external authentication.
   **NOTE:** At this point I received a TLS error due to Red Hat SSO using self-signed certs. <br/>
       <img src="/images/quay-sso-quay_oidc-6.png" alt="SSO quay OIDC 6 PNG" style="width:50%;"/>
 
-            See Appendix 1 to see how to setup Red Hat SSO with custom certificates issued and signed by Red Hat IdM so Quay can trust them. After this fix we can observe that if we try to save Quay configuration again it now succeeds. <br/>
+  See Appendix 1 to see how to setup Red Hat SSO with custom certificates issued and signed by Red Hat IdM so Quay can trust them. After this fix we can observe that if we try to save Quay configuration again it now succeeds. <br/>
       <img src="/images/quay-sso-quay_oidc-7.png" alt="SSO quay OIDC 7 PNG" style="width:50%;"/>
 
+{:start="7"}
  7. Download the new configuration as **quay-config.tar.gz**, stop the quay container in config mode, and upload the tarball to Quay’s config volume [2]. Finally start the container in normal mode.
 
 {% highlight console %}
@@ -120,10 +121,10 @@ extra_ca_certs/ipa-ca.crt
 {% endhighlight %}
 
  8. Now at the Quay login page observe the LAB SSO backend being displayed.<br/>
-  <img src="/images/quay-sso-quay_oidc-8.png" alt="SSO quay OIDC 8 PNG" style="width:50%;"/>
+  <img src="/images/quay-sso-quay_oidc-8.png" alt="SSO quay OIDC 8 PNG" style="width:30%;"/>
 
  9. Once we click on it we are immediately redirected to our Red Hat SSO instance to login.<br/>
-  <img src="/images/quay-sso-quay_oidc-9.png" alt="SSO quay OIDC 9 PNG" style="width:50%;"/>
+  <img src="/images/quay-sso-quay_oidc-9.png" alt="SSO quay OIDC 9 PNG" style="width:30%;"/>
 
  10. After authentication succeeds, the callback to Quay is correctly invoked and upon first login the new user creation needs to be confirmed within Quay.<br/>
   <img src="/images/quay-sso-quay_oidc-10.png" alt="SSO quay OIDC 10 PNG" style="width:50%;"/>
@@ -311,7 +312,7 @@ ice-sso-01.jks                standalone-ha.xml
 {% endhighlight %}
 
  5. Now we can see the connection to the SSO server is secured by a trusted CA.<br/>
-  <img src="/images/quay-sso-sso_trusted.png" alt="IdM users PNG" style="width:75%;"/>
+  <img src="/images/quay-sso-sso_trusted.png" alt="IdM users PNG" style="width:50%;"/>
 
 ### Appendix 2 - Quay config.yaml
 
