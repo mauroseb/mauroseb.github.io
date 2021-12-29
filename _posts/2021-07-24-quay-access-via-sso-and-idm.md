@@ -9,12 +9,13 @@ excerpt_separator: "<!-- more -->"
 ---
 ### Intro
 
-In this post I will cover the configuration overview of Red Hat Single Sign On (SSO) with an Red Hat Identity Management (IdM) backend and then integrate the authentication of Red Hat Quay enterprise registry with SSO.
+The purpose of this post is to cover the configuration of Red Hat Single Sign On (SSO) federated with an instance of Red Hat Identity Management (IdM) to later provide secure authentication of users in a Red Hat Quay enterprise registry via OpenID Connect 1.0 protocol. The post provides an insight of the changes that will be required in the three products to allow correct interaction.
+<!-- more -->
 
 
 ### Environment
 
- 1. **Red Hat IdM 4.6.8.** IdM is setup with default configuration. Some groups and users were created for this test: like the **mauro** or **jdoe** which to the **devops** group which will be the test subject. <br/>
+ 1. **Red Hat IdM 4.6.8.** IdM is setup with default configuration. Some groups and users were created in advance for this test: like the **mauro** or **jdoe** which to the **devops** group which will be the test subject. Refer to the official or upstream IdM documentation. <br/>
 
   <img src="/images/quay-sso-idm_users.png" alt="IdM users PNG" style="width:30%;"/>
 
