@@ -12,6 +12,7 @@ body {
     font-family: 'Arial', 'Sans-Serif';
     padding-bottom: 50px;
     padding-top: 20px;
+    overflow: hidden;
 }
 
 nav {
