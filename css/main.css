@@ -185,7 +185,7 @@ h1 {
 
 h1.navi {
     color:  #EEEEEE;
-    line-height: 5px;
+    line-height: 0px;
     vertical-align: top;
     padding: 20px;  
 }
