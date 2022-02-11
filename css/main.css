@@ -184,12 +184,8 @@ h1 {
 }
 
 h1.navi {
-    font-size: 40px;
-    font-family:'Arial', 'Sans-Serif';
-    font-weight: 300;
-    text-transform: uppercase;
     color:  #EEEEEE;
-    align: center;
+    line-height: 5px;
     vertical-align: top;
     padding: 20px;  
 }
