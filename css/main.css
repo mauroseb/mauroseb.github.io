@@ -12,7 +12,9 @@ body {
     font-family: 'Arial', 'Sans-Serif';
     padding-bottom: 50px;
     padding-top: 20px;
+    overflow: -moz-scrollbars-none; 
 }
+body::-webkit-scrollbar { width: 0 !important }
 
 nav {
     font-family: 'Arial', 'Sans-Serif';
