@@ -1,6 +1,6 @@
 ---
 layout: posts
-title: "OCP 4.3 on Azure Tests"
+title: "Testing OCP 4.3 on Azure"
 date: 2020-04-02
 categories: [blog]
 tags: [ ocp, azure, kubernetes ]
