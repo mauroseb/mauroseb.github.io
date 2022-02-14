@@ -108,7 +108,7 @@ a.navi:hover {
 
 div.content {
     margin-top: 80px;
-    width: 80%;
+    width: 70%;
     margin-left: auto;
     margin-right: auto;
     text-align: justify;
@@ -119,8 +119,8 @@ div.content {
     height: 100%;
 }
 
-div.content-sub {
-    width: 80%;
+div.content.sub {
+    width: 70%;
 }
 
 div.navi {
