@@ -17,7 +17,6 @@ body {
     overflow: hidden;
     height: 100%;  
 }
-body::-webkit-scrollbar { width: 0 !important }
 
 nav {
     font-family: 'Open Sans', sans-serif;
@@ -117,6 +116,12 @@ div.content {
     padding-top: 20px;
     overflow-y: auto; 
     height: 100%;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+div.content::-webkit-scrollbar {
+  display: none;
 }
 
 div.content.sub {
@@ -137,6 +142,7 @@ div.nav {
     top: 0;
     height: 100px; 
 }
+
 
 p.meta {
     text-align: center;
