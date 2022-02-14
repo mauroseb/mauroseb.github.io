@@ -115,11 +115,7 @@ div.content {
 
 div.navi {
     background-color: rgba(0, 0, 0, 0.5);
-    text-decoration: none;
-    border-radius: 8px;
     float: right;
-    border-radius: 8px;
-    font-size: 24px;
 }
 
 div.nav {
@@ -190,6 +186,7 @@ h1.navi {
     line-height: 0px;
     vertical-align: top;
     padding: 20px;  
+    font-size:24px;
 }
 
 h2 {
