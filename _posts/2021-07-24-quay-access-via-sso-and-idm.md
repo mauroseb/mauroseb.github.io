@@ -1,6 +1,6 @@
 ---
 layout: posts
-title: "Quay Single Sign On"
+title: "Setup Single Sign On for Red Hat Quay Enterprise Registry"
 date: 2021-07-24
 categories: [blog]
 tags: [ quay, sso, keycloack, idm ]
