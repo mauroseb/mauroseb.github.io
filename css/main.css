@@ -9,7 +9,7 @@ body {
     background-repeat: no-repeat;
     background-color: #d3d3d3;
     font-size: 12px;
-    font-family: 'Arial', 'Sans-Serif';
+    font-family: 'Open Sans', sans-serif;
     padding-bottom: 50px;
     padding-top: 20px;
     overflow: -moz-scrollbars-none; 
@@ -17,7 +17,7 @@ body {
 body::-webkit-scrollbar { width: 0 !important }
 
 nav {
-    font-family: 'Arial', 'Sans-Serif';
+    font-family: 'Open Sans', sans-serif;
     font-weight: bold;
     padding: 0;
     padding-top: 45px;
@@ -130,14 +130,14 @@ div.nav {
 
 p.meta {
     text-align: center;
-    font-family: 'Arial', 'Sans-Serif';
+    font-family: 'Open Sans', sans-serif;
     font-size: 9px;
     line-height: 1.4em;
     color: #333;
 }
 
 p.post {
-    font-family: 'Arial', 'Sans-Serif';
+    font-family: 'Open Sans', sans-serif;
     font-size: 12px;
     line-height: 1.4em;
     color: #333;
@@ -146,7 +146,7 @@ p.post {
 }
 
 p.navi {
-    font-family: 'Arial', 'Sans-Serif';
+    font-family: 'Open Sans', sans-serif;
     font-size: 24px;
     color: #000000;
     vertical-align: middle;
@@ -155,7 +155,7 @@ p.navi {
 }
 
 p.gen {
-    font-family: 'Arial', 'Sans-Serif';
+    font-family: 'Open Sans', sans-serif;
     font-size: 20px;
     line-height: 1.4em;
     color: #333;
@@ -164,7 +164,7 @@ p.gen {
 }
 
 p.index {
-    font-family: 'Arial', 'Sans-Serif';
+    font-family: 'Open Sans', sans-serif;
     font-size: 20px;
     line-height: 1.4em;
     color: #333;
@@ -174,7 +174,7 @@ p.index {
 
 h1 {
     font-size: 40px;
-    font-family:'Arial', 'Sans-Serif';
+    font-family: 'Open Sans', sans-serif;
     font-weight: 300;
     text-transform: uppercase;
     color: #696969;
@@ -191,7 +191,7 @@ h1.navi {
 
 h2 {
     font-size: 36px;
-    font-family:'Arial', 'Sans-Serif';
+    font-family: 'Open Sans', sans-serif;
     text-transform: uppercase;
     font-weight: 300;
     color: #000000;
@@ -199,7 +199,7 @@ h2 {
 
 h2.navi {
     font-size: 10px;
-    font-family:'Arial', 'Sans-Serif';
+    font-family: 'Open Sans', sans-serif;
     weight: 300;
     text-transform: uppercase;
     color: #000000;
@@ -209,7 +209,7 @@ h2.navi {
 
 h3 {
     font-size: 24px;
-    font-family:'Arial', 'Sans-Serif';
+    font-family: 'Open Sans', sans-serif;
     font-weight: 300;
     text-transform: uppercase;
     color: #000000;
@@ -217,7 +217,7 @@ h3 {
 
 h4 {
     font-size: 16px;
-    font-family:'Arial', 'Sans-Serif';
+    font-family: 'Open Sans', sans-serif;
     font-weight: 300;
     text-transform: uppercase;
     color: #000000;
@@ -225,7 +225,7 @@ h4 {
 
 h5 {
     font-size: 12px;
-    font-family:'Arial', 'Sans-Serif';
+    font-family: 'Open Sans', sans-serif;
     font-weight: 300;
     text-transform: uppercase;
     color: #000000;
@@ -244,7 +244,7 @@ div.footer {
 }
 
 ul.footer {
-    font-family: 'Arial', 'Sans-Serif';
+    font-family: 'Open Sans', sans-serif;
     font-weight: bold;
     list-style: none;
     position: relative;
@@ -272,7 +272,7 @@ footer {
 
 ul.posts { 
     font-size: 18px;
-    font-family: 'Arial', 'Sans-Serif';
+    font-family: 'Open Sans', sans-serif;
     width: 80%;
     margin: auto;
     display: table;
