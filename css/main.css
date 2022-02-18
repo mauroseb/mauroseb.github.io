@@ -341,3 +341,9 @@ code {
     font-size: 10px;
     font-weight: bold;
 }
+
+hr.regular {
+   size: 2px;
+   width: 100%; 
+   color: darkgray;   
+}
