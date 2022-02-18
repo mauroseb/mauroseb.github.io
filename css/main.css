@@ -41,6 +41,10 @@ nav {
     background-blend-mode: screen;
 }
 
+@media screen and (max-width: 768px) {
+   div.navi {display: none;}
+}
+
 .floatNav {
     border-radius: 4px;
     box-shadow: 0px 2px 12px #000000;
@@ -249,6 +253,7 @@ h5 {
 
 img {
     margin-left: 20px;
+    border-radius: 5px;
 }
 
 div.footer {
