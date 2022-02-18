@@ -5,12 +5,8 @@ title: BLOG
         <br/><br/><br/>
         <div>
 	  <ul class="posts">
-	    {% for post_year in site.posts | group_by: "date" | date '%Y' %}
-		<h2>{{ post_year }}</h2>
-		<hr class=regular />
-		{% for post in post_year %}
+		{% for post in site.posts %}
 	           <li class="posts"><span style="color:#00e500" > ‣ </span> <a style="color:#000000;" href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a><ul><li class="date"><span style="color:#696969">{{ post.date | date_to_string }}</span></li></ul> </li>
 	        {% endfor %}
-            {% endfor %}
 	  </ul>
         </div>
