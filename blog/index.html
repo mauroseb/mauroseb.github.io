@@ -4,9 +4,15 @@ title: BLOG
 ---
         <br/><br/><br/>
         <div>
-	  <ul class="posts">
+             <ul class="posts">
 		{% for post in site.posts %}
-	           <li class="posts"><span style="color:#00e500" > ‣ </span> <a style="color:#000000;" href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a><ul><li class="date"><span style="color:#696969">{{ post.date | date_to_string }}</span></li></ul> </li>
+		   {% capture this_year %}{{ post.date | date: "%Y" }}{% endcapture %}
+		     {% if this_year != date %}
+		       <h2 id="y{{ this_year }}">{{ this_year }}</h2>
+		       <hr>
+		       {% capture date %}{{ this_year }}{% endcapture %}
+		     {% endif %}
+	                  <li class="posts"><span style="color:#00e500" > ‣ </span> <a style="color:#000000;" href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a><ul><li class="date"><span style="color:#696969">{{ post.date | date_to_string }}</span></li></ul> </li>
 	        {% endfor %}
-	  </ul>
+	      </ul>
         </div>
