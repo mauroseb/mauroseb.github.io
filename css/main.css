@@ -122,9 +122,9 @@ div.content {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
     height: 100%;
-    height: -webkit-calc(100% - 105px);
-    height: -moz-calc(100% - 105px);
-    height: calc(100% - 105px);
+    height: -webkit-calc(100% - 200px);
+    height: -moz-calc(100% - 200px);
+    height: calc(100% - 200px);
 }
 
 div.content::-webkit-scrollbar {
