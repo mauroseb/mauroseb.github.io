@@ -164,8 +164,8 @@ hostname frr-upstream                              👈[1]
 !
 debug bgp updates
 debug bgp neighbor
-debug zebra nht 
-debug bgp nht 
+debug zebra nht
+debug bgp nht
 debug bfd peer
 log file /tmp/frr.log debugging
 log timestamp precision 3
@@ -193,7 +193,7 @@ router bgp 64521                                   👈[4]
   neighbor 192.168.133.72 activate
  exit-address-family
 !
-line vty 
+line vty
 
 {% endhighlight %}
 ```{epigraph}
@@ -202,17 +202,17 @@ line vty
 
 The important sections to adjust of the previous configuration file are the following:
 
- [1] _hostname <NAME>_: in my case is frr-bgp.
- [2] _interface <DEV>_: the interface name that is in the same subnet as the OCP worker nodes.
- [3] _ip address <IP/PREFIX>_: External host IP address and prefix, 192.168.133.1/24.
- [4] _router bgp <ASN>_: pick the ASN for the external router, 64521.
- [5] _bgp router-id <IP>_: pick the IP for the external router host, 192.168.133.1.
- [6] _timers bgp 3 15_: BGP hold time (15 secs) and keepalive timeout (3 secs). It can be adjusted to your needs.
- [7] _neighbor metallb remote-as <ASN>_: the remote (MetalLB) ASN, 64520.
- [8] _neighbor <IP> peer-group metallb_: each OCP node that runs a speaker pod should be identified as neighbour. I also mark these peers as are part of the peer-group metallb.
- [9] _neighbor <IP> bfd_: Enable BFD with the neighbour in question.
- [10] _neighbor <IP> next-hop-self_: tells FRR that the routes learned from this neighbor will have the BGP router address as the next hop. 
- [11] _neighbor <IP> activate_: states that the IPs listed will have the IPv4 address family enabled, and will receive announcements from this router.
+ **[1] hostname <NAME>:** in my case is frr-bgp. <br/>
+ **[2] interface <DEV>:** the interface name that is in the same subnet as the OCP worker nodes. <br/>
+ **[3] ip address <IP/PREFIX>:** External host IP address and prefix, 192.168.133.1/24.<br/>
+ **[4] router bgp <ASN>:** pick the ASN for the external router, 64521.<br/>
+ **[5] bgp router-id <IP>:** pick the IP for the external router host, 192.168.133.1.<br/>
+ **[6] timers bgp 3 15:** BGP hold time (15 secs) and keepalive timeout (3 secs). It can be adjusted to your needs.<br/>
+ **[7] neighbor metallb remote-as <ASN>:** the remote (MetalLB) ASN, 64520.<br/>
+ **[8] neighbor <IP> peer-group metallb:** each OCP node that runs a speaker pod should be identified as neighbour. I also mark these peers as are part of the peer-group metallb.<br/>
+ **[9] neighbor <IP> bfd:** Enable BFD with the neighbour in question.<br/>
+ **[10] neighbor <IP> next-hop-self:** tells FRR that the routes learned from this neighbor will have the BGP router address as the next hop.<br/>
+ **[11] neighbor <IP> activate:** states that the IPs listed will have the IPv4 address family enabled, and will receive announcements from this router. <br/>
 
 For more details on FRR BGP configuration check their documentation[^7].
 
