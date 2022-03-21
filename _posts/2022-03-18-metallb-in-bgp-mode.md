@@ -20,13 +20,13 @@ Some concepts need to be conveyed in order to follow the next section where I wi
 
 First and foremost I need to address what is MetalLB ?
 
-It is an OpenSource project that provides the ability to create ```LoadBalancer``` type of kubernetes Services on top of a baremetal OpenShift/Kubernetes cluster and in turn create the same user experience that one would get on a public cloud provider like in AWS, GCP or Azure.[^1]
+It is an OpenSource project that provides the ability to create **LoadBalancer** type of kubernetes Services on top of a baremetal OpenShift/Kubernetes cluster and in turn create the same user experience that one would get on a public cloud provider like in AWS, GCP or Azure.[^1]
 
-A service of type ```LoadBalancer``` in kubernetes will automatically request the cloud provider to provision a load balancer that will direct traffic to the right cluster node and port tuples, and subsequently assign an externally accessible IP to it. Then information like the assigned IP address will be updated in the status section of the new service resource.[^2] In an on prem environment Kubernetes will create a ClusterIP service and assign a node port and wait for the administrator to create the load balancer side configuration.
+A service of type **LoadBalancer** in kubernetes will automatically request the cloud provider to provision a load balancer that will direct traffic to the right cluster node and port tuples, and subsequently assign an externally accessible IP to it. Then information like the assigned IP address will be updated in the status section of the new service resource.[^2] In an on prem environment Kubernetes will create a ClusterIP service and assign a node port and wait for the administrator to create the load balancer side configuration.
 
-In order to achieve a similar behavior to public cloud providers, MetalLB has to handle two main tasks: _address allocation_ which means managing the address pools that the new ```LoadBalancer``` services will use, and secondly the _external announcement_ of these services' IPs, so that external entities to the cluster can learn how to reach them.
+In order to achieve a similar behavior to public cloud providers, MetalLB has to handle two main tasks: _address allocation_ which means managing the address pools that the new **LoadBalancer** services will use, and secondly the _external announcement_ of these services' IPs, so that external entities to the cluster can learn how to reach them.
 
-In regard to address allocation MetalLB has to be told which IPs or IP ranges it can assign when a new service is created and this is accomplished through the ```AddressPool``` CRD.
+In regard to address allocation MetalLB has to be told which IPs or IP ranges it can assign when a new service is created and this is accomplished through the **AddressPool** CRD.
 
 As to external announcement of the IP, MetalLB offers two alternatives:
 
@@ -39,14 +39,14 @@ The remaining part of this article I am going to focus on the latter, BGP mode.
 
 When MetalLB works in BGP mode, it makes use of FRR[^4], an opensource project that started as an spin off of Quagga, and provides GNU/Linux based fully featured IP routing capabilities. It supports all sort of routing protocols, and among them the one MetalLB needs: BGP. 
 
-BGP or Border Gateway Protocol is the Internet and industry de facto protocol for routing, which you probably heard of. In brief, BGPv4 was defined under RFC1654[^5] as an exterior gateway path-vector routing protocol, with the goal of conveying network reachibility between autonomous systems. The autonomous system can be a flexible term but in its conception refers to a set of routers under a single technical administration, ideally with a common internal gateway protocol in use, common metrics, etc. Each AS will be identified by an ASN or autonomous system number that will be typically a unique 16-bit number (or 32 bits with RFC 4893).
+BGP or Border Gateway Protocol is the Internet and industry de facto protocol for routing, which you probably heard of. In brief, BGPv4 was defined under RFC1654[^5] as an exterior gateway path-vector routing protocol, with the goal of conveying network reachability between autonomous systems. The autonomous system can be a flexible term but in its conception refers to a set of routers under a single technical administration, ideally with a common internal gateway protocol in use, common metrics, etc. Each AS will be identified by an ASN or autonomous system number that will be typically a unique 16-bit number (or 32 bits with RFC 4893).
 
-BGP minimum allowed time to keep a failed session (hold time) is 3 seconds, which may be unacceptable amount of time for a service to be unavailable. Therefore, in addition to the standard BGP speaking capabilities, MetalLB (and FRR) also supports to configure Bi-directional Forwarding Detection (or BFD) protocol. BFD adds further resiliency to the solution providing faster failure detection. It allows two routers to detect faults in the bidirectional path among them at subsencond intervals. BFD works at layer 3, and basically offers a lightweight liveness detection protocol (aka "hello" protocol) that is independant of the routing protocol itself, it will only limit itself to notify the routing protocol about the failure and not to take any corrective action.[^6]
+BGP minimum allowed time to keep a failed session (hold time) is 3 seconds, which may be unacceptable amount of time for a service to be unavailable. Therefore, in addition to the standard BGP speaking capabilities, MetalLB (and FRR) also supports configuring Bi-directional Forwarding Detection (or BFD) protocol. BFD adds further resiliency to the solution providing faster failure detection. It allows two routers to detect faults in the bidirectional path among them at subsecond intervals. BFD works at layer 3, and basically offers a lightweight liveness detection protocol (aka "hello" protocol) that is independent of the routing protocol itself, it will only limit itself to notify the routing protocol about the failure and not to take any corrective action.[^6]
 
 
 ### Environment
 
-The network where the OpenShift cluster will run on needs an adjacent router to speak also BGP and BFD, moreover the router will do ECMP (Equal Cost Multipath) in order to distribute the incoming requests uniformly across multiple worker nodes. So if a service is advertised from multiple worker nodes, each should get an even amount of requests.
+The network where the OpenShift cluster will run on needs an adjacent router which speaks also BGP and BFD, moreover the router will do ECMP (Equal Cost Multipath) in order to distribute the incoming requests uniformly across multiple worker nodes. So if a service is advertised from multiple worker nodes, each should get an even amount of requests.
 
 For this purpose I am going to use an isolated instance of FRR running containerized within an external system in order to emulate that router.
 
@@ -58,7 +58,6 @@ The following diagram describes the test scenario in more detail.
 For the purpose of testing this feature I have an already installed cluster of OpenShift 4.10.3 using baremetal UPI deployment method, and also using Openshift SDN as CNI plugin with default configuration.
 
 {% highlight bash %}
-
 $ oc get clusterversion
 NAME      VERSION   AVAILABLE   PROGRESSING   SINCE   STATUS
 version   4.10.3    True        False         23h     Cluster version is 4.10.3
@@ -149,7 +148,7 @@ For MetalLB in BGP mode to work that needs to be done is as follows:
 
 ### Procedure
 
-The procedure consists of deploying the external router, then deploy and configure MetalLB operator and test the resulting scenario.
+The procedure consists of three parts, deploying the external router, then deploying and configuring MetalLB operator and finally testing the resulting scenario.
 
 #### External Router
 
@@ -323,7 +322,7 @@ bdf2b6a9ebe087acc7df8b57f86dbf7e3f253f5df66ced360a18d2d40574b8f1
 {% endhighlight %}
 
 Finally allow BGP (179/TCP) and BFD (3784/UDP and 3785/UDP) communications to go through the firewall if you have one running between OpenShift nodes and the router. 
-Since in my LAB environment the host running the FRR pod is a Fedora hypervisor and the OpenShift cluster is virtualized, I will allow this port via firwalld and in the ```libvirt``` zone.
+Since in my LAB environment the host running the FRR pod is a Fedora hypervisor and the OpenShift cluster is virtualized, I will allow this port via firwalld and in the **libvirt** zone.
 
 {% highlight console %}
 $ firewall-cmd --zone=libvirt --add-port=179/tcp --add-port=3784/udp --add-port=3785/udp --permanent
@@ -422,7 +421,6 @@ metallb.metallb.io/metallb created
 ```
 
 {% highlight console %}
-
 $  oc get deployment -n metallb-system controller 
 NAME         READY   UP-TO-DATE   AVAILABLE   AGE
 controller   1/1     1            1           91s
@@ -459,8 +457,8 @@ spec:
 
 ##### 4. Create an AddressPool resource
 
-As mentioned before, the ```AddressPool``` resource will tell MetalLB which External IP addresses are valid to be assigned to a ```LoadBalancer``` service.
-These addresses can be specified as subnet range, or individual addresses like the example below. To avoid collissions these IP addresses should be available and reserved for this use. The protocol has to be set to ```bgp```. The other protocol option is the older method ```layer2``` which relies on ARP/NDP to advertise the addresses instead of BGP.
+As mentioned before, the **AddressPool** resource will tell MetalLB which External IP addresses are valid to be assigned to a **LoadBalancer** service.
+These addresses can be specified as subnet range, or individual addresses like the example below. To avoid collissions these IP addresses should be available and reserved for this use. The protocol has to be set to **bgp**. The other protocol option is the older method **layer2** which relies on ARP/NDP to advertise the addresses instead of BGP.
 
 {% highlight console %}
 $ cat << _EOF_ | oc apply -f -
@@ -472,19 +470,19 @@ metadata:
   namespace: metallb-system
 spec:
   addresses:
-  - 192.168.133.150/32
-  - 192.168.133.151/32
-  - 192.168.133.152/32
-  - 192.168.133.153/32
-  - 192.168.133.154/32
-  - 192.168.133.155/32
+  - 192.168.155.150/32
+  - 192.168.155.151/32
+  - 192.168.155.152/32
+  - 192.168.155.153/32
+  - 192.168.155.154/32
+  - 192.168.155.155/32
   autoAssign: true
   protocol: bgp
 _EOF_
 addresspool.metallb.io/address-pool-bgp created
 {% endhighlight %}
 
-##### 4. Create a BFD profile
+##### 5. Create a BFD profile
 
 The BFD profile holds the configuration and timeouts for BFD protocol.
 
@@ -507,9 +505,9 @@ _EOF_
 bfdprofile.metallb.io/test-bfd-prof created
 {% endhighlight %}
 
-##### 5. Create a BGPPeer resource
+##### 6. Create a BGPPeer resource
 
-Finally create the BGPPeer resource which will pass to the seaker pods' frr container the right ASN numbers, local and remote, as well as the remote peer IP address.
+Finally create the **BGPPeer** resource which will pass to the seaker pods' frr container the right ASN numbers, local and remote, as well as the remote peer IP address.
 
 {% highlight console %}
 $ cat << _EOF_ | oc apply -f -
@@ -531,14 +529,14 @@ bgppeer.metallb.io/peer-test created
 The speaker pods should be up and running in the worker nodes by now.
 
 {% highlight console %}
-oc get pods -n metallb-system
+$ oc get pods -n metallb-system
 NAME                                                   READY   STATUS    RESTARTS   AGE
 controller-5bcbccf6d4-lhp95                            2/2     Running   0          71s
 metallb-operator-controller-manager-654df86cc5-szk96   1/1     Running   0          14m
 speaker-bt8z2                                          6/6     Running   0          71s
 speaker-czhc5                                          6/6     Running   0          71s
 
-$oc get ds -n metallb-system
+$ oc get ds -n metallb-system
 NAME      DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR                     AGE
 speaker   2         2         2       2            2           node-role.kubernetes.io/worker=   110s
 {% endhighlight %}
@@ -547,7 +545,7 @@ speaker   2         2         2       2            2           node-role.kuberne
 ### Verification
 
 Now that the environment is up and running lets verify it is behaving as expected.
-Firstly, I will check that there are valid BGP sessions established in my speaker pods, for example ```speaker-6jsfc```.
+Firstly, I will check that there are valid BGP sessions established in my speaker pods, for example **speaker-6jsfc**.
 The BGP state should be **Established**, and BFD status should be **Up**.
 
 {% highlight console %}
@@ -696,10 +694,10 @@ end
 
 {% endhighlight %}
 
-Similarily if I check the standalone FRR pod the  output should be similar against each peer.
+Similarily if I check the standalone FRR pod the output should be similar against each peer.
 
 {% highlight console %}
-sudo podman exec -it  frr-upstream vtysh -c "show ip bgp neighbor"
+$ sudo podman exec -it  frr-upstream vtysh -c "show ip bgp neighbor"
 BGP neighbor is 192.168.133.71, remote AS 64520, local AS 64521, external link
 Hostname: ice-ocp4-worker-0.lab.local
  Member of peer-group metallb for session parameters
@@ -852,6 +850,56 @@ Read thread: on  Write thread: on  FD used: 27
 {% endhighlight %}
 
 
+The BFD sessions can be inspected in more detail with the following command.
+
+{% highlight console %}
+$ sudo podman exec -it frr-upstream   vtysh -c "show bfd peers"
+BFD Peers:
+	peer 192.168.133.71 local-address 192.168.133.1 vrf default interface virbr2
+		ID: 2094083731
+		Remote ID: 1259657737
+		Active mode
+		Status: up
+		Uptime: 2 day(s), 2 hour(s), 58 minute(s), 5 second(s)
+		Diagnostics: ok
+		Remote diagnostics: ok
+		Peer Type: dynamic
+		Local timers:
+			Detect-multiplier: 3
+			Receive interval: 300ms
+			Transmission interval: 300ms
+			Echo receive interval: 50ms
+			Echo transmission interval: disabled
+		Remote timers:
+			Detect-multiplier: 37
+			Receive interval: 35ms
+			Transmission interval: 35ms
+			Echo receive interval: 50ms
+
+	peer 192.168.133.72 local-address 192.168.133.1 vrf default interface virbr2
+		ID: 1112508781
+		Remote ID: 2587821932
+		Active mode
+		Status: up
+		Uptime: 1 day(s), 5 hour(s), 38 minute(s), 0 second(s)
+		Diagnostics: ok
+		Remote diagnostics: ok
+		Peer Type: dynamic
+		Local timers:
+			Detect-multiplier: 3
+			Receive interval: 300ms
+			Transmission interval: 300ms
+			Echo receive interval: 50ms
+			Echo transmission interval: disabled
+		Remote timers:
+			Detect-multiplier: 37
+			Receive interval: 35ms
+			Transmission interval: 35ms
+			Echo receive interval: 50ms
+{% endhighlight %}
+
+#### Creating a service to test MetalLB
+
 Now I will create a test service using the hello-node deployment to verify MetalLB is working as expected.
 
 {% highlight console %}
@@ -884,13 +932,12 @@ $ oc expose deployment.apps/hello-node --port 80 --target-port 9376 --name=test-
 service/test-frr exposed
 {% endhighlight %}
 
-The newly created ```LoadBalancer``` service is healthy, it is getting an External IP from the defined pool and has the right endpoint.
+The newly created **LoadBalancer** service is healthy, it is getting an External IP from the defined pool and has the right endpoint.
 
 {% highlight console %}
-oc get svc
+$ oc get svc
 NAME       TYPE           CLUSTER-IP       EXTERNAL-IP       PORT(S)        AGE
-test-frr   LoadBalancer   172.30.129.156   192.168.133.150   80:31749/TCP   38s
-
+test-frr   LoadBalancer   172.30.169.126   192.168.155.150   80:30194/TCP   33s
 
 $ oc describe svc test-frr
 Name:                     test-frr
@@ -901,45 +948,42 @@ Selector:                 app=hello-node
 Type:                     LoadBalancer
 IP Family Policy:         SingleStack
 IP Families:              IPv4
-IP:                       172.30.129.156
-IPs:                      172.30.129.156
-LoadBalancer Ingress:     192.168.133.150
+IP:                       172.30.169.126
+IPs:                      172.30.169.126
+LoadBalancer Ingress:     192.168.155.150
 Port:                     <unset>  80/TCP
 TargetPort:               9376/TCP
-NodePort:                 <unset>  31749/TCP
-Endpoints:                10.131.0.125:9376
+NodePort:                 <unset>  30194/TCP
+Endpoints:                10.131.1.165:9376
 Session Affinity:         None
 External Traffic Policy:  Cluster
 Events:
   Type    Reason        Age   From                Message
   ----    ------        ----  ----                -------
-  Normal  IPAllocated   65s   metallb-controller  Assigned IP ["192.168.133.150"]
-  Normal  nodeAssigned  65s   metallb-speaker     announcing from node "ice-ocp4-worker-1.lab.local"
-  Normal  nodeAssigned  64s   metallb-speaker     announcing from node "ice-ocp4-worker-0.lab.local"
+  Normal  nodeAssigned  60s   metallb-speaker     announcing from node "ice-ocp4-worker-0.lab.local"
+  Normal  IPAllocated   57s   metallb-controller  Assigned IP ["192.168.155.150"]
+  Normal  nodeAssigned  56s   metallb-speaker     announcing from node "ice-ocp4-worker-1.lab.local"
 {% endhighlight %}
 
 From the external FRR router pod the route to the external IP of the new service is learnt properly via BGP and the service is reachable on its external IP from other nodes in that network.
 
 {% highlight console %}
-$ sudo podman exec -it frr-upstream  bash
-bash-5.1# ip r
-default via 192.168.3.254 dev br0 proto static metric 425 
-192.168.0.0/24 dev virbr1 proto kernel scope link src 192.168.0.254 linkdown 
-192.168.3.254 dev br0 proto static scope link metric 20425 
-192.168.4.0/24 dev vlan1001 proto kernel scope link src 192.168.4.2 metric 400 
-192.168.122.0/24 dev virbr0 proto kernel scope link src 192.168.122.1 
-192.168.133.0/24 dev virbr2 proto kernel scope link src 192.168.133.1 
-192.168.133.150 nhid 494 proto bgp metric 20 
-	nexthop via 192.168.133.71 dev virbr2 weight 1 
-	nexthop via 192.168.133.72 dev virbr2 weight 1 
+$ sudo podman exec -it frr-upstream  ip r
+default via 192.168.3.254 dev br0 proto static metric 425
+192.168.0.0/24 dev virbr1 proto kernel scope link src 192.168.0.254 linkdown
+192.168.3.254 dev br0 proto static scope link metric 20425
+192.168.4.0/24 dev vlan1001 proto kernel scope link src 192.168.4.2 metric 400
+192.168.122.0/24 dev virbr0 proto kernel scope link src 192.168.122.1
+192.168.133.0/24 dev virbr2 proto kernel scope link src 192.168.133.1
+192.168.155.150 nhid 575 proto bgp metric 20
+    nexthop via 192.168.133.71 dev virbr2 weight 1
+    nexthop via 192.168.133.72 dev virbr2 weight 1
 
-bash-5.1# exit
-
-$ curl -l 192.168.133.150
+$ curl -l 192.168.155.150
 hello-node-78bd88f59b-5kswh
 {% endhighlight %}
 
-Now the requests are routed uniformly across the worker nodes. Since this example is using OpenShift SDN and MetalLB respects the externalTrafficPolicy in place (which is the default ```cluster``` in this case), the traffic will be distributed evenly and in every node and then ```kube-proxy``` will take care of distributing the traffic to the running pods. This can be verified by inspecting the iptables rules created by ```kube-proxy``` on every node associated with the ```test-metallb``` project and the ```test-frr``` service.[^8]
+Now the requests are routed uniformly across the worker nodes. Since this example is using OpenShift SDN and MetalLB respects the externalTrafficPolicy in place (which is the default **cluster** in this case), the traffic will be distributed evenly and in every node and then **kube-proxy** will take care of distributing the traffic to the running pods. This can be verified by inspecting the iptables rules created by **kube-proxy** on every node associated with the **test-metallb** project and the **test-frr** service.[^8]
 
 {% highlight console %}
     0     0 KUBE-SVC-22I6P2EHQ5PNEHEH  tcp  --  *      *       0.0.0.0/0            172.30.129.156       /* test-metallb/test-frr cluster IP */ tcp dpt:80
