@@ -15,7 +15,7 @@ BGP mode offers a novel way to statelessly load balance client traffic towards t
 
 The purpose of this article is to introduce MetalLB design and goals and cover in more detail this new mode. Throughout this article, I will discuss its configuration and usage, and in addition, provide mechanisms to verify that it is working properly.
 
-This article is now available at Red Hat's Hybrid Cloud Blog:
+The full article is now available at Red Hat's Hybrid Cloud Blog:
 - <https://cloud.redhat.com/blog/metallb-in-bgp-mode>
 
 <!-- more -->
