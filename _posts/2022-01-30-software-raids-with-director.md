@@ -87,7 +87,7 @@ inspection_iprange = 172.16.0.60,172.16.0.99
 
 #### STEP 2. Run undercloud install to deploy the new setting
 
-{% highlight bash %}
+{% highlight console %}
 (undercloud) [stack@undercloud-osp162 ~]$ openstack undercloud install
 {% endhighlight %}
 
@@ -95,7 +95,7 @@ inspection_iprange = 172.16.0.60,172.16.0.99
 
 In this case the overcloud_compute1 node has two disks that I will use to create a software RAID. The rest of the nodes we can assume they have a single disk.
 
-{% highlight bash %}
+{% highlight console %}
 (undercloud) [stack@undercloud-osp162 ~]$ openstack baremetal node set --raid-interface agent overcloud_compute1 
 {% endhighlight %}
 
@@ -103,7 +103,7 @@ In this case the overcloud_compute1 node has two disks that I will use to create
 
 There is a specific field in Ironic to set what is the target configuration that we want for the node. This can include, which disks we want to use, the RAID mode, if it is a root disk or not, the size of the disk to use, and some other options.
 
-{% highlight bash %}
+{% highlight console %}
 (undercloud) [stack@undercloud-osp162 ~]$ openstack baremetal node set --target-raid-config '{"logical_disks": [{"raid_level":"1","size_gb":"MAX","controller":"software","is_root_volume":true,"physical_disks":[ "/dev/vda", "/dev/vdb"]}]}' overcloud_compute1
 
 (undercloud) [stack@undercloud-osp162 ~]$ openstack baremetal node show -c raid_config -c raid_interface -c target_raid_config overcloud_compute1                                                                  
@@ -120,7 +120,7 @@ There is a specific field in Ironic to set what is the target configuration that
 
 It is important to know that to run the **clean** operation the node has to be moved from **available** state back to **manageable** state.
 
-{% highlight bash %}
+{% highlight console %}
 (undercloud) [stack@undercloud-osp162 ~]$ openstack baremetal node manage overcloud_compute1
 (undercloud) [stack@undercloud-osp162 ~]$ openstack baremetal node list
 +--------------------------------------+-----------------------+---------------+-------------+--------------------+-------------+                                                                                 
@@ -141,7 +141,7 @@ It is important to know that to run the **clean** operation the node has to be m
 
 Now we can safely run the clean operation adding three steps: delete_configuration (deletes the previous RAID), earse_devices_metadata (deletes any partition data), create_configuration (creates the RAID).
 
-{% highlight bash %}
+{% highlight console %}
 (undercloud) [stack@undercloud-osp162 ~]$ cat soft-raid-clean-steps.json
 [{
   "interface": "raid",
@@ -199,7 +199,7 @@ We can see the exact mdadm commmand that was executed, on which disks (/dev/vda 
 
 In order to run the deployment we need the node to be back in available.
 
-{% highlight bash %}
+{% highlight console %}
 (undercloud) [stack@undercloud-osp162 ~]$ openstack overcloud node provide overcloud_compute1
 Waiting for messages on queue 'tripleo' with no timeout.
 1 node(s) successfully moved to the "available" state.
@@ -225,7 +225,7 @@ Here just use your default deployment script as usual.
 
 #### STEP 9. Lets login to the compute1 and check the RAID config we obtained at the end
 
-{% highlight bash %}
+{% highlight console %}
 [root@com-01 ~]# mdadm --detail /dev/md127
 /dev/md127:
            Version : 1.2
@@ -294,7 +294,7 @@ export DIB_BLOCK_DEVICE_CONFIG='''
 
 #### STEP3. Copy and edit the overcloud-hardened-images-python3-custom.yaml to match the disk size and add mdadm package.
 
-{% highlight bash %}
+{% highlight console %}
 (undercloud) [stack@undercloud-osp162 ~]$ cp /usr/share/openstack-tripleo-common/image-yaml/overcloud-hardened-images-python3.yaml /home/stack/overcloud-hardened-images-python3-custom.yaml
 {% endhighlight %}
 
@@ -350,7 +350,7 @@ disk_images:
 
 #### STEP 4. Run the image build
 
-{% highlight bash %}
+{% highlight console %}
 (undercloud) [stack@undercloud-osp162 ~]$ openstack overcloud image build --image-name overcloud-hardened-full --config-file /home/stack/overcloud-hardened-images-python3-custom.yaml --config-file /usr/share/openstack-tripleo-common/image-yaml/overcloud-hardened-images-rhel8.yaml
 Running ['disk-image-create', '-a', 'amd64', '-o', './overcloud-hardened-full', '-t', 'qcow2', '-p', 'python3-psutil,python3-debtcollector,sos,device-mapper-multipath,openstack-heat-agents,os-net-config,jq,mdadm', '--min-tmpfs=7', 'rhel', 'openvswitch', 'overcloud-agent', 'overcloud-base', 'overcloud-controller', 'overcloud-compute', 'overcloud-ceph-storage', 'puppet-modules', 'stable-interface-names', 'bootloader', 'e
 lement-manifest', 'dynamic-login', 'iptables', 'enable-packages-install', 'override-pip-and-virtualenv', 'dracut-regenerate', 'remove-machine-id', 'remove-resolvconf', 'modprobe', 'overcloud-secure', 'openssh', 'disable-nouveau', 'interface-names']
