@@ -1,6 +1,6 @@
 ---
 layout: posts
-title: "Software Raids with Red Hat OpenStack Platform"
+title: "Software RAIDs with Red Hat OpenStack Platform"
 date: 2022-03-18
 categories: [blog]
 tags: [ osp, openstack, software-raids, tripleo ]
