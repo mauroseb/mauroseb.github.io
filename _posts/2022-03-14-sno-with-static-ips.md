@@ -22,7 +22,7 @@ Let's get started.
 
 <!-- more -->
 
-> :warning: **WARNING:** At the moment using static IP addressing is not supported so reach out to your account team if you have a need for it.
+**WARNING:** At the moment using static IP addressing is not supported so reach out to your account team if you have a need for it.
 
 ### Prerequisites
 
@@ -56,9 +56,10 @@ master-0.lab.local.
 #### Overview
 
 The first method will be based in a manual procedure to deploy just like a UPI deployment but on a single node.
-The following are the pros and cons of this procedure.
 
 <img src="/images/sno-static-ip-manual-prod-1.png" alt="SNO manual 1 PNG" style="width:60%;"/>
+
+The following are the pros and cons of this procedure.
 
 ##### PROs
 
