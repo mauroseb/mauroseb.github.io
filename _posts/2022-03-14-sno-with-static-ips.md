@@ -1,7 +1,7 @@
 ---
 layout: posts
 title: "Single Node OpenShift with Static IPs"
-date: 2021-11-29
+date: 2022-03-14
 categories: [blog]
 tags: [ openshift, assisted_installer, sno, ocp, networking ]
 author: mauroseb
