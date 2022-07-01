@@ -572,7 +572,7 @@ status_info: Installation in progress
 {% endhighlight %}
 
 
-> :warning: **WARNING:** If the boot media was not properly removed the installer will ask for user action to do so.
+**WARNING:** If the boot media was not properly removed the installer will ask for user action to do so.
 
 {% highlight console %}
 $ aicli info cluster t2 | grep -e status: -e status_info: -e  progress:
