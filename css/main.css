@@ -350,3 +350,7 @@ hr.regular {
    width: 100%; 
    color: darkgray;   
 }
+
+.col-dl {
+  display: none;
+}
