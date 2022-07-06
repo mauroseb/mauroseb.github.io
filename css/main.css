@@ -351,6 +351,10 @@ hr.regular {
    color: darkgray;   
 }
 
+dl {
+  transition: 0.2s;
+}
+
 .col-dl {
   display: none;
 }
