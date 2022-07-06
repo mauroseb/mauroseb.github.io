@@ -711,4 +711,10 @@ method=disabled
 
 [proxy]
 {% endhighlight %}
-
+  
+  
+#### Conclusions
+  
+After going through this two mechanisms to deploy Single Node OpenShift with Static IPs one can notice that none is perfect nor straight forward, as this issue is still unsupported and under active development. However it is doable with some work and will eventually be simplified once the open RFEs are implemented around it.
+  
+That is all for now!
