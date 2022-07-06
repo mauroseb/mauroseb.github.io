@@ -16,9 +16,9 @@ First and foremost, what is Single Node OpenShift. Well, indeed, it is pretty ob
 
 This kind of deployment does not offer any embeded availabilty measures like a full deployment does, where there are multiple etcd instances running as a cluster, or the kubeapi and ingress controllers have multiple replicas to survive an outage of a single node. Neither the workloads running on it are relying on that, and that is the whole point. We can lose the entire node/cluster and there will be probably another SNO deployment somewhere with the similar workloads that may take over user traffic, for instance.
 
-I will present two methods to do the same, one based in **Assisted Installer** and the other in a manual deployment method (like a UPI method).
+I will present two methods to do the same, one based in **Assisted Installer** and the other in a manual deployment method (like a UPI method). It is fair to say there is a third method, which is to use Advanced Cluster Management (ACM), but in the backend still uses assisted installer.
 
-Let's get started.
+So let's get started.
 
 <!-- more -->
 
@@ -51,15 +51,13 @@ master-0.lab.local.
 {% endhighlight %}
 
 
-###  Manual Method Procedure
+###  Manual Procedure
 
 #### Overview
 
 The first method will be based in a manual procedure to deploy just like a UPI deployment but on a single node.
 
-<img src="/images/sno-static-ip-manual-prod-1.png" alt="SNO manual 1 PNG" style="width:60%;"/>
-
-The following are the pros and cons of this procedure.
+<img src="/images/sno-static-ip-manual-prod-1.png" alt="SNO manual 1 PNG" style="width:75%;"/>
 
 ##### PROs
 
@@ -74,7 +72,7 @@ The following are the pros and cons of this procedure.
  * For static IPs to work the network configuration needs to be persisted to the disk. I will need to use a hack to do that. And that is another reason why this methods is not supported.
 
 
-#### Steps for Manual Method
+#### Steps for Manual Procedure
 
 ##### 1. Download the stock RHCOS live ISO
 
@@ -282,7 +280,7 @@ storage                                    4.9.23    True        False         F
 
 Assisted installer is offered as a SaaS service through the [Assisted Installer Portal](https://console.redhat.com/openshift/assisted-installer/clusters/), and has been created to improve the deployment experience of OpenShift and increase its success rate by creating an even more opinionated deployment sticking to our best practices. In turn it reduces the prerequisites needed to deploy. It can deploy multi node or single node clusters like I will exercise here. And it also counts with a CLI tool called [aicli](https://github.com/karmab/aicli) and an [on-prem](https://cloud.redhat.com/blog/assisted-installer-on-premise-deep-dive) version. There is an [Request for Enhancement](https://issues.redhat.com/browse/RFE-1936) to support disconnected environments but until it is implemented we have to rely in the manual method to deploy in them.
 
-<img src="/images/sno-static-ip-aicli-prod-1.png" alt="SNO aicli 1 PNG" style="width:60%;"/>
+<img src="/images/sno-static-ip-aicli-prod-1.png" alt="SNO aicli 1 PNG" style="width:75%;"/>
 
 ##### PROs
 
