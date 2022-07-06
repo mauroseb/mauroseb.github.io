@@ -417,7 +417,7 @@ $ aicli list infraenv
 
 ##### 2. Create the NMstate configuration that has the static IP addressing for the node
 
-Following [example](https://github.com/openshift/assisted-service/blob/master/docs/user-guide/restful-api-guide.md) we can create a YAML file with the network configuration. In my case I am calling this file master-0.yaml. Then this file has to be embedded into a JSON request that will be passed to the AI API to patch our cluster config (infraenv).
+Following [example](https://github.com/openshift/assisted-service/blob/master/docs/user-guide/restful-api-guide.md) we can create a YAML file with the network configuration. In my case I am calling this file master-0.yaml. Then this file has to be embedded into a JSON request that will be eventually passed to the AI API to patch our cluster config (infraenv). Just to clarify, this NMSate formatted file has nothing to do with the Kubernetes NMState Operator and its configuration.
 
 
 {% highlight console %}
