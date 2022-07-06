@@ -17,8 +17,8 @@ $(window).scroll(function() {
     }
 });
 $('#certs').click(function() {
-   $('#certs-dl').toggleClass('col-dl');
    var y = $(window).scrollTop();
-   $('html, body').animate({ scrollTop: y + 150 });
+   $('#certs-dl').toggleClass('col-dl');
+   $('body').animate({ scrollTop: y + 200 });
 });
 </script>
