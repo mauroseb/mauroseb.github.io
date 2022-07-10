@@ -12,7 +12,7 @@ title: BLOG
 		       <hr>
 		       {% capture date %}{{ this_year }}{% endcapture %}
 		     {% endif %}
-	                  <li class="posts"><span style="color:#00e500" > ‣ </span> <a style="color:#000000;" href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a><ul><li class="date"><span style="color:#696969">{{ post.date | date_to_string }}</span></li></ul> </li>
+	                  <li class="posts"><span style="color:#00e500" > ‣ </span> <a style="color:#000000;" href="{{ post.url }}" title="{{ post.title }}">{{ post.title }}</a><ul><li class="date"><i class="far fa-calendar-alt" aria-hidden="true"></i><span style="color:#696969;font-size: 10px;">{{ post.date | date_to_string }}</span></li></ul> </li>
 	        {% endfor %}
 	      </ul>
         </div>
