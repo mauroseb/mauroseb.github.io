@@ -98,10 +98,7 @@ $ tox -e pep8
 $ tox -e functional
 {% endhighlight %}
 
-When creating new functions it will always be required to add a test function correnspondingly.
-
-Happy hacking!
-
+That's all.
 
 ## References
 
