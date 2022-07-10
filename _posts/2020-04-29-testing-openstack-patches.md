@@ -30,13 +30,13 @@ Following is an example for some Director (TripleO) code.
 ## The Problem
 
 In my case the bug I ran into in this example is the following:
-OpenStack 16 downloading container images from registry.redhat.io times out after the Bearer Token expires and starts to return ```401. Unauthorized``` for any subsequent requests. Since that is a known issue someone has kindly filed a bugzilla ticket for me:
+OpenStack 16 downloading container images from registry.redhat.io times out after the Bearer Token expires and starts to return **401. Unauthorized** for any subsequent requests. Since that is a known issue someone has kindly filed a bugzilla ticket for me:
  - <https://bugzilla.redhat.com/show_bug.cgi?id=1811798>
 
 
 ## The Patch
 
-There is a patch that was merged some weeks ago but still there is no downstream package or image I can use to fix it:
+There is a patch that was merged some weeks ago but still there is no downstream package or image I can use in my deployment:
  - <https://review.opendev.org/#/c/713923/>
 
 You can notice very useful information in the gerrit dashboard like: the description, the code, if it has been reviewed, votes, comments, CI gates passing, that it has been merged already.
@@ -44,7 +44,7 @@ You can notice very useful information in the gerrit dashboard like: the descrip
 
 ## The Test
 
-I log in into my undercloud server, change to the directory where the code for the project in question ```tripleo-common``` sits. Then download the patch. Notice the URL is slightly different than before so I can get the mime-encoded version of it. And apply it.
+I log in into my undercloud server, change to the directory where the code for the project in question **tripleo-common** sits. Then download the patch. Notice the URL is slightly different than before so I can get the mime-encoded version of it. And apply it.
 
 {% highlight console %}
 
