@@ -19,7 +19,7 @@ OpenStack projects use **gerrit** for this purpose (in essence similar to gitlab
 
 But that is not what I am going to write about today. I just want to showcase how can you quickly test a patch in your own environment that has not been merged into the master branch yet, with an example.
 
-Let's say you run into a bug and you look in <bugzilla.redhat.com>, <bugs.launchpad.net> or <storyoard.openstack.org> and you found someone already reported it. And even better there is a patch for it yet to be merged, but there is no package or contianer image you can download and install.
+Let's say you run into a bug and you look in bugzilla.redhat.com, bugs.launchpad.net/openstack/ or storyoard.openstack.org and you found someone already reported it. And even better there is a patch for it yet to be merged, but there is no package or contianer image you can download and install.
 Then you could do the community and yourself a favor and test it.
 
 Since we are dealing mostly with python code one could just find the package code in the test environment and apply the patch.
