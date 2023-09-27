@@ -9,6 +9,9 @@ excerpt_separator: "<!-- more -->"
 ---
 ### Intro
 
+[!IMPORTANT]
+The twp methods described in this article are not longer valid since the GA of [Agent-based installs](https://docs.openshift.com/container-platform/4.12/installing/installing_with_agent_based_installer/preparing-to-install-with-agent-based-installer.html) in OpenShift 4.12.
+
 The purpose of this post is to showcase different Single Node OpenShift (SNO) deployment procedures that fulfill one requirement in particular:
 SNO cluster should be deployed with static IP addressing instead of the expected and supported dynamic addressing (DHCP).
 
