@@ -90,7 +90,8 @@ First lets see how this looks from neutron point of view. I basically have two t
 
 One thing to note at this point is that as I mentioned earlier the routers are no longer highly available using _VRRP_, instead OVN uses _BFD_ protocol, but this HA configuration is internal for OVN and not visible from OpenStack point of view. This means that we do see or set **ha** property for every router in Neutron anymore. It will be just the default for every router.
 
-**NOTE:** All OVN related commands have to be run in the container __ovn-dbs-bundle-podman-0__ which runs the OVN DB and is the master in my case.
+{% include note.html content="All OVN related commands have to be run in the container __ovn-dbs-bundle-podman-0__ which runs the OVN DB and is the master in my case." %}
+
 
 The northbound DB looks like this:
 
