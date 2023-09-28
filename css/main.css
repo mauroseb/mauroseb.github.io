@@ -347,6 +347,7 @@ code {
     box-decoration-break: clone;
     border-radius: .3rem;
     box-shadow: 0px .5px 1px #d8d8d8;
+    margin: 5px;
 }
 
 hr.regular {
