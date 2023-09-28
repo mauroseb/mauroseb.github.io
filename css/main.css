@@ -338,11 +338,15 @@ td {
 
 code {
     color: #ffffff;
-    padding: 1px 5px;
+    padding: .1rem .3rem .2rem;
     width: 75%;
     font-family:'Bitstream Vera Sans Mono','Courier', monospace;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: bold;
+    background: #ffeff0;
+    word-wrap: break-word;
+    box-decoration-break: clone;
+    border-radius: .2rem;
 }
 
 hr.regular {
