@@ -338,7 +338,7 @@ td {
 
 code {
     color: #ffffff;
-    padding 1px 5px;
+    padding: 1px 5px;
     width: 75%;
     font-family:'Bitstream Vera Sans Mono','Courier', monospace;
     font-size: 10px;
