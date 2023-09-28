@@ -982,9 +982,7 @@ $ oc replace -f ~/lab/ocp-service-mesh-foundations/istiofiles/virtual-service-ca
 virtualservice.networking.istio.io/catalog replace
 {% endhighlight %}
 
-
-__NOTE:__ since the rule already existed I need to use replace and not create.
-
+{% include note.html content="Since the rule already existed I need to use replace and not create." %}
 
 Verify that the traffic is effectively reaching v1 catalog microservice:
 
