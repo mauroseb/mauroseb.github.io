@@ -338,7 +338,7 @@ td {
 
 code {
     color: #ffeff0;
-    padding: .1rem .3rem .2rem;
+    padding: 20px;
     width: 75%;
     font-family:'Bitstream Vera Sans Mono','Courier', monospace;
     font-size: 11px;
@@ -346,7 +346,9 @@ code {
     word-wrap: break-word;
     box-decoration-break: clone;
     border-radius: .3rem;
-    margin: 5px;
+    border: 1px solid #999;
+    white-space: no-wrap;
+    display: block;
 }
 
 hr.regular {
