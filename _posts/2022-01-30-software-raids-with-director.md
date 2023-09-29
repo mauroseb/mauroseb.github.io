@@ -13,7 +13,8 @@ While helping one of my favourite customers to migrate from an OpenStack cluster
 
 As you know, Director is the Red Hat's downstream of TripleO deployment framework for OpenStack, and it is based in a broad set of technologies to achieve its extremely versatile deployment options. A typical configuration in Director is achieved by passing environment YAML files and Tripleo Heat Templates to the deployment command. However achieving software raids configuration is quite more complex than that and I will explain the process throughout this article.
 
-**IMPORTANT: Using software RAIDs with Red Hat OpenStack Platform at the time of writting this article is not yet officially supported, and you may need to ask for a support exception to run it in production.**
+{% include note.html content="Using software RAIDs with Red Hat OpenStack Platform at the time of writting this article is not yet officially supported, and you may need to ask for a support exception to run it in production." %} 
+
 
 <!-- more -->
 
