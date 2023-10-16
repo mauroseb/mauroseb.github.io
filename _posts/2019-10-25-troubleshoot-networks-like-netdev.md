@@ -8,13 +8,14 @@ excerpt_separator: "<!-- more -->"
 author: mauroseb
 ---
 
+* Table of Content {:toc}
+
 ## Introduction
 
 I am not a kernel developer myself, however while at Red Hat, many times had the chance to work next to some real experts in the matter, who are and have been for ages active contributors to the kernel networking stack. During the process I could learn some interesting techniques when it comes to troubleshoot network issues in complex environments like OpenStack or OpenShift, where there are dozens or even hundreds of virtual devices, overlay networks, featured smart NICs, and more. Hopefully this article can help you to address problems in similar scenarios.
 
 It should be noted that even though most examples in the series will involve OpenStack or OpenShift environments, the approaches and techniques discussed would hopefully help with networking issues in **any** linux based environment, with or without OpenvSwitch or OpenStack in the picture.
 <!-- more -->
-
 
 ## Know Your Enemy
 
