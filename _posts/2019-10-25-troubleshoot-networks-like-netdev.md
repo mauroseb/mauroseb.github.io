@@ -8,8 +8,6 @@ excerpt_separator: "<!-- more -->"
 author: mauroseb
 ---
 
-* Table of Content {:toc}
-
 ## Introduction
 
 I am not a kernel developer myself, however while at Red Hat, many times had the chance to work next to some real experts in the matter, who are and have been for ages active contributors to the kernel networking stack. During the process I could learn some interesting techniques when it comes to troubleshoot network issues in complex environments like OpenStack or OpenShift, where there are dozens or even hundreds of virtual devices, overlay networks, featured smart NICs, and more. Hopefully this article can help you to address problems in similar scenarios.
