@@ -1,8 +1,8 @@
 name: oddi.info
 title: " MAURO'S "
 
-description: OpenStack | Ceph | Kubernetes | Linux | Code | Random 
-url: 'http://oddi.info'
+description: Containers | Kubernetes | Linux | Cloud | Code | Random 
+url: 'http://blog.oddi.info'
 baseurl: '/'
 
 author: Mauro Oddi
