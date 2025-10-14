@@ -373,3 +373,34 @@ div.note {
      overflow: hidden;
      padding: 15px 60px;
 }
+
+.footer-container {
+  text-align: center;
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+.social-links {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.social-links li a i {
+  font-size: 24px;
+  color: black;
+  transition: color 0.3s ease;
+}
+
+.social-links li a:hover i {
+  color: #0073b1;
+}
+
+.footer-meta {
+  font-size: 0.9em;
+  color: #555;
+  margin-top: 10px;
+}
