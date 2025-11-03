@@ -545,11 +545,18 @@ There is some extra work to identify which commit or set of commits are needed t
   ...
 {% endhighlight %}
 
-In case you missed it, git also provides __bisect__ subcommand which helps in pinpointing the culprit out of those commits by testing good and bad versions. Nevertheless the software and hardware vendors would normally take care of the search at this level. Once the commit or commits needed are known I can get in which branch was applied in the downstream tree:
+In case you missed it, git also provides __bisect__ subcommand which helps in pinpointing the culprit out of those commits by testing good and bad versions. Nevertheless the software and hardware vendors would normally take care of the search at this level. Once the commit or commits needed are known I can get in which branch was it applied into, in the downstream tree:
 
 {% highlight console %}
   $ git branch --contains cc2af34db9a5b5222eefdc25fd1265e305df9f2e
   * (HEAD detached at kernel-3.10.0-1122.el7)    
+{% endhighlight %}
+
+Similarly one could check the oresence of the commit within the existing tags:
+
+{% highlight console %}
+  $ git fetch --tags
+  $ git tag --contains cc2af34db9a5b5222eefdc25fd1265e305df9f2e  
 {% endhighlight %}
 
 Now that we have a reproducer with the simplest scenario we came up with we can dive into the analysis of the systems involved while this happens.
